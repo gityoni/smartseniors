@@ -1,46 +1,97 @@
-export async function onRequestPost({ request, env }) {
-  const apiKey = env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return Response.json({ error: "API key not configured" }, { status: 500 });
-  }
+/**
+ * SmartSeniors — Cloudflare Pages Function
+ * POST /api/chat  →  text/event-stream (Anthropic streaming)
+ */
+
+const SYSTEM_PROMPT = `Tu es SmartSeniors, un assistant numérique bienveillant et patient, \
+dédié aux personnes âgées et à leurs aidants.
+
+Tes principes :
+- Réponds TOUJOURS en français, dans un langage simple, sans jargon.
+- Sois chaleureux, rassurant et encourageant.
+- Donne des réponses courtes et bien structurées (utilise des listes quand c'est utile).
+- Si la question touche à la santé ou à la sécurité, rappelle de consulter un professionnel.
+- Traite chaque personne avec le plus grand respect et la plus grande patience.`;
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+
+  // CORS preflight passthrough
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
 
   let body;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return new Response(JSON.stringify({ error: "JSON invalide" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   const { message, history = [] } = body;
-  if (!message || typeof message !== "string") {
-    return Response.json({ error: "Missing message" }, { status: 400 });
+
+  // Validation
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return new Response(JSON.stringify({ error: "Le champ message est requis." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+  if (!Array.isArray(history)) {
+    return new Response(JSON.stringify({ error: "history doit être un tableau." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  // Build messages (keep last 12 exchanges for context)
+  const trimmedHistory = history.slice(-12).map((h) => ({
+    role: h.role === "assistant" ? "assistant" : "user",
+    content: String(h.content),
+  }));
+  const messages = [...trimmedHistory, { role: "user", content: message.trim() }];
+
+  // Call Anthropic with stream: true
+  const upstream = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "x-api-key": env.ANTHROPIC_API_KEY,
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: `Tu es un assistant bienveillant et patient pour les seniors.
-- Phrases courtes, vocabulaire simple, jamais de jargon.
-- Toujours positif et rassurant.
-- Réponds dans la langue de l'utilisateur (français, anglais…).`,
-      messages: [...history, { role: "user", content: message }],
+      model: "claude-opus-4-6",
+      max_tokens: 1536,
+      stream: true,
+      system: SYSTEM_PROMPT,
+      messages,
     }),
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    return Response.json({ error: "Upstream error", detail: err }, { status: 502 });
+  if (!upstream.ok) {
+    const err = await upstream.text();
+    console.error("Anthropic error:", upstream.status, err);
+    return new Response(JSON.stringify({ error: "Erreur du service IA." }), {
+      status: 502,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
-  const data = await res.json();
-  return Response.json({ reply: data.content?.[0]?.text ?? "" });
+  // Pipe upstream SSE body directly to client
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "X-Accel-Buffering": "no",
+      ...corsHeaders,
+    },
+  });
 }
 
 export async function onRequestOptions() {
