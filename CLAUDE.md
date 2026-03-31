@@ -8,14 +8,20 @@ Répond en français, dans un langage simple, rassurant et structuré.
 - **Frontend** : HTML / JS vanilla (`pages/index.html`)
 - **API** : Cloudflare Pages Function (`pages/functions/api/chat.js`)
 - **LLM** : Anthropic Claude (`claude-opus-4-6`) — streaming SSE
+- **PWA** : Service worker + manifest (installable sur mobile)
 - **Hébergement** : Cloudflare Pages (auto-deploy sur push `main`)
-- **Repo** : gityoni/rebsam.github.io
+- **Repo** : gityoni/smartseniors
 
 ## Fichiers clés
 | Fichier | Rôle |
 |---|---|
 | `pages/index.html` | Interface chat principale |
 | `pages/functions/api/chat.js` | Edge function streaming Anthropic |
+| `pages/confidentialite.html` | Page de confidentialité RGPD |
+| `pages/manifest.json` | Manifest PWA (installable mobile) |
+| `pages/sw.js` | Service worker (cache offline) |
+| `pages/icon-192.png` | Icône PWA 192×192 |
+| `pages/icon-512.png` | Icône PWA 512×512 |
 | `CLAUDE.md` | Mémoire projet (ce fichier) |
 | `TASKS.md` | Suivi des tâches |
 
@@ -72,8 +78,19 @@ linear-gradient(135deg, #D4824A 0%, #EAA070 100%)
 - **Historique** : 12 derniers échanges transmis à Anthropic
 - Pas de token secret côté client (edge function protège la clé)
 
+## PWA
+- **Manifest** : `pages/manifest.json` — nom, icônes, couleurs, `display: standalone`
+- **Service worker** : `pages/sw.js` — cache des assets pour utilisation offline
+- **Icônes** : 192×192 et 512×512 (à remplacer par les vrais assets design)
+- **Meta tags** : `theme-color`, `apple-mobile-web-app-capable` dans `index.html`
+
+## Conformité RGPD
+- Page dédiée : `pages/confidentialite.html`
+- Lien accessible depuis le footer de l'interface chat
+- Pas de cookies tiers, pas de tracking invasif
+
 ## Règles importantes
 - Ne jamais committer `ANTHROPIC_API_KEY` ou tout autre secret
 - Langage simple, phrases courtes dans le prompt système
 - Toujours rappeler de consulter un professionnel pour les questions de santé/sécurité
-- Accessibilité : `aria-live`, `aria-label`, focus management
+- Accessibilité : skip link, `:focus-visible`, ARIA `role="banner"`, `aria-live`, `aria-label`, focus management
