@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartSeniors — Votre assistant numérique</title>
-  <meta name="description" content="SmartSeniors, l'assistant numérique bienveillant pour les seniors et leurs aidants." />
+  <title>SmartSeniors — IA Conseillère Cap Retraite</title>
+  <meta name="description" content="SmartSeniors, IA conseillère bienveillante pour orienter les familles vers les solutions Cap Retraite." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -23,7 +23,7 @@
       --bot-fg:   #3a2e25;
       --user-bg:  #7D6B5E;
       --font:     'Nunito', sans-serif;
-      /* joy palette */
+      --panel-bg: #fdf8f3;
       --joy1: #FF6B6B; --joy2: #4ECDC4; --joy3: #FFD93D;
       --joy4: #A855F7; --joy5: #3B82F6; --joy6: #F97316;
     }
@@ -36,57 +36,108 @@
     /* ── LAYOUT ─────────────────────────────── */
     #app {
       display: flex; flex-direction: column;
-      height: 100dvh; max-width: 800px; margin: 0 auto;
+      height: 100dvh;
     }
 
     /* ── HEADER ─────────────────────────────── */
     #header {
       background: var(--header);
-      padding: 12px 20px;
+      padding: 12px 24px;
       display: flex; align-items: center; gap: 14px;
       flex-shrink: 0;
       box-shadow: 0 3px 16px rgba(0,0,0,.28);
+      z-index: 10;
     }
 
-    /* Wordmark logo */
     .wordmark {
       font-size: 1.55rem; font-weight: 900;
       letter-spacing: -.5px; line-height: 1;
-      display: flex; align-items: baseline; gap: 0;
     }
-    .wm-smart  { color: #EDE5D8; }
-    .wm-s      { color: var(--accent2); }
-    .wm-enio   { color: var(--accent2); }
-    /* chip-i */
-    .wm-chi {
-      position: relative; display: inline-block;
-      color: var(--accent2);
-    }
-    .wm-stem { /* dotless-i stem */
-      display: inline-block; line-height: 1;
-    }
-    .wm-chip {
-      position: absolute;
-      top: -.28em; left: 50%;
-      transform: translateX(-50%);
-      width: .52em; height: .52em;
-    }
-    .wm-rs { color: var(--accent2); }
+    .wm-smart { color: #EDE5D8; }
+    .wm-seniors { color: var(--accent2); }
 
     .header-sub {
-      font-size: .7rem; color: rgba(237,229,216,.55);
+      font-size: .72rem; color: rgba(237,229,216,.55);
       font-weight: 400; margin-top: 2px;
     }
 
+    .header-right {
+      margin-left: auto; display: flex; align-items: center; gap: 12px;
+    }
+    .header-badge {
+      font-size: .65rem; color: var(--accent2);
+      border: 1px solid rgba(234,160,112,.35);
+      border-radius: 20px; padding: 4px 12px;
+      white-space: nowrap;
+    }
     .status-dot {
       width: 9px; height: 9px; border-radius: 50%;
-      background: #6ee7b7; margin-left: auto; flex-shrink: 0;
+      background: #6ee7b7; flex-shrink: 0;
       animation: pulse-dot 2.2s ease-in-out infinite;
     }
     @keyframes pulse-dot {
       0%,100% { opacity:1; transform:scale(1); }
-      50%      { opacity:.4; transform:scale(.65); }
+      50%     { opacity:.4; transform:scale(.65); }
     }
+
+    /* ── SCENARIO TABS ─────────────────────── */
+    #scenario-bar {
+      background: var(--panel-bg);
+      border-bottom: 1px solid #e0d5c8;
+      padding: 8px 24px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    #scenario-bar .label {
+      font-size: .78rem; color: var(--brown);
+      font-weight: 600; white-space: nowrap;
+    }
+    .scenario-tab {
+      font-family: var(--font); font-size: .8rem; font-weight: 700;
+      padding: 6px 16px; border-radius: 20px;
+      border: 1.5px solid #d5c9ba; background: #fff;
+      color: var(--bot-fg); cursor: pointer;
+      white-space: nowrap;
+      transition: all .18s;
+    }
+    .scenario-tab:hover {
+      border-color: var(--accent); color: var(--accent);
+      box-shadow: 0 2px 8px rgba(212,130,74,.2);
+    }
+    .scenario-tab.active {
+      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
+      color: #fff; border-color: transparent;
+    }
+
+    /* ── MAIN CONTENT (chat + panel) ────────── */
+    #content {
+      flex: 1; display: flex; overflow: hidden;
+    }
+
+    /* ── CHAT COLUMN ────────────────────────── */
+    #chat-col {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Advisor identity bar */
+    #advisor-bar {
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid #e8ddd0;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .advisor-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: #fff;
+      box-shadow: 0 2px 10px rgba(212,130,74,.35);
+    }
+    .advisor-info .name { font-weight: 800; font-size: .95rem; color: var(--header); }
+    .advisor-info .role { font-size: .75rem; color: var(--brown); }
 
     /* ── CHAT BOX ───────────────────────────── */
     #chat-box {
@@ -94,99 +145,37 @@
       padding: 20px 16px 12px;
       display: flex; flex-direction: column; gap: 16px;
       scroll-behavior: smooth;
-      position: relative;
+      background: var(--bg);
     }
     #chat-box::-webkit-scrollbar { width: 5px; }
     #chat-box::-webkit-scrollbar-thumb { background: #cbbfb3; border-radius: 4px; }
 
-    /* ── FLOATING DOTS (joy background) ──────── */
-    #dots-bg {
-      position: absolute; inset: 0;
-      pointer-events: none; overflow: hidden; z-index: 0;
-    }
-    .fdot {
-      position: absolute; border-radius: 50%;
-      bottom: -40px; opacity: 0;
-      animation: floatDot linear infinite;
-    }
-    @keyframes floatDot {
-      0%   { transform: translateY(0) scale(0);   opacity: 0; }
-      8%   { opacity: .55;  transform: scale(1); }
-      90%  { opacity: .45; }
-      100% { transform: translateY(-105vh) scale(.7); opacity: 0; }
-    }
-
     /* ── WELCOME ────────────────────────────── */
     #welcome {
-      position: relative; z-index: 1;
       display: flex; flex-direction: column;
-      align-items: center; gap: 16px;
-      padding: 10px 8px 6px;
+      align-items: center; gap: 14px;
+      padding: 40px 16px 10px;
       animation: slideUp .55s ease both;
     }
-
-    /* Two-face SVG illustration */
-    .duo-wrap {
-      position: relative; width: 160px; height: 120px;
+    .welcome-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
+      border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 18px rgba(212,130,74,.3);
     }
-    .duo-circle {
-      position: absolute; border-radius: 50%;
-      width: 82px; height: 82px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18);
-    }
-    .duo-circle.man {
-      background: linear-gradient(135deg, #D4824A 0%, #FFD93D 100%);
-      left: 4px; top: 10px; z-index: 2;
-    }
-    .duo-circle.woman {
-      background: linear-gradient(135deg, #4ECDC4 0%, #A855F7 100%);
-      right: 4px; top: 10px; z-index: 1;
-    }
-    .duo-circle svg { width: 52px; height: 52px; }
-
-    /* confetti dots around the duo */
-    .cdot {
-      position: absolute; border-radius: 50%;
-      animation: spinOrbit linear infinite;
-    }
-    @keyframes spinOrbit {
-      from { transform: rotate(0deg) translateX(76px) rotate(0deg); }
-      to   { transform: rotate(360deg) translateX(76px) rotate(-360deg); }
-    }
-
+    .welcome-icon svg { width: 28px; height: 28px; }
     #welcome h2 {
-      font-size: 1.25rem; font-weight: 800;
+      font-size: 1.2rem; font-weight: 800;
       color: var(--header); text-align: center;
     }
     #welcome p {
-      font-size: .92rem; color: #6b5a4e;
-      text-align: center; max-width: 370px; line-height: 1.55;
+      font-size: .88rem; color: #6b5a4e;
+      text-align: center; max-width: 420px; line-height: 1.55;
     }
-
-    /* ── SUGGESTION CHIPS ───────────────────── */
-    #suggestions {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 9px; width: 100%; max-width: 500px;
-    }
-    .sugg-chip {
-      border-radius: 14px; padding: 11px 13px;
-      font-family: var(--font); font-size: .84rem; font-weight: 700;
-      cursor: pointer; text-align: left; line-height: 1.35;
-      border: 2px solid transparent;
-      transition: transform .15s, box-shadow .18s, filter .15s;
-    }
-    .sugg-chip:hover  { transform: translateY(-3px); filter: brightness(1.07);
-                        box-shadow: 0 6px 18px rgba(0,0,0,.15); }
-    .sugg-chip:active { transform: translateY(0); }
-    .sugg-chip.c1 { background: #FFF0F0; border-color: var(--joy1); color: #b91c1c; }
-    .sugg-chip.c2 { background: #EDFAF9; border-color: var(--joy2); color: #0f766e; }
-    .sugg-chip.c3 { background: #FFFBEB; border-color: var(--joy3); color: #92400e; }
-    .sugg-chip.c4 { background: #F5F3FF; border-color: var(--joy4); color: #7e22ce; }
 
     /* ── ROWS & BUBBLES ─────────────────────── */
     .row {
-      position: relative; z-index: 1;
       display: flex; gap: 10px;
       animation: slideUp .32s ease both;
     }
@@ -197,21 +186,20 @@
     .row.user { flex-direction: row-reverse; }
     .row.bot  { flex-direction: row; }
 
-    /* avatar */
     .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       flex-shrink: 0; align-self: flex-end;
-      background: linear-gradient(135deg, #D4824A 0%, #4ECDC4 100%);
+      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 10px rgba(212,130,74,.35);
     }
-    .avatar svg { width: 19px; height: 19px; }
+    .avatar svg { width: 18px; height: 18px; }
 
     .bubble {
-      max-width: 72%; padding: 12px 16px;
-      border-radius: 18px; font-size: 1rem;
+      max-width: 78%; padding: 12px 16px;
+      border-radius: 18px; font-size: .95rem;
       line-height: 1.6; word-break: break-word;
-      box-shadow: 0 2px 10px rgba(125,107,94,.12);
+      box-shadow: 0 2px 10px rgba(125,107,94,.1);
     }
     .row.bot  .bubble {
       background: var(--bot-bg); color: var(--bot-fg);
@@ -222,7 +210,7 @@
       border-bottom-right-radius: 5px;
     }
 
-    /* markdown */
+    /* markdown in bubbles */
     .bubble p          { margin-bottom: .5em; }
     .bubble p:last-child { margin-bottom: 0; }
     .bubble ul, .bubble ol { padding-left: 1.4em; margin: .4em 0; }
@@ -238,7 +226,6 @@
     .bubble h2 { font-size: 1.05em; }
     .bubble h3 { font-size: 1em; }
 
-    /* streaming cursor */
     .cursor {
       display: inline-block; width: 2px; height: 1em;
       background: var(--accent); margin-left: 2px;
@@ -247,7 +234,6 @@
     }
     @keyframes blink { 50% { opacity:0; } }
 
-    /* thinking */
     .thinking-dots span {
       display: inline-block; width: 7px; height: 7px;
       border-radius: 50%; margin: 0 2px;
@@ -258,21 +244,21 @@
     .thinking-dots span:nth-child(3) { background: var(--joy3); animation-delay:.3s; }
     @keyframes bounce {
       0%,100% { transform:translateY(0); }
-      50%      { transform:translateY(-7px); }
+      50%     { transform:translateY(-7px); }
     }
 
     /* ── INPUT AREA ──────────────────────────── */
     #input-area {
-      flex-shrink: 0; background: #e4d9ca;
+      flex-shrink: 0; background: #fff;
       padding: 11px 16px 15px;
-      border-top: 1px solid #d5c9ba;
+      border-top: 1px solid #e8ddd0;
     }
     #form { display: flex; gap: 10px; align-items: flex-end; }
     #input {
       flex: 1; resize: none;
-      border: 1.5px solid #c9b9a7; border-radius: 14px;
-      padding: 12px 16px; font-family: var(--font); font-size: 1rem;
-      background: #fdf8f3; color: var(--bot-fg); outline: none;
+      border: 1.5px solid #d5c9ba; border-radius: 14px;
+      padding: 12px 16px; font-family: var(--font); font-size: .95rem;
+      background: var(--panel-bg); color: var(--bot-fg); outline: none;
       line-height: 1.5; max-height: 130px; overflow-y: auto;
       transition: border-color .2s, box-shadow .2s;
     }
@@ -283,7 +269,7 @@
     #input::placeholder { color: #a9927e; }
 
     #send-btn {
-      width: 48px; height: 48px; border: none; border-radius: 50%;
+      width: 44px; height: 44px; border: none; border-radius: 50%;
       cursor: pointer; flex-shrink: 0;
       background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
       display: flex; align-items: center; justify-content: center;
@@ -293,11 +279,76 @@
     #send-btn:hover  { transform:scale(1.08); box-shadow:0 5px 18px rgba(212,130,74,.55); }
     #send-btn:active { transform:scale(.95); }
     #send-btn:disabled { opacity:.4; cursor:default; transform:none; }
-    #send-btn svg { width: 22px; height: 22px; }
+    #send-btn svg { width: 20px; height: 20px; }
 
+    /* ── RIGHT PANEL (Lead) ─────────────────── */
+    #lead-panel {
+      width: 340px; flex-shrink: 0;
+      background: #fff;
+      border-left: 1px solid #e0d5c8;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      padding: 18px 20px;
+      border-bottom: 1px solid #ede5d8;
+    }
+    .panel-section:last-child { border-bottom: none; }
+
+    .panel-title {
+      font-size: .7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--brown); margin-bottom: 10px;
+    }
+
+    /* Score */
+    .score-wrap {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .score-bar-bg {
+      flex: 1; height: 6px; background: #ede5d8;
+      border-radius: 3px; overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%; width: 0%; border-radius: 3px;
+      background: linear-gradient(90deg, #D4824A, #EAA070);
+      transition: width .6s ease;
+    }
+    .score-value {
+      font-size: 1.6rem; font-weight: 900;
+      color: var(--accent); min-width: 36px; text-align: right;
+    }
+    .score-status {
+      font-size: .82rem; color: var(--brown); margin-top: 6px;
+    }
+
+    /* Lead fields */
+    .lead-field {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 8px 0;
+      border-bottom: 1px solid #f3ece3;
+    }
+    .lead-field:last-child { border-bottom: none; }
+    .lead-field .lf-label {
+      font-size: .82rem; font-weight: 600; color: var(--brown);
+    }
+    .lead-field .lf-value {
+      font-size: .82rem; color: var(--bot-fg);
+      font-weight: 700; max-width: 55%;
+      text-align: right; word-break: break-word;
+    }
+    .lead-field .lf-value.empty {
+      color: #c9b9a7; font-weight: 400;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width: 900px) {
+      #lead-panel { display: none; }
+    }
     @media (max-width: 480px) {
-      #suggestions { grid-template-columns: 1fr; }
-      .bubble { max-width: 86%; }
+      .bubble { max-width: 90%; }
+      #scenario-bar { padding: 8px 12px; }
     }
   </style>
 </head>
@@ -308,144 +359,162 @@
   <!-- ── HEADER ── -->
   <header id="header">
     <div>
-      <!-- SmartSeniors wordmark with chip-i -->
       <div class="wordmark" aria-label="SmartSeniors">
-        <span class="wm-smart">Smart</span><!--
-        --><span class="wm-s">S</span><!--
-        --><span class="wm-enio">enio</span><!--
-        --><span class="wm-chi">
-          <span class="wm-stem">ı</span>
-          <!-- chip / CPU icon replacing the i-dot -->
-          <svg class="wm-chip" viewBox="0 0 14 14" fill="none">
-            <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#D4824A"/>
-            <rect x="6" y="0" width="2" height="3" rx=".8" fill="#EAA070"/>
-            <rect x="6" y="11" width="2" height="3" rx=".8" fill="#EAA070"/>
-            <rect x="0" y="6" width="3" height="2" rx=".8" fill="#EAA070"/>
-            <rect x="11" y="6" width="3" height="2" rx=".8" fill="#EAA070"/>
-            <rect x="5.5" y="5.5" width="3" height="3" rx=".5" fill="#EAA070"/>
-          </svg>
-        </span><!--
-        --><span class="wm-rs">rs</span>
+        <span class="wm-smart">Smart</span><span class="wm-seniors">Seniors</span>
       </div>
-      <div class="header-sub">Votre assistant numérique bienveillant</div>
+      <div class="header-sub">IA Conseillère · Cap Retraite</div>
     </div>
-    <div class="status-dot" title="En ligne"></div>
+    <div class="header-right">
+      <span class="header-badge">Demo confidentielle — prototype v1</span>
+      <div class="status-dot" title="En ligne"></div>
+    </div>
   </header>
 
-  <!-- ── CHAT ── -->
-  <main id="chat-box" role="log" aria-live="polite" aria-label="Conversation">
+  <!-- ── SCENARIO TABS ── -->
+  <div id="scenario-bar">
+    <span class="label">Scenarios :</span>
+    <button class="scenario-tab" data-scenario="placement">🏥 Placement urgent (hopital)</button>
+    <button class="scenario-tab" data-scenario="budget">💰 Budget contraint</button>
+    <button class="scenario-tab" data-scenario="refus">👨‍👩‍👧 Parent qui refuse</button>
+    <button class="scenario-tab" data-scenario="alzheimer">🧠 Alzheimer avance</button>
+  </div>
 
-    <!-- Floating joy dots -->
-    <div id="dots-bg"></div>
+  <!-- ── MAIN CONTENT ── -->
+  <div id="content">
 
-    <!-- Welcome screen -->
-    <div id="welcome">
+    <!-- Chat column -->
+    <div id="chat-col">
 
-      <!-- Duo illustration inspired by the colorful two-faces image -->
-      <div class="duo-wrap" aria-hidden="true">
-        <!-- orbit confetti -->
-        <div class="cdot" style="width:10px;height:10px;background:#FF6B6B;top:50%;left:50%;margin:-5px;animation-duration:7s;animation-delay:0s;"></div>
-        <div class="cdot" style="width:8px;height:8px;background:#4ECDC4;top:50%;left:50%;margin:-4px;animation-duration:9s;animation-delay:-3s;"></div>
-        <div class="cdot" style="width:7px;height:7px;background:#FFD93D;top:50%;left:50%;margin:-3.5px;animation-duration:11s;animation-delay:-5s;"></div>
-        <div class="cdot" style="width:9px;height:9px;background:#A855F7;top:50%;left:50%;margin:-4.5px;animation-duration:8s;animation-delay:-1.5s;"></div>
-        <div class="cdot" style="width:6px;height:6px;background:#F97316;top:50%;left:50%;margin:-3px;animation-duration:12s;animation-delay:-7s;"></div>
-        <!-- Man face (warm orange) -->
-        <div class="duo-circle man">
-          <svg viewBox="0 0 52 52" fill="none">
-            <!-- head -->
-            <ellipse cx="26" cy="20" rx="13" ry="14" fill="rgba(255,255,255,.25)"/>
-            <!-- hair (white/silver) -->
-            <path d="M13 18 Q14 8 26 8 Q38 8 39 18" fill="rgba(255,255,255,.55)" stroke="none"/>
-            <!-- glasses -->
-            <circle cx="21" cy="20" r="4" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <circle cx="31" cy="20" r="4" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <line x1="25" y1="20" x2="27" y2="20" stroke="#fff" stroke-width="1.5"/>
-            <line x1="13" y1="20" x2="17" y2="20" stroke="#fff" stroke-width="1.5"/>
-            <line x1="35" y1="20" x2="39" y2="20" stroke="#fff" stroke-width="1.5"/>
-            <!-- smile -->
-            <path d="M21 27 Q26 31 31 27" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <!-- body -->
-            <path d="M12 45 Q12 37 26 36 Q40 37 40 45" fill="rgba(255,255,255,.2)"/>
-            <!-- tie -->
-            <path d="M25 36 L26 42 L27 36" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </div>
-        <!-- Woman face (cool teal) -->
-        <div class="duo-circle woman">
-          <svg viewBox="0 0 52 52" fill="none">
-            <!-- head -->
-            <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
-            <!-- hair (long white) -->
-            <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)" stroke="none"/>
-            <!-- face area -->
-            <ellipse cx="26" cy="22" rx="10" ry="11" fill="rgba(255,255,255,.15)"/>
-            <!-- glasses -->
-            <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-            <line x1="14" y1="21" x2="18.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-            <line x1="33.5" y1="21" x2="38" y2="21" stroke="#fff" stroke-width="1.5"/>
-            <!-- smile -->
-            <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <!-- body -->
-            <path d="M13 46 Q13 38 26 37 Q39 38 39 46" fill="rgba(255,255,255,.18)"/>
-          </svg>
+      <!-- Advisor identity -->
+      <div id="advisor-bar">
+        <div class="advisor-avatar">S</div>
+        <div class="advisor-info">
+          <div class="name">Sophie</div>
+          <div class="role">Conseillere senior · IA entrainee sur 9 ans d'experience Cap Retraite</div>
         </div>
       </div>
 
-      <h2>Bonjour, comment puis-je vous aider ?</h2>
-      <p>Posez-moi vos questions, je suis là pour vous accompagner avec patience et bienveillance.</p>
+      <!-- Chat messages -->
+      <main id="chat-box" role="log" aria-live="polite" aria-label="Conversation">
 
-      <div id="suggestions" role="list" aria-label="Suggestions">
-        <button class="sugg-chip c1" role="listitem">💊 Gérer mes médicaments au quotidien</button>
-        <button class="sugg-chip c2" role="listitem">📋 Aide pour une démarche administrative</button>
-        <button class="sugg-chip c3" role="listitem">🌿 Activités et loisirs pour seniors</button>
-        <button class="sugg-chip c4" role="listitem">❤️ Conseils santé et bien-être</button>
+        <div id="welcome">
+          <div class="welcome-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h2>Bonjour, comment puis-je vous aider ?</h2>
+          <p>Selectionnez un scenario ou ecrivez directement pour voir Sophie en action.</p>
+        </div>
+
+      </main>
+
+      <!-- Input -->
+      <div id="input-area">
+        <form id="form" novalidate>
+          <textarea id="input" rows="1" placeholder="Votre message a Sophie…"
+            aria-label="Votre message" maxlength="2000"></textarea>
+          <button type="submit" id="send-btn" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </form>
       </div>
+
     </div>
 
-  </main>
+    <!-- ── RIGHT PANEL: Lead qualification ── -->
+    <aside id="lead-panel">
 
-  <!-- ── INPUT ── -->
-  <div id="input-area">
-    <form id="form" novalidate>
-      <textarea id="input" rows="1" placeholder="Écrivez votre message…"
-        aria-label="Votre message" maxlength="2000"></textarea>
-      <button type="submit" id="send-btn" aria-label="Envoyer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </form>
+      <div class="panel-section">
+        <div class="panel-title">Score de qualification</div>
+        <div class="score-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" id="score-fill"></div></div>
+          <div class="score-value" id="score-value">0</div>
+        </div>
+        <div class="score-status" id="score-status">En attente</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Fiche lead · mise a jour en temps reel</div>
+        <div class="lead-field"><span class="lf-label">Appelant</span><span class="lf-value empty" id="lead-appelant">—</span></div>
+        <div class="lead-field"><span class="lf-label">Prenom</span><span class="lf-value empty" id="lead-prenom">—</span></div>
+        <div class="lead-field"><span class="lf-label">Age</span><span class="lf-value empty" id="lead-age">—</span></div>
+        <div class="lead-field"><span class="lf-label">Pathologie</span><span class="lf-value empty" id="lead-pathologie">—</span></div>
+        <div class="lead-field"><span class="lf-label">Autonomie</span><span class="lf-value empty" id="lead-autonomie">—</span></div>
+        <div class="lead-field"><span class="lf-label">Localisation</span><span class="lf-value empty" id="lead-localisation">—</span></div>
+        <div class="lead-field"><span class="lf-label">Budget</span><span class="lf-value empty" id="lead-budget">—</span></div>
+        <div class="lead-field"><span class="lf-label">Urgence</span><span class="lf-value empty" id="lead-urgence">—</span></div>
+        <div class="lead-field"><span class="lf-label">Delai</span><span class="lf-value empty" id="lead-delai">—</span></div>
+      </div>
+
+    </aside>
+
   </div>
 
 </div>
 
 <script>
-  /* ── Floating dots init ── */
-  (function() {
-    const colors = ['#FF6B6B','#4ECDC4','#FFD93D','#A855F7','#3B82F6','#F97316','#EAA070','#6ee7b7'];
-    const bg = document.getElementById('dots-bg');
-    for (let i = 0; i < 18; i++) {
-      const d = document.createElement('div');
-      d.className = 'fdot';
-      const size = 6 + Math.random() * 14;
-      d.style.cssText = [
-        `width:${size}px`, `height:${size}px`,
-        `left:${Math.random()*100}%`,
-        `background:${colors[i % colors.length]}`,
-        `animation-duration:${12 + Math.random()*18}s`,
-        `animation-delay:${-Math.random()*20}s`
-      ].join(';');
-      bg.appendChild(d);
-    }
-  })();
-
   /* ── Config ── */
   const API_URL = "/api/chat";
 
+  /* ── Lead data model ── */
+  const leadData = {
+    appelant: null, prenom: null, age: null,
+    pathologie: null, autonomie: null, localisation: null,
+    budget: null, urgence: null, delai: null
+  };
+
+  const LEAD_FIELDS = ['appelant','prenom','age','pathologie','autonomie','localisation','budget','urgence','delai'];
+
+  function updateLeadPanel() {
+    let filled = 0;
+    LEAD_FIELDS.forEach(key => {
+      const el = document.getElementById('lead-' + key);
+      if (leadData[key]) {
+        el.textContent = leadData[key];
+        el.classList.remove('empty');
+        filled++;
+      } else {
+        el.textContent = '—';
+        el.classList.add('empty');
+      }
+    });
+    const score = Math.round((filled / LEAD_FIELDS.length) * 100);
+    document.getElementById('score-value').textContent = score;
+    document.getElementById('score-fill').style.width = score + '%';
+
+    const statusEl = document.getElementById('score-status');
+    if (score === 0) statusEl.textContent = 'En attente';
+    else if (score < 40) statusEl.textContent = 'Qualification en cours…';
+    else if (score < 70) statusEl.textContent = 'Lead partiellement qualifie';
+    else if (score < 100) statusEl.textContent = 'Presque complet';
+    else statusEl.textContent = 'Lead qualifie !';
+  }
+
+  function extractLeadInfo(text) {
+    const lower = text.toLowerCase();
+
+    // Extract from structured JSON if the AI sends it
+    const jsonMatch = text.match(/\[LEAD_DATA\]([\s\S]*?)\[\/LEAD_DATA\]/);
+    if (jsonMatch) {
+      try {
+        const data = JSON.parse(jsonMatch[1]);
+        Object.keys(data).forEach(k => {
+          if (LEAD_FIELDS.includes(k) && data[k]) leadData[k] = data[k];
+        });
+        updateLeadPanel();
+        return text.replace(/\[LEAD_DATA\][\s\S]*?\[\/LEAD_DATA\]/, '').trim();
+      } catch {}
+    }
+
+    return text;
+  }
+
+  /* ── Markdown ── */
   function renderMarkdown(text) {
     if (window.marked) {
       marked.setOptions({ gfm: true, breaks: true });
@@ -462,26 +531,40 @@
       .replace(/\n/g,"<br>");
   }
 
+  /* ── DOM refs ── */
   const chatBox = document.getElementById("chat-box");
   const form    = document.getElementById("form");
   const input   = document.getElementById("input");
   const sendBtn = document.getElementById("send-btn");
   const welcome = document.getElementById("welcome");
-  const suggsEl = document.getElementById("suggestions");
   const history = [];
 
+  /* ── Textarea auto-resize ── */
   input.addEventListener("input", () => {
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 130) + "px";
   });
 
-  suggsEl.querySelectorAll(".sugg-chip").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const text = btn.textContent.replace(/^[^\s]+\s/, "").trim();
-      sendMessage(text);
+  /* ── Scenario tabs ── */
+  const SCENARIOS = {
+    placement: "Bonjour, ma mere est actuellement hospitalisee suite a une chute. L'hopital nous dit qu'elle ne peut plus rentrer chez elle et qu'il faut trouver un etablissement rapidement. On ne sait pas du tout comment faire, c'est tres urgent.",
+    budget: "Bonjour, on cherche une maison de retraite pour mon pere mais on a un petit budget. Sa retraite est de 1200 euros par mois. Est-ce qu'il existe des aides ? On ne sait pas comment financer.",
+    refus: "Bonjour, mon pere de 84 ans refuse categoriquement d'aller en maison de retraite. Il dit qu'il veut rester chez lui mais il a deja fait 2 chutes cette annee et oublie de prendre ses medicaments. On ne sait plus quoi faire.",
+    alzheimer: "Bonjour, ma mere a un Alzheimer avance. Elle ne nous reconnait plus et fugue la nuit. Son aide a domicile ne peut plus gerer. On cherche un etablissement specialise Alzheimer, de preference dans le 75 ou le 92."
+  };
+
+  document.querySelectorAll('.scenario-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const scenario = tab.dataset.scenario;
+      if (SCENARIOS[scenario]) {
+        sendMessage(SCENARIOS[scenario]);
+      }
     });
   });
 
+  /* ── Keyboard ── */
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
   });
@@ -492,6 +575,7 @@
     if (text) sendMessage(text);
   });
 
+  /* ── Chat functions ── */
   function avatarHTML() {
     return `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
@@ -585,7 +669,8 @@
             const delta = json?.delta?.text ?? json?.delta?.content?.[0]?.text ?? null;
             if (delta) {
               fullText += delta;
-              botBubble.innerHTML = renderMarkdown(fullText);
+              const cleaned = extractLeadInfo(fullText);
+              botBubble.innerHTML = renderMarkdown(cleaned);
               cursorEl = document.createElement("span");
               cursorEl.className = "cursor";
               botBubble.appendChild(cursorEl);
@@ -597,12 +682,13 @@
     } catch (err) {
       removeThinking();
       if (!botBubble) botBubble = createRow("bot");
-      fullText = "Désolé, une erreur est survenue. Veuillez réessayer.";
+      fullText = "Desole, une erreur est survenue. Veuillez reessayer.";
       botBubble.innerHTML = renderMarkdown(fullText);
       console.error(err);
     }
 
     if (cursorEl) cursorEl.remove();
+    fullText = extractLeadInfo(fullText);
     if (botBubble) botBubble.innerHTML = renderMarkdown(fullText);
     if (fullText) history.push({ role: "assistant", content: fullText });
 
