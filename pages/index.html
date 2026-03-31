@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartSeniors — IA Conseillère Cap Retraite</title>
   <meta name="description" content="SmartSeniors, IA conseillère bienveillante pour orienter les familles vers les solutions Cap Retraite." />
+  <meta name="theme-color" content="#3D2B1F" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -12,6 +16,22 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Skip link for keyboard nav */
+    .skip-link {
+      position: absolute; left: -9999px; top: 0;
+      background: var(--accent); color: #fff;
+      padding: 8px 16px; z-index: 100;
+      font-weight: 700; font-size: .9rem;
+      border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus { left: 0; }
+
+    /* Focus visible for keyboard users */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
 
     :root {
       --bg:       #EDE5D8;
@@ -253,6 +273,15 @@
       padding: 11px 16px 15px;
       border-top: 1px solid #e8ddd0;
     }
+    .footer-link {
+      text-align: center; padding: 4px 0;
+      background: #fff; border-top: 1px solid #f3ece3;
+    }
+    .footer-link a {
+      font-size: .72rem; color: var(--brown);
+      text-decoration: none;
+    }
+    .footer-link a:hover { text-decoration: underline; }
     #form { display: flex; gap: 10px; align-items: flex-end; }
     #input {
       flex: 1; resize: none;
@@ -354,10 +383,12 @@
 </head>
 <body>
 
+<a class="skip-link" href="#input">Aller au champ de saisie</a>
+
 <div id="app">
 
   <!-- ── HEADER ── -->
-  <header id="header">
+  <header id="header" role="banner">
     <div>
       <div class="wordmark" aria-label="SmartSeniors">
         <span class="wm-smart">Smart</span><span class="wm-seniors">Seniors</span>
@@ -422,6 +453,10 @@
             </svg>
           </button>
         </form>
+      </div>
+
+      <div class="footer-link">
+        <a href="/confidentialite.html">Politique de confidentialite</a>
       </div>
 
     </div>
@@ -696,6 +731,16 @@
     input.focus();
     scrollDown();
   }
+
+  /* ── Service Worker registration ── */
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }
 </script>
+
+<!-- Cloudflare Web Analytics (cookie-free) -->
+<!-- Replace YOUR_TOKEN with your actual Cloudflare Web Analytics token -->
+<!-- <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script> -->
+
 </body>
 </html>
