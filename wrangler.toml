@@ -1,0 +1,8 @@
+name = "smartseniors"
+compatibility_date = "2024-01-15"
+pages_build_output_dir = "pages"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "smartseniors-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
