@@ -5,4 +5,4 @@ pages_build_output_dir = "pages"
 [[d1_databases]]
 binding = "DB"
 database_name = "smartseniors-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "3c1a84ef-2d23-42d4-853a-748f0cc16847"
