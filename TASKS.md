@@ -2,26 +2,22 @@
 
 ## ✅ Fait
 
-- Création `pages/functions/api/chat.js` — streaming Anthropic SSE
-- Création `pages/index.html` — UI "wow effect" (Nunito, palette beige/cuivré, streaming token par token)
-- CLAUDE.md — mémoire projet complète (stack, design system, règles)
-- TASKS.md — ce fichier de suivi
-- PWA : `manifest.json`, service worker (`sw.js`), icônes 192/512px, meta tags
-- Accessibilité : skip link, `:focus-visible`, ARIA `role="banner"`, outline styles
-- Analytics : snippet Cloudflare Web Analytics prêt (à activer avec le token)
-- Page de confidentialité RGPD (`confidentialite.html`) + lien footer
-
-## 🔄 En cours
-
-- (rien en cours)
+- `pages/index.html` — interface lead gen 2 colonnes (Emma chat + formulaire qualification)
+- `pages/functions/api/chat.js` — streaming Anthropic SSE, persona Emma EHPAD
+- `pages/functions/api/ehpads.js` — GET /api/ehpads?localite= (mock data 8 depts + fallback D1)
+- `pages/functions/api/leads.js` — POST /api/leads (sauvegarde D1)
+- `schema.sql` — tables `leads` et `ehpads` Cloudflare D1
+- `wrangler.toml` — config Cloudflare Pages + binding D1 (`3c1a84ef-2d23-42d4-853a-748f0cc16847`)
+- `CLAUDE.md` — mémoire projet complète (Emma, lead gen, D1, design system)
+- D1 database créée : `smartseniors-db`
+- Déploiement Cloudflare Pages — prod live ✅
 
 ## 🔴 À faire
 
-- Configurer la variable `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Environment variables)
-- Connecter le repo à Cloudflare Pages si pas encore fait (publier `pages/` comme dossier racine)
-- Tester le streaming de bout en bout en prod
-- Personnaliser le prompt système (`SYSTEM_PROMPT` dans `chat.js`) selon le positionnement final
+- Appliquer le schema D1 : `npx wrangler d1 execute smartseniors-db --file=schema.sql --remote`
+- Configurer `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Environment variables)
+- Lier le binding D1 `DB` dans le dashboard Cloudflare Pages (Settings → Functions → D1 bindings)
+- Alimenter la table `ehpads` avec de vraies données EHPAD
+- Tester le flux complet : formulaire → POST /api/leads → GET /api/ehpads → cartes + CSV
 - Ajouter un domaine custom (ex. `smartseniors.fr`)
-- Activer Cloudflare Web Analytics (remplacer `YOUR_TOKEN` dans index.html)
-- Remplacer les icônes PWA par de vrais assets design
-- Multilingue : version anglaise si nécessaire
+- Implémenter l'envoi d'email aux EHPAD (dans `leads.js`) via Mailchannels
