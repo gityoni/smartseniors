@@ -1,0 +1,24 @@
+{
+  "name": "smartseniors",
+  "version": "1.0.0",
+  "description": "Plateforme lead gen EHPAD — Emma IA conseillère",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev":           "wrangler pages dev pages",
+    "deploy":        "wrangler pages deploy pages",
+    "db:schema":     "wrangler d1 execute smartseniors-db --local  --file=schema.sql",
+    "db:schema:remote": "wrangler d1 execute smartseniors-db --remote --file=schema.sql",
+    "seed":          "node scripts/seed.mjs",
+    "seed:remote":   "node scripts/seed.mjs --remote",
+    "seed:reset":    "node scripts/seed.mjs --remote --reset",
+    "seed:dry":      "node scripts/seed.mjs --dry-run",
+    "import:csv":    "node scripts/import-ehpads.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

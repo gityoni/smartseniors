@@ -1,0 +1,161 @@
+{
+  "$schema": "./ehpads.schema.json",
+  "_comment": "Source de vérité des EHPAD partenaires SmartSeniors. Modifier ce fichier puis lancer `npm run seed:remote` pour mettre à jour la production.",
+  "_last_updated": "2026-04-13",
+  "ehpads": [
+    {
+      "nom": "Résidence Les Marronniers",
+      "adresse": "12 rue de la Paix",
+      "ville": "Paris 15e",
+      "code_postal": "75015",
+      "departement": "75",
+      "telephone": "01 45 67 89 10",
+      "email": "contact@marronniers75.fr",
+      "places_disponibles": 3,
+      "tarif_jour": 112
+    },
+    {
+      "nom": "EHPAD Saint-Michel",
+      "adresse": "8 boulevard Saint-Michel",
+      "ville": "Paris 6e",
+      "code_postal": "75006",
+      "departement": "75",
+      "telephone": "01 43 22 11 00",
+      "email": "admissions@saint-michel-paris.fr",
+      "places_disponibles": 1,
+      "tarif_jour": 138
+    },
+    {
+      "nom": "Maison de Retraite du Belvédère",
+      "adresse": "34 avenue du Belvédère",
+      "ville": "Paris 20e",
+      "code_postal": "75020",
+      "departement": "75",
+      "telephone": "01 43 67 45 90",
+      "email": "belvedere@mdr75.fr",
+      "places_disponibles": 5,
+      "tarif_jour": 98
+    },
+    {
+      "nom": "Villa Serena",
+      "adresse": "56 rue de Passy",
+      "ville": "Paris 16e",
+      "code_postal": "75016",
+      "departement": "75",
+      "telephone": "01 45 24 78 32",
+      "email": "info@villa-serena-paris.fr",
+      "places_disponibles": 2,
+      "tarif_jour": 155
+    },
+    {
+      "nom": "Les Jardins de la Saône",
+      "adresse": "22 quai de la Saône",
+      "ville": "Lyon 5e",
+      "code_postal": "69005",
+      "departement": "69",
+      "telephone": "04 72 41 55 30",
+      "email": "jardins-saone@ehpad69.fr",
+      "places_disponibles": 4,
+      "tarif_jour": 88
+    },
+    {
+      "nom": "Résidence Fourvière",
+      "adresse": "7 montée Saint-Barthélémy",
+      "ville": "Lyon 5e",
+      "code_postal": "69005",
+      "departement": "69",
+      "telephone": "04 72 38 92 11",
+      "email": "fourviere@residence-lyon.fr",
+      "places_disponibles": 2,
+      "tarif_jour": 95
+    },
+    {
+      "nom": "EHPAD Le Confluent",
+      "adresse": "18 rue du Confluent",
+      "ville": "Lyon 2e",
+      "code_postal": "69002",
+      "departement": "69",
+      "telephone": "04 78 56 34 20",
+      "email": "contact@le-confluent.fr",
+      "places_disponibles": 6,
+      "tarif_jour": 82
+    },
+    {
+      "nom": "Villa Méditerranée",
+      "adresse": "45 corniche Kennedy",
+      "ville": "Marseille 7e",
+      "code_postal": "13007",
+      "departement": "13",
+      "telephone": "04 91 55 44 30",
+      "email": "villa-med@ehpad13.fr",
+      "places_disponibles": 3,
+      "tarif_jour": 90
+    },
+    {
+      "nom": "Résidence Les Calanques",
+      "adresse": "12 avenue des Calanques",
+      "ville": "Marseille 9e",
+      "code_postal": "13009",
+      "departement": "13",
+      "telephone": "04 91 73 88 20",
+      "email": "calanques@residence-marseille.fr",
+      "places_disponibles": 5,
+      "tarif_jour": 79
+    },
+    {
+      "nom": "Les Vignes d'Or",
+      "adresse": "8 allée des Vignes",
+      "ville": "Bordeaux",
+      "code_postal": "33000",
+      "departement": "33",
+      "telephone": "05 56 44 77 88",
+      "email": "vignes-or@ehpad33.fr",
+      "places_disponibles": 4,
+      "tarif_jour": 86
+    },
+    {
+      "nom": "Villa Azur",
+      "adresse": "32 promenade des Anglais",
+      "ville": "Nice",
+      "code_postal": "06000",
+      "departement": "06",
+      "telephone": "04 93 87 54 21",
+      "email": "villa-azur@ehpad06.fr",
+      "places_disponibles": 2,
+      "tarif_jour": 115
+    },
+    {
+      "nom": "Les Capitouls",
+      "adresse": "5 rue des Capitouls",
+      "ville": "Toulouse",
+      "code_postal": "31000",
+      "departement": "31",
+      "telephone": "05 61 23 45 67",
+      "email": "capitouls@ehpad31.fr",
+      "places_disponibles": 6,
+      "tarif_jour": 80
+    },
+    {
+      "nom": "Villa du Nord",
+      "adresse": "14 rue Nationale",
+      "ville": "Lille",
+      "code_postal": "59000",
+      "departement": "59",
+      "telephone": "03 20 55 43 21",
+      "email": "villa-nord@ehpad59.fr",
+      "places_disponibles": 5,
+      "tarif_jour": 75
+    },
+    {
+      "nom": "Résidence Alsace Senior",
+      "adresse": "12 quai des Bateliers",
+      "ville": "Strasbourg",
+      "code_postal": "67000",
+      "departement": "67",
+      "telephone": "03 88 32 45 67",
+      "email": "alsace-senior@ehpad67.fr",
+      "places_disponibles": 3,
+      "tarif_jour": 88
+    }
+  ]
+}
