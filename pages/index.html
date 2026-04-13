@@ -435,9 +435,12 @@
       margin-bottom: 8px;
     }
     .ehpad-card-tarif {
-      background: #FFF7ED; color: #c2410c;
-      border-radius: 6px; padding: 2px 8px; font-weight: 700;
+      background: #FFF7ED; color: #7c3a10;
+      border-radius: 7px; padding: 6px 10px;
+      font-size: .78rem; line-height: 1.4; font-weight: 500;
+      margin-bottom: 6px;
     }
+    .ehpad-card-tarif strong { color: #c2410c; font-weight: 800; }
     .ehpad-card-contact { display: flex; flex-wrap: wrap; gap: 10px; }
     .ehpad-card-contact a {
       font-size: .78rem; font-weight: 700; color: var(--accent);
@@ -1414,7 +1417,7 @@
       card.className = "ehpad-result-card";
 
       const tarifHtml = e.tarif_jour
-        ? `<span class="ehpad-card-tarif">~${e.tarif_jour} €/jour</span>`
+        ? `<div class="ehpad-card-tarif">Tarif hébergement hors GIR chambre individuelle à partir de <strong>${e.tarif_jour} €/jour</strong></div>`
         : '';
 
       const telHtml = e.telephone && e.telephone !== "Contactez-nous"
@@ -1439,8 +1442,8 @@
           </div>
           ${placeBadge(e.places_disponibles)}
         </div>
+        ${tarifHtml}
         <div class="ehpad-card-info">
-          ${tarifHtml}
           ${e.adresse ? `<span>${e.adresse}</span>` : ''}
         </div>
         ${telHtml || emailHtml ? `<div class="ehpad-card-contact">${telHtml}${emailHtml}</div>` : ''}
@@ -1472,7 +1475,7 @@
       e.nom, e.adresse || "", e.ville, e.code_postal || "", e.departement,
       e.telephone || "", e.email || "",
       e.places_disponibles !== null ? e.places_disponibles : "",
-      e.tarif_jour !== null ? e.tarif_jour : ""
+      e.tarif_jour !== null ? `à partir de ${e.tarif_jour} €/jour` : ""
     ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
 
     const csv = [headers.join(","), ...rows].join("\n");
