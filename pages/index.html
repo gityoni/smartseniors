@@ -810,12 +810,12 @@
     </div>
 
     <h1 id="hero-title">
-      Trouvez le <em>bon EHPAD</em><br>
-      pour votre proche
+      La bonne résidence<br>
+      pour <em>votre maman, votre papa</em>
     </h1>
 
     <p class="hero-sub">
-      Emma, votre conseillère SmartSeniors, vous accompagne gratuitement dans votre recherche d'EHPAD. Empathie, expertise et résultats concrets.
+      Des milliers de familles traversent ce moment difficile. Emma, votre conseillère dédiée, vous accompagne gratuitement — avec empathie et sans jugement.
     </p>
 
     <div class="hero-actions">
@@ -889,7 +889,7 @@
 
               <!-- Emma's opening message (chat bubble style) -->
               <div class="emma-first-msg">
-                <p>Bonjour ! Je suis là pour vous aider à trouver le bon EHPAD pour votre proche. 💚</p>
+                <p>Bonjour ! Je suis là pour vous aider à trouver la bonne résidence pour votre maman ou votre papa. 💚</p>
                 <p>Cette démarche est souvent difficile. Je vous accompagne <strong>gratuitement</strong>, sans jugement, à chaque étape.</p>
                 <p><strong>Comment puis-je vous aider aujourd'hui ?</strong></p>
               </div>
@@ -906,9 +906,9 @@
 
               <!-- Secondary chips -->
               <div id="suggestions" role="list" aria-label="Suggestions de questions">
-                <button class="sugg-chip c1" role="listitem">🆘 Situation urgente</button>
-                <button class="sugg-chip c2" role="listitem">💰 Budget &amp; aides ?</button>
-                <button class="sugg-chip c4" role="listitem">📋 Démarches admission ?</button>
+                <button class="sugg-chip c1" role="listitem">🏥 Mon parent vient d'être hospitalisé</button>
+                <button class="sugg-chip c2" role="listitem">😔 Il refuse d'aller en résidence</button>
+                <button class="sugg-chip c4" role="listitem">💰 Je ne sais pas comment financer</button>
               </div>
 
             </div>
@@ -1021,7 +1021,7 @@
 
           <!-- Pane 5: PROCHE - Nombre -->
           <div class="step-pane" id="pane-5">
-            <div class="step-q">Pour combien de personnes âgées ?</div>
+            <div class="step-q">Vous recherchez une résidence pour combien de personnes ?</div>
             <div class="s-grid">
               <button class="s-card" data-val="1"><span class="ce">👤</span>1 personne</button>
               <button class="s-card" data-val="2"><span class="ce">👥</span>2 personnes</button>
@@ -1031,7 +1031,7 @@
 
           <!-- Pane 6: PROCHE - Genre -->
           <div class="step-pane" id="pane-6">
-            <div class="step-q">La personne âgée est</div>
+            <div class="step-q">C'est un homme ou une femme ?</div>
             <div class="s-grid">
               <button class="s-card" data-val="homme"><span class="ce">👨</span>Un homme</button>
               <button class="s-card" data-val="femme"><span class="ce">👩</span>Une femme</button>
@@ -1041,7 +1041,7 @@
 
           <!-- Pane 7: PROCHE - Identité -->
           <div class="step-pane" id="pane-7">
-            <div class="step-q">Information sur la personne âgée</div>
+            <div class="step-q">Quel est son prénom ?</div>
             <div class="step-sub">Cela nous permet de personnaliser votre recherche.</div>
             <div class="s-fields">
               <div class="s-field-g">
@@ -1260,8 +1260,8 @@
   suggsEl.querySelectorAll(".sugg-chip").forEach(btn => {
     btn.addEventListener("click", () => {
       const text = btn.textContent.trim();
-      // Urgent situation: also open the funnel so Emma can guide them
-      if (text.toLowerCase().includes('urgent')) openFunnel();
+      // Hospitalization or urgent: open funnel so Emma can guide them
+      if (text.toLowerCase().includes('hospitalisé') || text.toLowerCase().includes('urgent')) openFunnel();
       sendMessage(text);
     });
   });
@@ -1679,7 +1679,9 @@
 
   function updateNames() {
     const titre = F.genre_proche === 'femme' ? 'Madame' : 'Monsieur';
-    const full = F.prenom_proche && F.nom_proche ? `${titre} ${F.prenom_proche} ${F.nom_proche}` : 'votre proche';
+    const full = F.prenom_proche && F.nom_proche
+      ? `${titre} ${F.prenom_proche} ${F.nom_proche}`
+      : F.prenom_proche || (F.genre_proche === 'femme' ? 'votre maman' : F.genre_proche === 'homme' ? 'votre papa' : 'votre proche');
     const qs = document.getElementById('q-sit');
     const qa = document.getElementById('q-age');
     const qg = document.getElementById('q-gir');
