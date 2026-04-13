@@ -167,13 +167,6 @@
     }
     .stat-label { font-size: .78rem; color: rgba(237,229,216,.55); margin-top: 4px; font-weight: 600; }
 
-    /* ── HOW IT WORKS ───────────────────────── */
-    #how-it-works {
-      padding: 64px 24px 72px;
-      max-width: 1000px; margin: 0 auto;
-      text-align: center;
-    }
-
     .section-label {
       font-size: .76rem; font-weight: 800; letter-spacing: .08em;
       text-transform: uppercase; color: var(--accent);
@@ -184,27 +177,6 @@
       line-height: 1.2; margin-bottom: 12px;
     }
     .section-sub { font-size: .95rem; color: var(--brown); max-width: 480px; margin: 0 auto 44px; line-height: 1.65; }
-
-    .steps-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
-    }
-    .step-card {
-      background: #fff; border-radius: 20px; padding: 32px 24px 28px;
-      box-shadow: 0 4px 24px rgba(61,43,31,.08);
-      border: 1.5px solid rgba(125,107,94,.1);
-      position: relative;
-    }
-    .step-num {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; font-size: 1.25rem; font-weight: 900;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 18px;
-      box-shadow: 0 4px 16px rgba(212,130,74,.4);
-    }
-    .step-icon { font-size: 2rem; margin-bottom: 12px; }
-    .step-title { font-size: 1rem; font-weight: 800; color: var(--header); margin-bottom: 8px; }
-    .step-desc { font-size: .88rem; color: var(--brown); line-height: 1.6; }
 
     /* ── MAIN SECTION ───────────────────────── */
     #main-section {
@@ -268,8 +240,8 @@
     }
     @keyframes floatDot {
       0%   { transform: translateY(0) scale(0);   opacity: 0; }
-      8%   { opacity: .55;  transform: scale(1); }
-      90%  { opacity: .45; }
+      8%   { opacity: .28;  transform: scale(1); }
+      90%  { opacity: .18; }
       100% { transform: translateY(-560px) scale(.7); opacity: 0; }
     }
 
@@ -277,70 +249,73 @@
     #welcome {
       position: relative; z-index: 1;
       display: flex; flex-direction: column;
-      align-items: flex-start; gap: 12px;
-      padding: 14px 16px 8px;
+      align-self: center;        /* center horizontally in chat-box */
+      align-items: stretch;      /* children fill the width */
+      gap: 14px;
+      padding: 28px 28px 20px;
       animation: slideUp .55s ease both;
-      width: 100%;
+      width: 100%; max-width: 600px;
+      margin: auto;              /* center vertically in flex container */
     }
 
     /* Emma identity card */
     .emma-card {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 14px; background: rgba(255,255,255,.8);
-      border-radius: 14px; border: 1.5px solid rgba(125,107,94,.12);
-      box-shadow: 0 2px 14px rgba(61,43,31,.08);
-      width: 100%; max-width: 460px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; background: rgba(255,255,255,.85);
+      border-radius: 16px; border: 1.5px solid rgba(125,107,94,.12);
+      box-shadow: 0 3px 18px rgba(61,43,31,.1);
+      width: 100%;
     }
     .emma-av-wrap {
-      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+      width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
       background: linear-gradient(135deg, #4ECDC4 0%, #A855F7 100%);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 14px rgba(168,85,247,.3); position: relative;
+      box-shadow: 0 4px 18px rgba(168,85,247,.35); position: relative;
     }
-    .emma-av-wrap svg { width: 27px; height: 27px; }
+    .emma-av-wrap svg { width: 32px; height: 32px; }
     .emma-av-online {
-      position: absolute; bottom: 0; right: 0;
-      width: 13px; height: 13px; border-radius: 50%;
+      position: absolute; bottom: 1px; right: 1px;
+      width: 14px; height: 14px; border-radius: 50%;
       background: #6ee7b7; border: 2.5px solid var(--bg);
       animation: pulse-dot 2s infinite;
     }
-    .emma-card-name { font-weight: 900; font-size: 1.01rem; color: var(--header); line-height: 1.2; }
-    .emma-card-role { font-size: .71rem; color: #9a7060; font-weight: 600; }
+    .emma-card-name { font-weight: 900; font-size: 1.08rem; color: var(--header); line-height: 1.2; }
+    .emma-card-role { font-size: .74rem; color: #9a7060; font-weight: 600; margin-top: 2px; }
 
     /* Emma's opening message bubble */
     .emma-first-msg {
-      background: #fff; border-radius: 4px 14px 14px 14px;
-      padding: 13px 16px; box-shadow: 0 2px 10px rgba(125,107,94,.1);
-      font-size: .88rem; color: var(--bot-fg); line-height: 1.65;
-      max-width: 460px; width: 100%;
+      background: #fff; border-radius: 4px 16px 16px 16px;
+      padding: 15px 18px; box-shadow: 0 2px 12px rgba(125,107,94,.1);
+      font-size: .92rem; color: var(--bot-fg); line-height: 1.68;
+      width: 100%;
     }
-    .emma-first-msg p { margin-bottom: .5em; }
+    .emma-first-msg p { margin-bottom: .55em; }
     .emma-first-msg p:last-child { margin-bottom: 0; }
 
     /* Big primary launch button */
     .launch-chip {
-      width: 100%; max-width: 460px;
+      width: 100%;
       background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
       color: #fff; border: none; border-radius: 14px;
-      padding: 14px 18px; font-family: var(--font);
+      padding: 16px 22px; font-family: var(--font);
       cursor: pointer; text-align: left;
-      box-shadow: 0 5px 22px rgba(212,130,74,.42);
+      box-shadow: 0 6px 26px rgba(212,130,74,.44);
       transition: transform .18s, box-shadow .18s;
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 14px;
     }
-    .launch-chip:hover  { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,130,74,.52); }
+    .launch-chip:hover  { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,130,74,.54); }
     .launch-chip:active { transform: translateY(0); }
-    .lc-icon { font-size: 1.28rem; flex-shrink: 0; }
+    .lc-icon { font-size: 1.5rem; flex-shrink: 0; }
     .lc-text { flex: 1; }
-    .lc-text strong { display: block; font-size: .97rem; font-weight: 800; }
-    .lc-text small   { display: block; font-size: .72rem; opacity: .78; margin-top: 2px; font-weight: 600; }
-    .lc-arr { font-size: 1.1rem; flex-shrink: 0; opacity: .8; transition: transform .18s; }
+    .lc-text strong { display: block; font-size: 1.03rem; font-weight: 800; }
+    .lc-text small   { display: block; font-size: .75rem; opacity: .78; margin-top: 3px; font-weight: 600; }
+    .lc-arr { font-size: 1.2rem; flex-shrink: 0; opacity: .8; transition: transform .18s; }
     .launch-chip:hover .lc-arr { transform: translateX(4px); }
 
     /* ── SUGGESTION CHIPS ───────────────────── */
     #suggestions {
       display: flex; flex-wrap: wrap;
-      gap: 7px; width: 100%; max-width: 460px;
+      gap: 8px; width: 100%;
     }
     .sugg-chip {
       border-radius: 12px; padding: 9px 13px;
@@ -663,7 +638,6 @@
       }
       .chat-side { min-height: 520px; }
       #chat-box { min-height: 320px; }
-      .steps-grid { grid-template-columns: 1fr; gap: 16px; }
     }
     @media (max-width: 640px) {
       #hero { padding: 52px 20px 60px; }
@@ -821,7 +795,6 @@
       <div class="header-sub">Votre conseillère EHPAD bienveillante</div>
     </div>
     <nav class="header-nav" aria-label="Navigation principale">
-      <a class="nav-link" href="#how-it-works">Comment ça marche ?</a>
       <a class="nav-link" href="#main-section">Parler à Emma</a>
       <button class="nav-cta" onclick="openFunnel()">Lancer ma recherche</button>
       <div class="status-dot" title="Emma en ligne"></div>
@@ -852,8 +825,8 @@
         </svg>
         Parler à Emma maintenant
       </button>
-      <button class="btn-secondary" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
-        Comment ça marche ?
+      <button class="btn-secondary" onclick="scrollToMain()">
+        Parler à Emma d'abord
       </button>
     </div>
 
@@ -876,38 +849,6 @@
       </div>
     </div>
 
-  </section>
-
-  <!-- ── HOW IT WORKS ── -->
-  <section id="how-it-works" aria-labelledby="how-title">
-    <div class="section-label">Simple &amp; rapide</div>
-    <h2 class="section-title" id="how-title">Votre recherche EHPAD en 3 étapes</h2>
-    <p class="section-sub">Emma s'occupe de tout. Dites-lui simplement ce que vous cherchez.</p>
-
-    <div class="steps-grid" role="list">
-
-      <div class="step-card" role="listitem">
-        <div class="step-num">1</div>
-        <div class="step-icon" aria-hidden="true">💬</div>
-        <h3 class="step-title">Parlez à Emma</h3>
-        <p class="step-desc">Décrivez la situation de votre proche à Emma. Elle vous pose les bonnes questions et lance la recherche pour vous.</p>
-      </div>
-
-      <div class="step-card" role="listitem">
-        <div class="step-num">2</div>
-        <div class="step-icon" aria-hidden="true">🔍</div>
-        <h3 class="step-title">Emma recherche pour vous</h3>
-        <p class="step-desc">Emma analyse les disponibilités des EHPAD dans la zone géographique souhaitée et sélectionne les meilleures options.</p>
-      </div>
-
-      <div class="step-card" role="listitem">
-        <div class="step-num">3</div>
-        <div class="step-icon" aria-hidden="true">📥</div>
-        <h3 class="step-title">Recevez la liste complète</h3>
-        <p class="step-desc">Les résultats s'affichent directement dans le chat avec coordonnées, tarifs et places disponibles. Export CSV inclus.</p>
-      </div>
-
-    </div>
   </section>
 
   <!-- ── MAIN SECTION ── -->
@@ -1263,7 +1204,7 @@
   (function() {
     const colors = ['#FF6B6B','#4ECDC4','#FFD93D','#A855F7','#3B82F6','#F97316','#EAA070','#6ee7b7'];
     const bg = document.getElementById('dots-bg');
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 7; i++) {
       const d = document.createElement('div');
       d.className = 'fdot';
       const size = 5 + Math.random() * 12;
