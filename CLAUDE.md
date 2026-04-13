@@ -10,6 +10,8 @@ Répond en français, dans un langage simple, rassurant et structuré.
 - **Rôle** : Conseillère senior SmartSeniors, spécialisée EHPAD
 - **Ton** : Empathique, bienveillant, professionnel
 - **Mission** : Accueillir les familles, comprendre leurs besoins, les orienter vers les bons EHPAD
+- **Vocabulaire strict** : "votre maman/papa" (jamais "votre proche"), "résidence/établissement" (jamais "maison de retraite"), "solution d'accompagnement" (jamais "placement")
+- **Règle d'or** : une seule question par message, valider l'émotion avant de poser la question
 - **Règles** : Jamais de conseil médical direct, toujours orienter vers un professionnel pour les questions de santé
 
 ## Stack technique
@@ -19,13 +21,13 @@ Répond en français, dans un langage simple, rassurant et structuré.
 - **Base de données** : Cloudflare D1 (SQLite edge) — binding `DB`
 - **Hébergement** : Cloudflare Pages (auto-deploy sur push `main`)
 - **Config** : `wrangler.toml` (nom, D1 binding, pages output dir)
-- **Repo** : gityoni/rebsam.github.io
+- **Repo** : gityoni/smartseniors
 
 ## Fichiers clés
 | Fichier | Rôle |
 |---|---|
-| `pages/index.html` | Interface lead gen : chat Emma + formulaire qualification |
-| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma) |
+| `pages/index.html` | Interface lead gen : chat Emma (entrée principale) + formulaire qualification (panneau latéral) |
+| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma + contexte funnel dynamique) |
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde lead en D1 |
 | `schema.sql` | Schéma D1 : tables `leads` et `ehpads` |
@@ -37,11 +39,13 @@ Répond en français, dans un langage simple, rassurant et structuré.
 
 ### Flux utilisateur
 1. L'utilisateur arrive sur `pages/index.html`
-2. Il peut discuter avec Emma (chat streaming) OU remplir le formulaire
-3. Formulaire : prénom, nom, date_naissance, localité du proche
-4. Soumission → `POST /api/leads` (sauvegarde D1) + `GET /api/ehpads?localite=` (liste)
-5. Les résultats EHPAD s'affichent dans le chat sous forme de cartes
-6. Bouton CSV pour télécharger la liste
+2. Emma accueille — c'est le seul point d'entrée (formulaire masqué par défaut)
+3. Le bouton "Lancer ma recherche personnalisée" ou les chips déclenchent l'ouverture du funnel
+4. Formulaire 14 étapes : type résidence → lien → délai → contact → ville → nb personnes → genre → prénom → situation → âge → GIR → ville proche → famille → confirmation
+5. Soumission → `POST /api/leads` (sauvegarde D1) + `GET /api/ehpads?localite=` (liste)
+6. Les résultats EHPAD s'affichent dans le chat sous forme de cartes
+7. Bouton CSV pour télécharger la liste
+8. À chaque message, le contexte funnel (`getFunnelContext()`) est passé à `/api/chat` pour personnaliser Emma
 
 ### Endpoints API
 | Endpoint | Méthode | Description |
@@ -49,6 +53,12 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `POST /api/chat` | POST | Chat streaming SSE avec Emma (Anthropic) |
 | `GET /api/ehpads?localite=` | GET | Liste EHPAD par localité (département extrait) |
 | `POST /api/leads` | POST | Sauvegarde lead (prenom, nom, date_naissance, localite) |
+
+### Contexte funnel dynamique
+`getFunnelContext()` dans `index.html` retourne un snapshot de l'objet `F` (champs non vides uniquement).
+Ce snapshot est passé dans chaque requête `POST /api/chat` sous la clé `funnel`.
+`buildContextSection(funnel)` dans `chat.js` injecte ces données dans le system prompt d'Emma.
+Emma ne re-demande jamais une information déjà présente dans le contexte.
 
 ### Détection département
 `extractDepartement()` dans `ehpads.js` :
@@ -114,20 +124,33 @@ linear-gradient(135deg, #D4824A 0%, #EAA070 100%)
 - Taille corps : minimum `1rem` (accessibilité)
 
 ### Layout principal
-- `#main-section` : grille 2 colonnes `55fr 45fr`
-- Colonne gauche (`.chat-side`) : interface chat Emma
-- Colonne droite (`.form-side`) : fond `#3D2B1F`, formulaire qualification
+- `.main-layout` : flex row — chat-side (flex 1) + form-side (flex 0 0 44%, masqué par défaut)
+- `.form-side` s'affiche via `.funnel-open` (animation `panelSlideIn`)
+- `openFunnel()` ajoute la classe et scroll vers le panneau
 - Mobile `≤ 900px` : colonne unique, formulaire en haut
 
-### UI chat
+### UI chat — welcome
+- Emma card (avatar SVG + dot vert + nom + rôle)
+- Message d'accueil : "votre maman ou votre papa"
+- CTA principal : `#launch-funnel-btn` → déclenche `openFunnel()`
+- 3 chips scénarios émotionnels : hospitalisé / refuse / financement
+- Hero : "La bonne résidence pour votre maman, votre papa"
+
+### UI chat — conversation
 - Bulles assistant : fond blanc, avatar SVG cuivré à gauche
 - Bulles user : fond `#7D6B5E`, texte blanc
 - Animations `slideUp` sur apparition des bulles
 - Curseur clignotant pendant le streaming
-- 4 chips EHPAD cliquables au démarrage
 - `marked.js` (CDN) pour rendu markdown
 - Cartes EHPAD résultats : `.ehpad-result-card` dans le chat
 - Bouton CSV `.csv-btn` sous les cartes
+
+## Prompt Emma — points clés
+- **Vocabulaire interdit** : "votre proche", "résident", "patient", "placement", "maison de retraite"
+- **Processus de qualification** (7 étapes strictes) : contexte émotionnel → profil senior → autonomie → localisation → budget → délai/urgence → critères spéciaux
+- **Gestion objections** : "trop cher" (APA + ASH), "refuse d'y aller" (visite sans engagement), "trop compliqué" (guidage pas à pas), "juste des infos" (répondre puis recadrer)
+- **APA** : jusqu'à 1 700 €/mois selon GIR et ressources
+- **Déduction fiscale** : 25 % des frais d'hébergement
 
 ## Règles importantes
 - Ne jamais committer `ANTHROPIC_API_KEY` ou tout autre secret
