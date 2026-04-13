@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SmartSeniors EHPAD data",
+  "type": "object",
+  "required": ["ehpads"],
+  "properties": {
+    "ehpads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nom", "ville", "departement"],
+        "properties": {
+          "nom":                { "type": "string",  "description": "Nom complet de l'établissement" },
+          "adresse":            { "type": "string",  "description": "Adresse postale" },
+          "ville":              { "type": "string",  "description": "Ville" },
+          "code_postal":        { "type": "string",  "pattern": "^\\d{4,5}$" },
+          "departement":        { "type": "string",  "pattern": "^\\d{2,3}$", "description": "Numéro de département (ex: 75, 69, 971)" },
+          "telephone":          { "type": "string",  "description": "Numéro de téléphone principal" },
+          "email":              { "type": "string",  "format": "email", "description": "Email de reception des leads — CRITIQUE" },
+          "places_disponibles": { "type": ["integer","null"], "minimum": 0 },
+          "tarif_jour":         { "type": ["number","null"],  "minimum": 0, "description": "Tarif hébergement hors GIR chambre individuelle €/jour" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
