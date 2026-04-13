@@ -206,15 +206,14 @@
     .step-title { font-size: 1rem; font-weight: 800; color: var(--header); margin-bottom: 8px; }
     .step-desc { font-size: .88rem; color: var(--brown); line-height: 1.6; }
 
-    /* ── MAIN SECTION (2 columns) ───────────── */
+    /* ── MAIN SECTION ───────────────────────── */
     #main-section {
       max-width: 1200px; margin: 0 auto;
       padding: 0 0 72px;
     }
 
     .main-layout {
-      display: grid;
-      grid-template-columns: 55fr 45fr;
+      display: flex;
       gap: 0;
       min-height: 600px;
       border-radius: 24px;
@@ -228,6 +227,7 @@
       background: var(--bg);
       display: flex; flex-direction: column;
       min-height: 640px;
+      flex: 1 0 0; min-width: 0;
     }
 
     .chat-side-head {
@@ -277,47 +277,78 @@
     #welcome {
       position: relative; z-index: 1;
       display: flex; flex-direction: column;
-      align-items: center; gap: 14px;
-      padding: 8px 8px 4px;
+      align-items: flex-start; gap: 12px;
+      padding: 14px 16px 8px;
       animation: slideUp .55s ease both;
+      width: 100%;
     }
 
-    .duo-wrap {
-      position: relative; width: 140px; height: 105px;
+    /* Emma identity card */
+    .emma-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: rgba(255,255,255,.8);
+      border-radius: 14px; border: 1.5px solid rgba(125,107,94,.12);
+      box-shadow: 0 2px 14px rgba(61,43,31,.08);
+      width: 100%; max-width: 460px;
     }
-    .duo-circle {
-      position: absolute; border-radius: 50%;
-      width: 76px; height: 76px;
+    .emma-av-wrap {
+      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #4ECDC4 0%, #A855F7 100%);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      box-shadow: 0 3px 14px rgba(168,85,247,.3); position: relative;
     }
-    .duo-circle.man   { background: linear-gradient(135deg, #D4824A, #FFD93D); left: 4px; top: 8px; z-index: 2; }
-    .duo-circle.woman { background: linear-gradient(135deg, #4ECDC4, #A855F7); right: 4px; top: 8px; z-index: 1; }
-    .duo-circle svg { width: 48px; height: 48px; }
+    .emma-av-wrap svg { width: 27px; height: 27px; }
+    .emma-av-online {
+      position: absolute; bottom: 0; right: 0;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: #6ee7b7; border: 2.5px solid var(--bg);
+      animation: pulse-dot 2s infinite;
+    }
+    .emma-card-name { font-weight: 900; font-size: 1.01rem; color: var(--header); line-height: 1.2; }
+    .emma-card-role { font-size: .71rem; color: #9a7060; font-weight: 600; }
 
-    .cdot {
-      position: absolute; border-radius: 50%;
-      animation: spinOrbit linear infinite;
+    /* Emma's opening message bubble */
+    .emma-first-msg {
+      background: #fff; border-radius: 4px 14px 14px 14px;
+      padding: 13px 16px; box-shadow: 0 2px 10px rgba(125,107,94,.1);
+      font-size: .88rem; color: var(--bot-fg); line-height: 1.65;
+      max-width: 460px; width: 100%;
     }
-    @keyframes spinOrbit {
-      from { transform: rotate(0deg) translateX(70px) rotate(0deg); }
-      to   { transform: rotate(360deg) translateX(70px) rotate(-360deg); }
-    }
+    .emma-first-msg p { margin-bottom: .5em; }
+    .emma-first-msg p:last-child { margin-bottom: 0; }
 
-    #welcome h2 { font-size: 1.05rem; font-weight: 800; color: var(--header); text-align: center; }
-    #welcome p  { font-size: .84rem; color: #6b5a4e; text-align: center; max-width: 320px; line-height: 1.5; }
+    /* Big primary launch button */
+    .launch-chip {
+      width: 100%; max-width: 460px;
+      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
+      color: #fff; border: none; border-radius: 14px;
+      padding: 14px 18px; font-family: var(--font);
+      cursor: pointer; text-align: left;
+      box-shadow: 0 5px 22px rgba(212,130,74,.42);
+      transition: transform .18s, box-shadow .18s;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .launch-chip:hover  { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,130,74,.52); }
+    .launch-chip:active { transform: translateY(0); }
+    .lc-icon { font-size: 1.28rem; flex-shrink: 0; }
+    .lc-text { flex: 1; }
+    .lc-text strong { display: block; font-size: .97rem; font-weight: 800; }
+    .lc-text small   { display: block; font-size: .72rem; opacity: .78; margin-top: 2px; font-weight: 600; }
+    .lc-arr { font-size: 1.1rem; flex-shrink: 0; opacity: .8; transition: transform .18s; }
+    .launch-chip:hover .lc-arr { transform: translateX(4px); }
 
     /* ── SUGGESTION CHIPS ───────────────────── */
     #suggestions {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 7px; width: 100%; max-width: 440px;
+      display: flex; flex-wrap: wrap;
+      gap: 7px; width: 100%; max-width: 460px;
     }
     .sugg-chip {
-      border-radius: 12px; padding: 9px 11px;
+      border-radius: 12px; padding: 9px 13px;
       font-family: var(--font); font-size: .78rem; font-weight: 700;
       cursor: pointer; text-align: left; line-height: 1.3;
       border: 2px solid transparent;
       transition: transform .15s, box-shadow .18s, filter .15s;
+      flex: 1 1 auto; white-space: nowrap;
     }
     .sugg-chip:hover  { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 5px 14px rgba(0,0,0,.12); }
     .sugg-chip:active { transform: translateY(0); }
@@ -494,8 +525,21 @@
     .form-side {
       background: var(--header);
       padding: 36px 32px 40px;
-      display: flex; flex-direction: column;
+      display: none; flex-direction: column;
       position: relative; overflow: hidden;
+      flex: 0 0 44%;
+    }
+    .form-side.funnel-open {
+      display: flex;
+      animation: panelSlideIn 0.42s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    @keyframes panelSlideIn {
+      from { opacity: 0; transform: translateX(36px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes panelSlideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .form-side::before {
       content: ''; position: absolute;
@@ -606,12 +650,16 @@
     /* ── RESPONSIVE ──────────────────────────── */
     @media (max-width: 900px) {
       .main-layout {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         margin: 0 10px;
       }
       .form-side {
+        flex: none;
+        width: 100%;
         order: -1;
-        padding: 28px 20px 32px;
+      }
+      .form-side.funnel-open {
+        animation: panelSlideDown 0.4s ease both;
       }
       .chat-side { min-height: 520px; }
       #chat-box { min-height: 320px; }
@@ -620,7 +668,8 @@
     @media (max-width: 640px) {
       #hero { padding: 52px 20px 60px; }
       .hero-stats { gap: 24px; }
-      #suggestions { grid-template-columns: 1fr; }
+      #suggestions { gap: 6px; }
+      .sugg-chip { flex: 1 1 100%; }
       .bubble { max-width: 88%; }
       .header-nav .nav-link { display: none; }
       .form-side { padding: 24px 16px 28px; }
@@ -774,7 +823,7 @@
     <nav class="header-nav" aria-label="Navigation principale">
       <a class="nav-link" href="#how-it-works">Comment ça marche ?</a>
       <a class="nav-link" href="#main-section">Parler à Emma</a>
-      <button class="nav-cta" onclick="scrollToMain()">Lancer ma recherche</button>
+      <button class="nav-cta" onclick="openFunnel()">Lancer ma recherche</button>
       <div class="status-dot" title="Emma en ligne"></div>
     </nav>
   </header>
@@ -833,15 +882,15 @@
   <section id="how-it-works" aria-labelledby="how-title">
     <div class="section-label">Simple &amp; rapide</div>
     <h2 class="section-title" id="how-title">Votre recherche EHPAD en 3 étapes</h2>
-    <p class="section-sub">Emma s'occupe de tout. Vous n'avez qu'à remplir le formulaire.</p>
+    <p class="section-sub">Emma s'occupe de tout. Dites-lui simplement ce que vous cherchez.</p>
 
     <div class="steps-grid" role="list">
 
       <div class="step-card" role="listitem">
         <div class="step-num">1</div>
-        <div class="step-icon" aria-hidden="true">📋</div>
-        <h3 class="step-title">Remplissez le formulaire</h3>
-        <p class="step-desc">Prénom, nom, date de naissance et localité de votre proche. C'est tout ce qu'il faut pour démarrer.</p>
+        <div class="step-icon" aria-hidden="true">💬</div>
+        <h3 class="step-title">Parlez à Emma</h3>
+        <p class="step-desc">Décrivez la situation de votre proche à Emma. Elle vous pose les bonnes questions et lance la recherche pour vous.</p>
       </div>
 
       <div class="step-card" role="listitem">
@@ -870,12 +919,6 @@
       <!-- LEFT: Chat with Emma -->
       <div class="chat-side">
 
-        <div class="chat-side-head">
-          <div class="section-label">Emma vous répond</div>
-          <div class="section-title" style="font-size:1.25rem;">Discutez avec votre conseillère</div>
-          <p class="section-sub" style="font-size:.82rem;margin-bottom:12px;">Posez toutes vos questions sur les EHPAD, l'admission, les aides financières…</p>
-        </div>
-
         <div id="chat-wrap">
 
           <main id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma">
@@ -883,49 +926,50 @@
             <div id="dots-bg"></div>
 
             <div id="welcome">
-              <div class="duo-wrap" aria-hidden="true">
-                <div class="cdot" style="width:9px;height:9px;background:#FF6B6B;top:50%;left:50%;margin:-4.5px;animation-duration:7s;animation-delay:0s;"></div>
-                <div class="cdot" style="width:7px;height:7px;background:#4ECDC4;top:50%;left:50%;margin:-3.5px;animation-duration:9s;animation-delay:-3s;"></div>
-                <div class="cdot" style="width:6px;height:6px;background:#FFD93D;top:50%;left:50%;margin:-3px;animation-duration:11s;animation-delay:-5s;"></div>
-                <div class="cdot" style="width:8px;height:8px;background:#A855F7;top:50%;left:50%;margin:-4px;animation-duration:8s;animation-delay:-1.5s;"></div>
-                <div class="duo-circle man">
-                  <svg viewBox="0 0 52 52" fill="none">
-                    <ellipse cx="26" cy="20" rx="13" ry="14" fill="rgba(255,255,255,.25)"/>
-                    <path d="M13 18 Q14 8 26 8 Q38 8 39 18" fill="rgba(255,255,255,.55)"/>
-                    <circle cx="21" cy="20" r="4" stroke="#fff" stroke-width="1.5" fill="none"/>
-                    <circle cx="31" cy="20" r="4" stroke="#fff" stroke-width="1.5" fill="none"/>
-                    <line x1="25" y1="20" x2="27" y2="20" stroke="#fff" stroke-width="1.5"/>
-                    <line x1="13" y1="20" x2="17" y2="20" stroke="#fff" stroke-width="1.5"/>
-                    <line x1="35" y1="20" x2="39" y2="20" stroke="#fff" stroke-width="1.5"/>
-                    <path d="M21 27 Q26 31 31 27" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                    <path d="M12 45 Q12 37 26 36 Q40 37 40 45" fill="rgba(255,255,255,.2)"/>
-                  </svg>
-                </div>
-                <div class="duo-circle woman">
+
+              <!-- Emma identity card -->
+              <div class="emma-card" aria-label="Emma, conseillère EHPAD en ligne">
+                <div class="emma-av-wrap" aria-hidden="true">
                   <svg viewBox="0 0 52 52" fill="none">
                     <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
                     <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
-                    <ellipse cx="26" cy="22" rx="10" ry="11" fill="rgba(255,255,255,.15)"/>
                     <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
                     <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
                     <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-                    <line x1="14" y1="21" x2="18.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-                    <line x1="33.5" y1="21" x2="38" y2="21" stroke="#fff" stroke-width="1.5"/>
                     <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                    <path d="M13 46 Q13 38 26 37 Q39 38 39 46" fill="rgba(255,255,255,.18)"/>
                   </svg>
+                  <div class="emma-av-online"></div>
+                </div>
+                <div>
+                  <div class="emma-card-name">Emma</div>
+                  <div class="emma-card-role">Conseillère EHPAD · En ligne maintenant</div>
                 </div>
               </div>
 
-              <h2>Bonjour, je suis Emma !</h2>
-              <p>Bonjour ! Je suis Emma, votre conseillère SmartSeniors. Je suis là pour vous aider à trouver le bon EHPAD pour votre proche. Remplissez le formulaire à droite pour lancer la recherche, ou posez-moi vos questions directement ici.</p>
-
-              <div id="suggestions" role="list" aria-label="Suggestions">
-                <button class="sugg-chip c1" role="listitem">🏠 Comment choisir un bon EHPAD ?</button>
-                <button class="sugg-chip c2" role="listitem">💰 Quel est le coût moyen d'un EHPAD ?</button>
-                <button class="sugg-chip c3" role="listitem">📋 Comment se passe l'admission ?</button>
-                <button class="sugg-chip c4" role="listitem">❓ Quelles aides financières existent ?</button>
+              <!-- Emma's opening message (chat bubble style) -->
+              <div class="emma-first-msg">
+                <p>Bonjour ! Je suis là pour vous aider à trouver le bon EHPAD pour votre proche. 💚</p>
+                <p>Cette démarche est souvent difficile. Je vous accompagne <strong>gratuitement</strong>, sans jugement, à chaque étape.</p>
+                <p><strong>Comment puis-je vous aider aujourd'hui ?</strong></p>
               </div>
+
+              <!-- Primary CTA -->
+              <button id="launch-funnel-btn" class="launch-chip" aria-label="Lancer ma recherche d'EHPAD personnalisée">
+                <span class="lc-icon">🔍</span>
+                <span class="lc-text">
+                  <strong>Lancer ma recherche personnalisée</strong>
+                  <small>EHPAD, résidence autonomie, Alzheimer…</small>
+                </span>
+                <span class="lc-arr" aria-hidden="true">→</span>
+              </button>
+
+              <!-- Secondary chips -->
+              <div id="suggestions" role="list" aria-label="Suggestions de questions">
+                <button class="sugg-chip c1" role="listitem">🆘 Situation urgente</button>
+                <button class="sugg-chip c2" role="listitem">💰 Budget &amp; aides ?</button>
+                <button class="sugg-chip c4" role="listitem">📋 Démarches admission ?</button>
+              </div>
+
             </div>
 
           </main>
@@ -1202,8 +1246,16 @@
   <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}</style>
 
 <script>
-  /* ── Scroll helpers ── */
+  /* ── Navigation helpers ── */
   function scrollToMain() {
+    document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function openFunnel() {
+    const panel = document.querySelector('.form-side');
+    if (panel && !panel.classList.contains('funnel-open')) {
+      panel.classList.add('funnel-open');
+    }
     document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -1259,9 +1311,16 @@
     input.style.height = Math.min(input.scrollHeight, 120) + "px";
   });
 
+  // Launch funnel CTA inside welcome
+  document.getElementById('launch-funnel-btn')?.addEventListener('click', () => {
+    openFunnel();
+  });
+
   suggsEl.querySelectorAll(".sugg-chip").forEach(btn => {
     btn.addEventListener("click", () => {
       const text = btn.textContent.trim();
+      // Urgent situation: also open the funnel so Emma can guide them
+      if (text.toLowerCase().includes('urgent')) openFunnel();
       sendMessage(text);
     });
   });
