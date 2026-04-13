@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS leads (
   prenom_proche         TEXT,
   nom_proche            TEXT,
   situation_actuelle    TEXT,   -- domicile|famille|hopital|autre_residence|autre
-  age_proche            INTEGER,
+  date_naissance_proche TEXT,   -- format YYYY-MM-DD (obligatoire dossier admission + APA)
+  age_proche            INTEGER, -- calculé auto depuis date_naissance_proche
   niveau_autonomie      TEXT,   -- autonome|semi_dependant|tres_dependant
   ville_proche_actuelle TEXT,
   -- Scoring

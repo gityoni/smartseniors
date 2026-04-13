@@ -1081,15 +1081,16 @@
             <div class="s-nav"><button class="s-prev" data-to="7">← Retour</button><button class="s-next" id="n8" disabled>CONTINUER →</button></div>
           </div>
 
-          <!-- Pane 9: PROCHE - Âge -->
+          <!-- Pane 9: PROCHE - Date de naissance -->
           <div class="step-pane" id="pane-9">
-            <div class="step-q" id="q-age">Quel âge a votre proche ?</div>
-            <div class="step-sub">Certaines résidences fixent un âge minimum.</div>
+            <div class="step-q" id="q-age">Quelle est la date de naissance de votre proche ?</div>
+            <div class="step-sub">Nécessaire pour le dossier d'admission et le calcul de l'APA.</div>
             <div class="s-fields">
               <div class="s-field-g">
-                <label class="s-field-lbl" for="s-age">Âge</label>
-                <input class="s-input" type="number" id="s-age" placeholder="ex : 84" min="50" max="120" />
+                <label class="s-field-lbl" for="s-dob">Date de naissance</label>
+                <input class="s-input" type="date" id="s-dob" max="" />
               </div>
+              <div id="age-display" style="font-size:.8rem;color:var(--accent2);font-weight:700;margin-top:4px;min-height:1.2em;"></div>
             </div>
             <div class="s-nav"><button class="s-prev" data-to="8">← Retour</button><button class="s-next" id="n9" disabled>VALIDER →</button></div>
           </div>
@@ -1500,7 +1501,8 @@
     ville_recherche:'', rayon_km:20,
     nb_personnes:1, genre_proche:null,
     prenom_proche:'', nom_proche:'',
-    situation_actuelle:null, age_proche:null,
+    situation_actuelle:null,
+    date_naissance_proche:'', age_proche:null,
     niveau_autonomie:null, ville_proche_actuelle:'',
     contact_prenom:'', contact_tel2:'', contact_email2:'',
   };
@@ -1621,11 +1623,27 @@
     updateNames();
   }));
 
-  // Âge (pane 9)
-  const ageEl = document.getElementById('s-age');
-  ageEl.addEventListener('input', () => {
-    F.age_proche = parseInt(ageEl.value) || null;
-    document.getElementById('n9').disabled = !F.age_proche || F.age_proche < 50;
+  // Date de naissance (pane 9) — calcul âge auto
+  const dobEl = document.getElementById('s-dob');
+  const ageDisplay = document.getElementById('age-display');
+  // Limite max = aujourd'hui
+  dobEl.max = new Date().toISOString().split('T')[0];
+  dobEl.addEventListener('input', () => {
+    F.date_naissance_proche = dobEl.value;
+    if (dobEl.value) {
+      const today = new Date();
+      const dob   = new Date(dobEl.value);
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      F.age_proche = age > 0 ? age : null;
+      ageDisplay.textContent = F.age_proche ? `→ ${F.age_proche} ans` : '';
+      document.getElementById('n9').disabled = !F.age_proche || F.age_proche < 50;
+    } else {
+      F.age_proche = null;
+      ageDisplay.textContent = '';
+      document.getElementById('n9').disabled = true;
+    }
   });
 
   // Ville proche actuelle (pane 11)
@@ -1714,7 +1732,8 @@
           ville_recherche: ville, rayon_km: F.rayon_km, budget_mensuel: F.budget_mensuel,
           nb_personnes: F.nb_personnes, genre_proche: F.genre_proche,
           prenom_proche: F.prenom_proche, nom_proche: F.nom_proche,
-          situation_actuelle: F.situation_actuelle, age_proche: F.age_proche,
+          situation_actuelle: F.situation_actuelle,
+          date_naissance_proche: F.date_naissance_proche, age_proche: F.age_proche,
           niveau_autonomie: F.niveau_autonomie, ville_proche_actuelle: F.ville_proche_actuelle,
           score_urgence: score, statut: score >= 7 ? 'chaud' : score >= 4 ? 'tiede' : 'froid',
           source: 'funnel', nb_etapes_completees: 13, localite: ville,
