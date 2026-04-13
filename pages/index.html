@@ -1339,7 +1339,7 @@
       const resp = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history: history.slice(0, -1) }),
+        body: JSON.stringify({ message: text, history: history.slice(0, -1), funnel: getFunnelContext() }),
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
@@ -1508,7 +1508,18 @@
     date_naissance_proche:'', age_proche:null,
     niveau_autonomie:null, ville_proche_actuelle:'',
     contact_prenom:'', contact_tel2:'', contact_email2:'',
+    ehpads_proposes: [],
   };
+
+  // Retourne un snapshot allégé de F pour le contexte Emma (sans valeurs vides)
+  function getFunnelContext() {
+    const ctx = {};
+    Object.entries(F).forEach(([k, v]) => {
+      if (v !== null && v !== '' && v !== undefined &&
+          !(Array.isArray(v) && v.length === 0)) ctx[k] = v;
+    });
+    return Object.keys(ctx).length > 0 ? ctx : null;
+  }
 
   // Build progress bar
   (function(){
@@ -1759,6 +1770,7 @@
         );
         scrollDown();
         history.push({ role: 'assistant', content: `J'ai trouvé ${nb} EHPAD disponibles près de ${ville}.` });
+        F.ehpads_proposes = ehpadData.ehpads.slice(0, 5);
         renderEhpadResults(ehpadData.ehpads, ville);
         document.getElementById('results-title').textContent = `✅ ${nb} EHPAD trouvé${nb>1?'s':''} !`;
         document.getElementById('results-sub').textContent = 'Résultats affichés dans le chat. Emma est disponible pour vos questions.';
@@ -1787,18 +1799,16 @@
     goPane(0);
   });
 
-  // Doc stubs → Emma répond
+  // Boutons documents → Emma répond avec le contexte funnel complet
   ['dl-visite','dl-dossier','dl-entree'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', () => {
-      const msgs = {
-        'dl-visite': 'Je prépare l\'aide mémoire visite pour vous. Voici les points clés à vérifier lors de votre visite d\'EHPAD : accueil, propreté, activités, personnel, tarifs et contrat.',
-        'dl-dossier': 'Le dossier d\'admission EHPAD comprend généralement : pièce d\'identité, attestation vitale, ordonnances, bilan médical récent, et justificatifs de ressources. Je peux vous guider étape par étape.',
-        'dl-entree': 'Pour préparer l\'entrée en EHPAD en douceur : commencez les visites en amont, impliquez votre proche dans les décisions, apportez des objets personnels familiers et planifiez des visites régulières.'
+      const prenom = F.prenom_proche || 'mon proche';
+      const queries = {
+        'dl-visite':  `Pouvez-vous me donner les points clés à vérifier lors d'une visite d'EHPAD pour ${prenom} ? Qu'est-ce que je dois absolument regarder ?`,
+        'dl-dossier': `Quels documents dois-je rassembler pour constituer le dossier d'admission EHPAD de ${prenom} ?`,
+        'dl-entree':  `Comment préparer l'entrée en EHPAD de ${prenom} pour que ce soit le plus serein possible ?`,
       };
-      const b = createRow('bot');
-      b.innerHTML = renderMarkdown(msgs[id] || 'Ce document sera disponible très prochainement !');
-      scrollDown();
-      history.push({ role: 'assistant', content: msgs[id] });
+      sendMessage(queries[id] || 'Pouvez-vous m\'aider ?');
     });
   });
 </script>
