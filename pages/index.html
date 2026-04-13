@@ -435,9 +435,12 @@
       margin-bottom: 8px;
     }
     .ehpad-card-tarif {
-      background: #FFF7ED; color: #c2410c;
-      border-radius: 6px; padding: 2px 8px; font-weight: 700;
+      background: #FFF7ED; color: #7c3a10;
+      border-radius: 7px; padding: 6px 10px;
+      font-size: .78rem; line-height: 1.4; font-weight: 500;
+      margin-bottom: 6px;
     }
+    .ehpad-card-tarif strong { color: #c2410c; font-weight: 800; }
     .ehpad-card-contact { display: flex; flex-wrap: wrap; gap: 10px; }
     .ehpad-card-contact a {
       font-size: .78rem; font-weight: 700; color: var(--accent);
@@ -622,6 +625,126 @@
       .header-nav .nav-link { display: none; }
       .form-side { padding: 24px 16px 28px; }
     }
+
+    /* ── STEPPER ────────────────────────────────── */
+    .stepper-wrap { display: flex; flex-direction: column; height: 100%; min-height: 560px; }
+
+    .step-progress {
+      display: flex; align-items: flex-start; gap: 0;
+      margin-bottom: 18px; overflow-x: auto; overflow-y: visible;
+      position: relative; z-index: 1; scrollbar-width: none;
+    }
+    .step-progress::-webkit-scrollbar { display: none; }
+
+    .step-prog-item { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
+    .step-prog-dot {
+      width: 27px; height: 27px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800;
+      background: rgba(255,255,255,.07); color: rgba(237,229,216,.3);
+      border: 1.5px solid rgba(237,229,216,.1); transition: all .3s; flex-shrink: 0;
+    }
+    .step-prog-dot.active { background: linear-gradient(135deg,#D4824A,#EAA070); color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(212,130,74,.4); }
+    .step-prog-dot.done   { background: rgba(110,231,183,.16); color:#6ee7b7; border-color:rgba(110,231,183,.28); }
+    .step-prog-lbl { font-size:.5rem; font-weight:700; color:rgba(237,229,216,.28); text-transform:uppercase; letter-spacing:.03em; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; transition:color .3s; }
+    .step-prog-lbl.active { color:var(--accent2); }
+    .step-prog-lbl.done   { color:rgba(110,231,183,.55); }
+    .step-prog-sep { flex: 0 0 12px; height:1.5px; background:rgba(237,229,216,.1); margin-top:12px; align-self:flex-start; transition:background .3s; }
+    .step-prog-sep.done { background:rgba(110,231,183,.3); }
+
+    .step-pane { display:none; flex-direction:column; flex:1; position:relative; z-index:1; }
+    .step-pane.active { display:flex; animation:stepIn .22s ease both; }
+    @keyframes stepIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+
+    .step-q { font-size:.93rem; font-weight:800; color:#EDE5D8; margin-bottom:3px; line-height:1.3; }
+    .step-sub { font-size:.73rem; color:rgba(237,229,216,.48); margin-bottom:12px; line-height:1.5; }
+
+    .s-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+    .s-grid.cols1 { grid-template-columns:1fr; }
+    .s-card {
+      background:rgba(255,255,255,.07); border:1.5px solid rgba(237,229,216,.12);
+      border-radius:10px; padding:10px 11px;
+      font-family:var(--font); font-size:.78rem; font-weight:700; color:rgba(237,229,216,.72);
+      cursor:pointer; text-align:left; line-height:1.3;
+      transition:all .18s; display:flex; align-items:center; gap:6px;
+    }
+    .s-card:hover { background:rgba(255,255,255,.12); border-color:rgba(237,229,216,.26); color:#EDE5D8; transform:translateY(-1px); }
+    .s-card.sel   { background:rgba(212,130,74,.17); border-color:var(--accent); color:var(--accent2); }
+    .s-card .ce   { font-size:1.05rem; flex-shrink:0; }
+
+    .s-radio { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+    .s-radio-item {
+      background:rgba(255,255,255,.06); border:1.5px solid rgba(237,229,216,.1);
+      border-radius:9px; padding:10px 13px;
+      font-family:var(--font); font-size:.83rem; font-weight:600; color:rgba(237,229,216,.68);
+      cursor:pointer; display:flex; align-items:flex-start; gap:10px; transition:all .18s; text-align:left;
+    }
+    .s-radio-item:hover { background:rgba(255,255,255,.1); border-color:rgba(237,229,216,.2); }
+    .s-radio-item.sel   { background:rgba(212,130,74,.15); border-color:var(--accent); color:var(--accent2); }
+    .s-radio-dot { width:15px; height:15px; border-radius:50%; border:2px solid rgba(237,229,216,.25); flex-shrink:0; margin-top:2px; transition:all .18s; }
+    .s-radio-item.sel .s-radio-dot { border-color:var(--accent); background:var(--accent); }
+    .s-radio-desc { font-size:.7rem; color:rgba(237,229,216,.38); font-weight:400; margin-top:2px; line-height:1.4; }
+
+    .s-fields { display:flex; flex-direction:column; gap:9px; margin-bottom:12px; }
+    .s-field-g { display:flex; flex-direction:column; gap:4px; }
+    .s-field-lbl { font-size:.7rem; font-weight:700; color:rgba(237,229,216,.48); text-transform:uppercase; letter-spacing:.03em; }
+    .s-input {
+      background:rgba(255,255,255,.08); border:1.5px solid rgba(237,229,216,.15);
+      border-radius:9px; padding:10px 12px;
+      font-family:var(--font); font-size:.88rem; color:#EDE5D8;
+      outline:none; width:100%; transition:border-color .2s,background .2s;
+    }
+    .s-input::placeholder { color:rgba(237,229,216,.24); }
+    .s-input:focus { border-color:var(--accent2); background:rgba(255,255,255,.11); }
+
+    .s-slider-w { margin-bottom:12px; }
+    .s-slider-lbl { font-size:.76rem; color:rgba(237,229,216,.58); margin-bottom:6px; font-weight:600; }
+    .s-slider-val { color:var(--accent2); font-weight:800; }
+    .s-slider { width:100%; accent-color:var(--accent); cursor:pointer; }
+
+    .s-nav { display:flex; gap:7px; align-items:center; margin-top:auto; padding-top:8px; }
+    .s-prev {
+      background:transparent; border:1.5px solid rgba(237,229,216,.16);
+      border-radius:8px; padding:9px 13px;
+      font-family:var(--font); font-size:.78rem; font-weight:700; color:rgba(237,229,216,.42);
+      cursor:pointer; transition:all .18s; flex-shrink:0;
+    }
+    .s-prev:hover { border-color:rgba(237,229,216,.32); color:rgba(237,229,216,.72); }
+    .s-next {
+      flex:1; background:linear-gradient(135deg,#D4824A 0%,#EAA070 100%);
+      color:#fff; border:none; border-radius:8px; padding:12px 14px;
+      font-family:var(--font); font-size:.86rem; font-weight:800;
+      cursor:pointer; transition:opacity .18s,transform .15s;
+      box-shadow:0 4px 14px rgba(212,130,74,.36);
+    }
+    .s-next:hover    { opacity:.92; transform:translateY(-1px); }
+    .s-next:disabled { opacity:.35; cursor:default; transform:none; box-shadow:none; }
+
+    .s-trust { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:.68rem; color:rgba(237,229,216,.26); font-weight:600; position:relative; z-index:1; flex-shrink:0; }
+
+    /* Results pane */
+    .s-success-box { background:rgba(110,231,183,.1); border:1px solid rgba(110,231,183,.2); border-radius:11px; padding:13px 15px; margin-bottom:12px; }
+    .s-success-box .rs-t { font-size:.92rem; font-weight:800; color:#6ee7b7; margin-bottom:3px; }
+    .s-success-box .rs-s { font-size:.75rem; color:rgba(110,231,183,.65); line-height:1.5; }
+
+    .s-docs { display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
+    .s-doc {
+      background:rgba(255,255,255,.07); border:1px solid rgba(237,229,216,.1);
+      border-radius:9px; padding:10px 13px;
+      display:flex; align-items:center; gap:9px;
+      font-size:.8rem; font-weight:700; color:rgba(237,229,216,.72);
+      text-decoration:none; transition:all .18s; cursor:pointer; border:none; font-family:var(--font); text-align:left; width:100%;
+    }
+    .s-doc:hover { background:rgba(255,255,255,.12); color:#EDE5D8; }
+    .s-doc .di { font-size:1.1rem; flex-shrink:0; }
+    .s-doc .dt .dn { font-weight:800; color:#EDE5D8; margin-bottom:1px; }
+    .s-doc .dt .dd { font-size:.69rem; color:rgba(237,229,216,.42); font-weight:400; }
+    .s-newsearch {
+      background:rgba(255,255,255,.07); border:1.5px solid rgba(237,229,216,.18);
+      border-radius:8px; padding:9px 14px; width:100%;
+      font-family:var(--font); font-size:.8rem; font-weight:700; color:rgba(237,229,216,.55);
+      cursor:pointer; transition:all .18s; margin-top:3px;
+    }
+    .s-newsearch:hover { background:rgba(255,255,255,.11); color:#EDE5D8; }
   </style>
 </head>
 <body>
@@ -825,76 +948,244 @@
 
       </div><!-- /.chat-side -->
 
-      <!-- RIGHT: Lead Form -->
+      <!-- RIGHT: Qualification Stepper -->
       <div class="form-side">
+        <div class="stepper-wrap">
 
-        <div class="form-side-head">
-          <div class="form-emma-avatar" aria-hidden="true">
-            <svg viewBox="0 0 52 52" fill="none">
-              <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
-              <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
-              <ellipse cx="26" cy="22" rx="10" ry="11" fill="rgba(255,255,255,.15)"/>
-              <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
-              <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
-              <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-              <line x1="14" y1="21" x2="18.5" y2="21" stroke="#fff" stroke-width="1.5"/>
-              <line x1="33.5" y1="21" x2="38" y2="21" stroke="#fff" stroke-width="1.5"/>
-              <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-              <path d="M13 46 Q13 38 26 37 Q39 38 39 46" fill="rgba(255,255,255,.18)"/>
-            </svg>
+          <!-- Progress bar (built by JS) -->
+          <div class="step-progress" id="step-progress" aria-label="Étapes de qualification"></div>
+
+          <!-- Pane 0: TYPE -->
+          <div class="step-pane active" id="pane-0">
+            <div class="step-q">Quel type de résidence recherchez-vous ?</div>
+            <div class="s-grid">
+              <button class="s-card" data-val="ehpad_medicalise"><span class="ce">🏥</span>EHPAD médicalisé</button>
+              <button class="s-card" data-val="alzheimer"><span class="ce">🧠</span>Spécialisé Alzheimer</button>
+              <button class="s-card" data-val="autonomie"><span class="ce">🏡</span>Résidence Autonomie</button>
+              <button class="s-card" data-val="senior"><span class="ce">🌿</span>Résidence Sénior</button>
+              <button class="s-card" data-val="autre"><span class="ce">🔍</span>Autres types</button>
+              <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
+            </div>
+            <div class="s-nav"><button class="s-next" id="n0" disabled>CONTINUER →</button></div>
           </div>
-          <div>
-            <div class="form-emma-name">Votre conseillère Emma</div>
-            <div class="form-emma-role">SmartSeniors · Spécialiste EHPAD</div>
+
+          <!-- Pane 1: LIEN -->
+          <div class="step-pane" id="pane-1">
+            <div class="step-q">Pour qui recherchez-vous ?</div>
+            <div class="s-grid">
+              <button class="s-card" data-val="parent"><span class="ce">👨‍👧</span>Un parent</button>
+              <button class="s-card" data-val="conjoint"><span class="ce">💑</span>Mon conjoint</button>
+              <button class="s-card" data-val="grand_parent"><span class="ce">👴</span>Un grand-parent</button>
+              <button class="s-card" data-val="moi_meme"><span class="ce">🙋</span>Moi-même</button>
+              <button class="s-card" data-val="ass_sociale"><span class="ce">👩‍💼</span>Ass. Sociale</button>
+              <button class="s-card" data-val="autre"><span class="ce">👥</span>Autre</button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="0">← Retour</button><button class="s-next" id="n1" disabled>CONTINUER →</button></div>
           </div>
+
+          <!-- Pane 2: DÉLAI -->
+          <div class="step-pane" id="pane-2">
+            <div class="step-q">Quel est le délai d'entrée souhaité ?</div>
+            <div class="s-grid">
+              <button class="s-card" data-val="urgent"><span class="ce">⚡</span>Le plus tôt possible</button>
+              <button class="s-card" data-val="1_mois"><span class="ce">📅</span>Dans 1 mois</button>
+              <button class="s-card" data-val="1_3_mois"><span class="ce">🗓️</span>Entre 1 et 3 mois</button>
+              <button class="s-card" data-val="3_6_mois"><span class="ce">📆</span>Entre 3 et 6 mois</button>
+              <button class="s-card" data-val="6_mois_plus"><span class="ce">📅</span>Plus de 6 mois</button>
+              <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="1">← Retour</button><button class="s-next" id="n2" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 3: LISTE (quick contact) -->
+          <div class="step-pane" id="pane-3">
+            <div class="step-q">Recevez la liste des EHPAD</div>
+            <div class="step-sub">Gratuit · Sans engagement · Données protégées.</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-cnom">Votre nom</label>
+                <input class="s-input" type="text" id="s-cnom" placeholder="ex : Dupont" autocomplete="family-name" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-ctel">Votre téléphone</label>
+                <input class="s-input" type="tel" id="s-ctel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-cemail">Votre email</label>
+                <input class="s-input" type="email" id="s-cemail" placeholder="ex : jean@email.fr" autocomplete="email" />
+              </div>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="2">← Retour</button><button class="s-next" id="n3">JE VEUX VOIR LA LISTE →</button></div>
+          </div>
+
+          <!-- Pane 4: ÉTABLISSEMENT -->
+          <div class="step-pane" id="pane-4">
+            <div class="step-q">Dans quelle ville recherchez-vous ?</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-ville">Ville ou code postal</label>
+                <input class="s-input" type="text" id="s-ville" placeholder="ex : Lyon, 69000…" autocomplete="off" />
+              </div>
+            </div>
+            <div class="s-slider-w">
+              <div class="s-slider-lbl">Dans un rayon de <span class="s-slider-val" id="rayon-val">20</span> km</div>
+              <input class="s-slider" type="range" id="s-rayon" min="10" max="50" value="20" step="10" />
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="3">← Retour</button><button class="s-next" id="n4" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 5: PROCHE - Nombre -->
+          <div class="step-pane" id="pane-5">
+            <div class="step-q">Pour combien de personnes âgées ?</div>
+            <div class="s-grid">
+              <button class="s-card" data-val="1"><span class="ce">👤</span>1 personne</button>
+              <button class="s-card" data-val="2"><span class="ce">👥</span>2 personnes</button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="4">← Retour</button><button class="s-next" id="n5" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 6: PROCHE - Genre -->
+          <div class="step-pane" id="pane-6">
+            <div class="step-q">La personne âgée est</div>
+            <div class="s-grid">
+              <button class="s-card" data-val="homme"><span class="ce">👨</span>Un homme</button>
+              <button class="s-card" data-val="femme"><span class="ce">👩</span>Une femme</button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="5">← Retour</button><button class="s-next" id="n6" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 7: PROCHE - Identité -->
+          <div class="step-pane" id="pane-7">
+            <div class="step-q">Information sur la personne âgée</div>
+            <div class="step-sub">Cela nous permet de personnaliser votre recherche.</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-pprenom">Prénom</label>
+                <input class="s-input" type="text" id="s-pprenom" placeholder="ex : Marcel" autocomplete="given-name" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-pnom">Nom</label>
+                <input class="s-input" type="text" id="s-pnom" placeholder="ex : Dupont" autocomplete="family-name" />
+              </div>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="6">← Retour</button><button class="s-next" id="n7" disabled>VALIDER →</button></div>
+          </div>
+
+          <!-- Pane 8: PROCHE - Situation actuelle -->
+          <div class="step-pane" id="pane-8">
+            <div class="step-q" id="q-sit">Où se trouve votre proche actuellement ?</div>
+            <div class="s-radio">
+              <button class="s-radio-item" data-val="domicile"><span class="s-radio-dot"></span><span>Domicile</span></button>
+              <button class="s-radio-item" data-val="famille"><span class="s-radio-dot"></span><span>Famille</span></button>
+              <button class="s-radio-item" data-val="hopital"><span class="s-radio-dot"></span><span>Hôpital / Clinique</span></button>
+              <button class="s-radio-item" data-val="autre_residence"><span class="s-radio-dot"></span><span>Autre Résidence</span></button>
+              <button class="s-radio-item" data-val="autre"><span class="s-radio-dot"></span><span>Autre choix</span></button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="7">← Retour</button><button class="s-next" id="n8" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 9: PROCHE - Date de naissance -->
+          <div class="step-pane" id="pane-9">
+            <div class="step-q" id="q-age">Quelle est la date de naissance de votre proche ?</div>
+            <div class="step-sub">Nécessaire pour le dossier d'admission et le calcul de l'APA.</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-dob">Date de naissance</label>
+                <input class="s-input" type="date" id="s-dob" max="" />
+              </div>
+              <div id="age-display" style="font-size:.8rem;color:var(--accent2);font-weight:700;margin-top:4px;min-height:1.2em;"></div>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="8">← Retour</button><button class="s-next" id="n9" disabled>VALIDER →</button></div>
+          </div>
+
+          <!-- Pane 10: PROCHE - Autonomie GIR -->
+          <div class="step-pane" id="pane-10">
+            <div class="step-q" id="q-gir">Quel est le niveau d'autonomie ?</div>
+            <div class="s-radio">
+              <button class="s-radio-item" data-val="autonome">
+                <span class="s-radio-dot"></span>
+                <div><div>Autonome (GIR 5-6)</div><div class="s-radio-desc">Personne valide capable d'agir seul.</div></div>
+              </button>
+              <button class="s-radio-item" data-val="semi_dependant">
+                <span class="s-radio-dot"></span>
+                <div><div>Semi dépendant (GIR 3-4)</div><div class="s-radio-desc">Besoin d'aide pour marcher, manger, s'habiller ou faire sa toilette.</div></div>
+              </button>
+              <button class="s-radio-item" data-val="tres_dependant">
+                <span class="s-radio-dot"></span>
+                <div><div>Très dépendant (GIR 1-2)</div><div class="s-radio-desc">N'arrive pas à marcher, manger, s'habiller ou faire sa toilette.</div></div>
+              </button>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="9">← Retour</button><button class="s-next" id="n10" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 11: PROCHE - Ville actuelle -->
+          <div class="step-pane" id="pane-11">
+            <div class="step-q" id="q-vproche">Dans quelle ville réside votre proche actuellement ?</div>
+            <div class="step-sub">Les aides financières (APA) se font auprès du conseil général du lieu de résidence.</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-vproche">Ville ou code postal</label>
+                <input class="s-input" type="text" id="s-vproche" placeholder="Ville ou code postal" autocomplete="off" />
+              </div>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="10">← Retour</button><button class="s-next" id="n11" disabled>CONTINUER →</button></div>
+          </div>
+
+          <!-- Pane 12: FAMILLE - Contact complet -->
+          <div class="step-pane" id="pane-12">
+            <div class="step-q">Complétez vos coordonnées</div>
+            <div class="step-sub">Pour accéder à votre liste personnalisée d'EHPAD.</div>
+            <div class="s-fields">
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-fprenom">Votre prénom</label>
+                <input class="s-input" type="text" id="s-fprenom" placeholder="ex : Marie" autocomplete="given-name" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-fnom">Votre nom</label>
+                <input class="s-input" type="text" id="s-fnom" placeholder="ex : Dupont" autocomplete="family-name" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-ftel">Téléphone mobile</label>
+                <input class="s-input" type="tel" id="s-ftel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
+              </div>
+              <div class="s-field-g">
+                <label class="s-field-lbl" for="s-femail">Email</label>
+                <input class="s-input" type="email" id="s-femail" placeholder="ex : marie@email.fr" autocomplete="email" />
+              </div>
+            </div>
+            <div class="s-nav"><button class="s-prev" data-to="11">← Retour</button><button class="s-next" id="n12">ACCÉDER À MA LISTE →</button></div>
+          </div>
+
+          <!-- Pane 13: RÉSULTATS -->
+          <div class="step-pane" id="pane-13">
+            <div class="s-success-box">
+              <div class="rs-t" id="results-title">🔍 Recherche en cours…</div>
+              <div class="rs-s" id="results-sub">Emma cherche les EHPAD disponibles. Les résultats apparaissent dans le chat à gauche.</div>
+            </div>
+            <div class="s-docs">
+              <button class="s-doc" id="dl-visite">
+                <span class="di">📋</span>
+                <div class="dt"><div class="dn">Aide mémoire visite</div><div class="dd">Ne rien oublier lors de la visite d'un EHPAD</div></div>
+              </button>
+              <button class="s-doc" id="dl-dossier">
+                <span class="di">📄</span>
+                <div class="dt"><div class="dn">Dossier d'admission</div><div class="dd">Formulaire d'inscription EHPAD à compléter</div></div>
+              </button>
+              <button class="s-doc" id="dl-entree">
+                <span class="di">📦</span>
+                <div class="dt"><div class="dn">Aide mémoire entrée</div><div class="dd">Préparer l'hébergement en douceur</div></div>
+              </button>
+            </div>
+            <button class="s-newsearch" id="new-search-btn">🔄 Nouvelle recherche</button>
+          </div>
+
+          <!-- Trust -->
+          <div class="s-trust">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Données confidentielles · RGPD · Service gratuit
+          </div>
+
         </div>
-
-        <p class="form-intro">
-          Renseignez les informations de votre proche pour que je lance la <strong>recherche d'EHPAD disponibles</strong> dans sa zone géographique.
-        </p>
-
-        <form class="lead-form" id="lead-form" novalidate>
-
-          <div class="lead-field">
-            <label for="f-prenom">Prénom du proche</label>
-            <input type="text" id="f-prenom" name="prenom" placeholder="ex : Marcel" autocomplete="given-name" required />
-          </div>
-
-          <div class="lead-field">
-            <label for="f-nom">Nom du proche</label>
-            <input type="text" id="f-nom" name="nom" placeholder="ex : Dupont" autocomplete="family-name" required />
-          </div>
-
-          <div class="lead-field">
-            <label for="f-dob">Date de naissance</label>
-            <input type="date" id="f-dob" name="date_naissance" required />
-          </div>
-
-          <div class="lead-field">
-            <label for="f-localite">Ville ou code postal souhaité</label>
-            <input type="text" id="f-localite" name="localite" placeholder="ex : Paris, Lyon, 69000…" required />
-          </div>
-
-          <button type="submit" class="lead-submit-btn" id="lead-submit-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Lancer la recherche d'EHPAD
-          </button>
-
-          <div class="form-status" id="form-status" role="alert" aria-live="polite"></div>
-
-        </form>
-
-        <div class="form-trust" aria-label="Confidentialité">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          Données confidentielles · Jamais revendues · Service gratuit
-        </div>
-
       </div><!-- /.form-side -->
 
     </div><!-- /.main-layout -->
@@ -914,7 +1205,6 @@
   /* ── Scroll helpers ── */
   function scrollToMain() {
     document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => document.getElementById('f-prenom').focus(), 600);
   }
 
   /* ── Floating dots ── */
@@ -1127,7 +1417,7 @@
       card.className = "ehpad-result-card";
 
       const tarifHtml = e.tarif_jour
-        ? `<span class="ehpad-card-tarif">~${e.tarif_jour} €/jour</span>`
+        ? `<div class="ehpad-card-tarif">Tarif hébergement hors GIR chambre individuelle à partir de <strong>${e.tarif_jour} €/jour</strong></div>`
         : '';
 
       const telHtml = e.telephone && e.telephone !== "Contactez-nous"
@@ -1152,8 +1442,8 @@
           </div>
           ${placeBadge(e.places_disponibles)}
         </div>
+        ${tarifHtml}
         <div class="ehpad-card-info">
-          ${tarifHtml}
           ${e.adresse ? `<span>${e.adresse}</span>` : ''}
         </div>
         ${telHtml || emailHtml ? `<div class="ehpad-card-contact">${telHtml}${emailHtml}</div>` : ''}
@@ -1185,7 +1475,7 @@
       e.nom, e.adresse || "", e.ville, e.code_postal || "", e.departement,
       e.telephone || "", e.email || "",
       e.places_disponibles !== null ? e.places_disponibles : "",
-      e.tarif_jour !== null ? e.tarif_jour : ""
+      e.tarif_jour !== null ? `à partir de ${e.tarif_jour} €/jour` : ""
     ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
 
     const csv = [headers.join(","), ...rows].join("\n");
@@ -1200,95 +1490,316 @@
     URL.revokeObjectURL(url);
   }
 
-  /* ── Lead form ── */
-  const leadForm      = document.getElementById("lead-form");
-  const formStatus    = document.getElementById("form-status");
-  const leadSubmitBtn = document.getElementById("lead-submit-btn");
+  /* ── STEPPER ── */
+  const PROG = [
+    {icon:'📋',lbl:'Type'},{icon:'👤',lbl:'Lien'},{icon:'📅',lbl:'Délai'},
+    {icon:'📋',lbl:'Liste'},{icon:'🏠',lbl:'Lieu'},{icon:'👴',lbl:'Proche'},
+    {icon:'👨‍👩‍👧',lbl:'Famille'},{icon:'✅',lbl:'Résultats'}
+  ];
+  const PPANE = [0,1,2,3,4,5,5,5,5,5,5,5,6,7];
+  let curPane = 0;
+  const F = {
+    type_residence:null, lien_proche:null, delai:null,
+    contact_nom:'', contact_telephone:'', contact_email:'',
+    ville_recherche:'', rayon_km:20,
+    nb_personnes:1, genre_proche:null,
+    prenom_proche:'', nom_proche:'',
+    situation_actuelle:null,
+    date_naissance_proche:'', age_proche:null,
+    niveau_autonomie:null, ville_proche_actuelle:'',
+    contact_prenom:'', contact_tel2:'', contact_email2:'',
+  };
 
-  function setStatus(msg, type) {
-    formStatus.textContent = msg;
-    formStatus.className = `form-status ${type}`;
+  // Build progress bar
+  (function(){
+    const bar = document.getElementById('step-progress');
+    PROG.forEach((s,i) => {
+      if (i > 0) {
+        const sep = document.createElement('div');
+        sep.className = 'step-prog-sep'; sep.id = `psep${i}`; bar.appendChild(sep);
+      }
+      const item = document.createElement('div');
+      item.className = 'step-prog-item';
+      item.innerHTML = `<div class="step-prog-dot" id="pd${i}">${s.icon}</div><div class="step-prog-lbl" id="pl${i}">${s.lbl}</div>`;
+      bar.appendChild(item);
+    });
+    refreshProg();
+  })();
+
+  function refreshProg() {
+    const prog = PPANE[curPane];
+    PROG.forEach((_,i) => {
+      const dot = document.getElementById(`pd${i}`);
+      const lbl = document.getElementById(`pl${i}`);
+      const sep = document.getElementById(`psep${i}`);
+      if (i < prog)      { dot.className='step-prog-dot done';   lbl.className='step-prog-lbl done';   if(sep) sep.className='step-prog-sep done'; }
+      else if (i===prog) { dot.className='step-prog-dot active'; lbl.className='step-prog-lbl active'; if(sep) sep.className='step-prog-sep'; }
+      else               { dot.className='step-prog-dot';        lbl.className='step-prog-lbl';        if(sep) sep.className='step-prog-sep'; }
+    });
   }
-  function clearStatus() {
-    formStatus.className = "form-status";
-    formStatus.textContent = "";
+
+  function goPane(n) {
+    document.getElementById(`pane-${curPane}`).classList.remove('active');
+    curPane = n;
+    document.getElementById(`pane-${curPane}`).classList.add('active');
+    refreshProg();
   }
 
-  leadForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    clearStatus();
+  // Card selection
+  document.querySelectorAll('.s-grid').forEach(grid => {
+    const pi = parseInt(grid.closest('.step-pane').id.replace('pane-',''));
+    const nb = document.getElementById(`n${pi}`);
+    grid.querySelectorAll('.s-card').forEach(card => {
+      card.addEventListener('click', () => {
+        grid.querySelectorAll('.s-card').forEach(c => c.classList.remove('sel'));
+        card.classList.add('sel');
+        if (nb) nb.disabled = false;
+        const v = card.dataset.val;
+        if (pi===0) F.type_residence = v;
+        else if (pi===1) F.lien_proche = v;
+        else if (pi===2) F.delai = v;
+        else if (pi===5) F.nb_personnes = parseInt(v);
+        else if (pi===6) { F.genre_proche = v; updateNames(); }
+      });
+    });
+  });
 
-    const prenom        = document.getElementById("f-prenom").value.trim();
-    const nom           = document.getElementById("f-nom").value.trim();
-    const date_naissance = document.getElementById("f-dob").value.trim();
-    const localite      = document.getElementById("f-localite").value.trim();
+  // Radio selection
+  document.querySelectorAll('.s-radio').forEach(list => {
+    const pi = parseInt(list.closest('.step-pane').id.replace('pane-',''));
+    const nb = document.getElementById(`n${pi}`);
+    list.querySelectorAll('.s-radio-item').forEach(item => {
+      item.addEventListener('click', () => {
+        list.querySelectorAll('.s-radio-item').forEach(i => i.classList.remove('sel'));
+        item.classList.add('sel');
+        if (nb) nb.disabled = false;
+        const v = item.dataset.val;
+        if (pi===8)  F.situation_actuelle = v;
+        else if (pi===10) F.niveau_autonomie = v;
+      });
+    });
+  });
 
-    if (!prenom || !nom || !date_naissance || !localite) {
-      setStatus("Veuillez remplir tous les champs.", "error");
-      return;
+  // Prev buttons
+  document.querySelectorAll('.s-prev').forEach(btn =>
+    btn.addEventListener('click', () => goPane(parseInt(btn.dataset.to)))
+  );
+
+  // Next buttons 0-11
+  for (let i = 0; i <= 11; i++) {
+    const btn = document.getElementById(`n${i}`);
+    if (btn) btn.addEventListener('click', () => {
+      if (i === 3) savePartialLead();
+      goPane(i + 1);
+    });
+  }
+  document.getElementById('n12').addEventListener('click', submitFunnel);
+
+  // Rayon slider
+  const rayonEl = document.getElementById('s-rayon');
+  rayonEl.addEventListener('input', () => {
+    document.getElementById('rayon-val').textContent = rayonEl.value;
+    F.rayon_km = parseInt(rayonEl.value);
+  });
+
+  // Ville recherche (pane 4)
+  const villeEl = document.getElementById('s-ville');
+  villeEl.addEventListener('input', () => {
+    F.ville_recherche = villeEl.value.trim();
+    document.getElementById('n4').disabled = F.ville_recherche.length < 2;
+  });
+
+  // Contact rapide (pane 3)
+  const cnomEl=document.getElementById('s-cnom'), ctelEl=document.getElementById('s-ctel'), cemailEl=document.getElementById('s-cemail');
+  [cnomEl,ctelEl,cemailEl].forEach(el => el.addEventListener('input', () => {
+    F.contact_nom = cnomEl.value.trim();
+    F.contact_telephone = ctelEl.value.trim();
+    F.contact_email = cemailEl.value.trim();
+  }));
+
+  // Proche identité (pane 7)
+  const ppEl=document.getElementById('s-pprenom'), pnEl=document.getElementById('s-pnom');
+  [ppEl,pnEl].forEach(el => el.addEventListener('input', () => {
+    F.prenom_proche = ppEl.value.trim();
+    F.nom_proche = pnEl.value.trim();
+    document.getElementById('n7').disabled = !F.prenom_proche || !F.nom_proche;
+    updateNames();
+  }));
+
+  // Date de naissance (pane 9) — calcul âge auto
+  const dobEl = document.getElementById('s-dob');
+  const ageDisplay = document.getElementById('age-display');
+  // Limite max = aujourd'hui
+  dobEl.max = new Date().toISOString().split('T')[0];
+  dobEl.addEventListener('input', () => {
+    F.date_naissance_proche = dobEl.value;
+    if (dobEl.value) {
+      const today = new Date();
+      const dob   = new Date(dobEl.value);
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      F.age_proche = age > 0 ? age : null;
+      ageDisplay.textContent = F.age_proche ? `→ ${F.age_proche} ans` : '';
+      document.getElementById('n9').disabled = !F.age_proche || F.age_proche < 50;
+    } else {
+      F.age_proche = null;
+      ageDisplay.textContent = '';
+      document.getElementById('n9').disabled = true;
     }
+  });
 
-    leadSubmitBtn.disabled = true;
-    setStatus("Emma cherche les EHPAD disponibles…", "loading");
+  // Ville proche actuelle (pane 11)
+  const vpEl = document.getElementById('s-vproche');
+  vpEl.addEventListener('input', () => {
+    F.ville_proche_actuelle = vpEl.value.trim();
+    document.getElementById('n11').disabled = F.ville_proche_actuelle.length < 2;
+  });
 
-    // Scroll to chat to show results
-    document.getElementById("main-section").scrollIntoView({ behavior: "smooth" });
+  // Famille contact (pane 12)
+  const ffpEl=document.getElementById('s-fprenom'), ffnEl=document.getElementById('s-fnom'),
+        fftEl=document.getElementById('s-ftel'),    ffeEl=document.getElementById('s-femail');
+  [ffpEl,ffnEl,fftEl,ffeEl].forEach(el => el.addEventListener('input', () => {
+    F.contact_prenom = ffpEl.value.trim();
+    F.contact_tel2   = fftEl.value.trim();
+    F.contact_email2 = ffeEl.value.trim();
+    if (ffnEl.value.trim()) F.contact_nom = ffnEl.value.trim();
+  }));
+
+  function updateNames() {
+    const titre = F.genre_proche === 'femme' ? 'Madame' : 'Monsieur';
+    const full = F.prenom_proche && F.nom_proche ? `${titre} ${F.prenom_proche} ${F.nom_proche}` : 'votre proche';
+    const qs = document.getElementById('q-sit');
+    const qa = document.getElementById('q-age');
+    const qg = document.getElementById('q-gir');
+    const qv = document.getElementById('q-vproche');
+    if (qs) qs.textContent = `Où se trouve ${full} actuellement ?`;
+    if (qa) qa.textContent = `Quel âge a ${full} ?`;
+    if (qg) qg.textContent = `Quel est le niveau d'autonomie de ${full} ?`;
+    if (qv) qv.textContent = `Dans quelle ville réside ${full} actuellement ?`;
+  }
+
+  async function savePartialLead() {
+    try {
+      await fetch(LEADS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact_nom: F.contact_nom, contact_telephone: F.contact_telephone,
+          contact_email: F.contact_email, type_residence: F.type_residence,
+          lien_proche: F.lien_proche, delai: F.delai,
+          source: 'funnel_partial', nb_etapes_completees: 3, localite: F.ville_recherche,
+        }),
+      });
+    } catch(e) { console.error('Partial lead:', e); }
+  }
+
+  async function submitFunnel() {
+    goPane(13);
+    document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
     hideWelcome();
 
-    // Show user's search request in chat
-    const searchMsg = `Bonjour Emma, je cherche un EHPAD pour ${prenom} ${nom} (né(e) le ${date_naissance}) à ${localite}.`;
-    const userBubble = createRow("user");
-    userBubble.textContent = searchMsg;
+    // Score urgence
+    let score = 0;
+    if (['urgent','1_mois'].includes(F.delai)) score += 4;
+    else if (F.delai === '1_3_mois') score += 2;
+    if (['ehpad_medicalise','alzheimer'].includes(F.type_residence)) score += 3;
+    if (['tres_dependant','semi_dependant'].includes(F.niveau_autonomie)) score += 1;
+    if (F.contact_tel2 || F.contact_telephone) score += 2;
+    if (F.contact_email2 || F.contact_email) score += 1;
+    if (F.situation_actuelle === 'hopital') score += 1;
+
+    const ville = F.ville_recherche;
+    const prenom = F.prenom_proche || '';
+    const nomProche = F.nom_proche || '';
+    const typeLabel = {ehpad_medicalise:'EHPAD médicalisé',alzheimer:'spécialisé Alzheimer',autonomie:'Résidence Autonomie',senior:'Résidence Sénior',autre:'EHPAD',inconnu:'EHPAD'}[F.type_residence] || 'EHPAD';
+    const delaiLabel = {urgent:'dès que possible','1_mois':'dans 1 mois','1_3_mois':'entre 1 et 3 mois','3_6_mois':'entre 3 et 6 mois','6_mois_plus':'dans plus de 6 mois',inconnu:'délai non précisé'}[F.delai] || '';
+    const girLabel = {autonome:'autonome (GIR 5-6)',semi_dependant:'semi-dépendant (GIR 3-4)',tres_dependant:'très dépendant (GIR 1-2)'}[F.niveau_autonomie] || '';
+
+    const searchMsg = `Bonjour Emma ! Je cherche un ${typeLabel} pour ${prenom} ${nomProche}${F.age_proche ? `, ${F.age_proche} ans` : ''}${girLabel ? `, ${girLabel}` : ''}, à ${ville} (rayon ${F.rayon_km} km). Délai : ${delaiLabel}.`;
+    const ub = createRow('user');
+    ub.textContent = searchMsg;
     scrollDown();
-    history.push({ role: "user", content: searchMsg });
+    history.push({ role: 'user', content: searchMsg });
 
+    // Save final lead
     try {
-      // 1. Save lead
       await fetch(LEADS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prenom, nom, date_naissance, localite }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact_nom: F.contact_nom, contact_prenom: F.contact_prenom,
+          contact_telephone: F.contact_tel2 || F.contact_telephone,
+          contact_email: F.contact_email2 || F.contact_email,
+          type_residence: F.type_residence, lien_proche: F.lien_proche, delai: F.delai,
+          ville_recherche: ville, rayon_km: F.rayon_km, budget_mensuel: F.budget_mensuel,
+          nb_personnes: F.nb_personnes, genre_proche: F.genre_proche,
+          prenom_proche: F.prenom_proche, nom_proche: F.nom_proche,
+          situation_actuelle: F.situation_actuelle,
+          date_naissance_proche: F.date_naissance_proche, age_proche: F.age_proche,
+          niveau_autonomie: F.niveau_autonomie, ville_proche_actuelle: F.ville_proche_actuelle,
+          score_urgence: score, statut: score >= 7 ? 'chaud' : score >= 4 ? 'tiede' : 'froid',
+          source: 'funnel', nb_etapes_completees: 13, localite: ville,
+        }),
       });
+    } catch(e) { console.error('Lead final:', e); }
 
-      // 2. Fetch EHPAD list
-      showThinking();
-      const ehpadResp = await fetch(`${EHPADS_URL}?localite=${encodeURIComponent(localite)}`);
+    // Fetch EHPADs
+    showThinking();
+    try {
+      const ehpadResp = await fetch(`${EHPADS_URL}?localite=${encodeURIComponent(ville)}`);
       const ehpadData = ehpadResp.ok ? await ehpadResp.json() : null;
       removeThinking();
-
       if (ehpadData && ehpadData.ehpads && ehpadData.ehpads.length > 0) {
-        // Show Emma's intro message in chat
-        const introBubble = createRow("bot");
-        introBubble.innerHTML = renderMarkdown(
-          `J'ai trouvé **${ehpadData.ehpads.length} EHPAD** disponibles près de **${localite}**. Voici la liste avec les coordonnées et les disponibilités :`
+        const nb = ehpadData.ehpads.length;
+        const ib = createRow('bot');
+        ib.innerHTML = renderMarkdown(
+          `J'ai trouvé **${nb} EHPAD** disponibles près de **${ville}** (rayon ${F.rayon_km} km) !\n\n` +
+          (prenom ? `Pour **${prenom} ${nomProche}**${girLabel ? `, ${girLabel}` : ''}, voici mes sélections :` : 'Voici la liste :')
         );
         scrollDown();
-        history.push({ role: "assistant", content: `J'ai trouvé ${ehpadData.ehpads.length} EHPAD disponibles près de ${localite}.` });
-
-        // Render EHPAD cards
-        renderEhpadResults(ehpadData.ehpads, localite);
-
-        setStatus(`Recherche terminée ! ${ehpadData.ehpads.length} EHPAD affichés dans le chat.`, "success");
+        history.push({ role: 'assistant', content: `J'ai trouvé ${nb} EHPAD disponibles près de ${ville}.` });
+        renderEhpadResults(ehpadData.ehpads, ville);
+        document.getElementById('results-title').textContent = `✅ ${nb} EHPAD trouvé${nb>1?'s':''} !`;
+        document.getElementById('results-sub').textContent = 'Résultats affichés dans le chat. Emma est disponible pour vos questions.';
       } else {
-        const noBubble = createRow("bot");
-        noBubble.innerHTML = renderMarkdown(
-          `Je n'ai pas trouvé d'EHPAD référencé pour **${localite}** dans notre base. N'hésitez pas à me poser vos questions, je peux vous orienter dans vos démarches.`
-        );
+        const nb2 = createRow('bot');
+        nb2.innerHTML = renderMarkdown(`Je n'ai pas trouvé d'EHPAD référencé pour **${ville}**. Posez-moi vos questions directement, je peux vous orienter.`);
         scrollDown();
-        setStatus("Aucun EHPAD trouvé pour cette localité.", "error");
+        document.getElementById('results-title').textContent = '😔 Aucun EHPAD trouvé';
+        document.getElementById('results-sub').textContent = `Posez vos questions à Emma directement dans le chat !`;
       }
-    } catch (err) {
+    } catch(err) {
       removeThinking();
-      const errBubble = createRow("bot");
-      errBubble.innerHTML = renderMarkdown("Une erreur est survenue lors de la recherche. Veuillez réessayer ou posez-moi votre question directement.");
+      createRow('bot').innerHTML = renderMarkdown('Une erreur est survenue. Posez-moi votre question directement.');
       scrollDown();
-      setStatus("Erreur lors de la recherche. Réessayez.", "error");
-      console.error(err);
     }
-
-    leadSubmitBtn.disabled = false;
     input.focus();
-    scrollDown();
+  }
+
+  // Nouvelle recherche
+  document.getElementById('new-search-btn').addEventListener('click', () => {
+    Object.keys(F).forEach(k => { F[k] = k==='rayon_km'?20 : k==='nb_personnes'?1 : typeof F[k]==='string'?'' : null; });
+    document.querySelectorAll('.s-card.sel,.s-radio-item.sel').forEach(el => el.classList.remove('sel'));
+    document.querySelectorAll('.s-input').forEach(el => el.value = '');
+    document.querySelectorAll('.s-next').forEach(btn => { if(!['n3','n12'].includes(btn.id)) btn.disabled=true; });
+    document.getElementById('rayon-val').textContent = '20';
+    goPane(0);
+  });
+
+  // Doc stubs → Emma répond
+  ['dl-visite','dl-dossier','dl-entree'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => {
+      const msgs = {
+        'dl-visite': 'Je prépare l\'aide mémoire visite pour vous. Voici les points clés à vérifier lors de votre visite d\'EHPAD : accueil, propreté, activités, personnel, tarifs et contrat.',
+        'dl-dossier': 'Le dossier d\'admission EHPAD comprend généralement : pièce d\'identité, attestation vitale, ordonnances, bilan médical récent, et justificatifs de ressources. Je peux vous guider étape par étape.',
+        'dl-entree': 'Pour préparer l\'entrée en EHPAD en douceur : commencez les visites en amont, impliquez votre proche dans les décisions, apportez des objets personnels familiers et planifiez des visites régulières.'
+      };
+      const b = createRow('bot');
+      b.innerHTML = renderMarkdown(msgs[id] || 'Ce document sera disponible très prochainement !');
+      scrollDown();
+      history.push({ role: 'assistant', content: msgs[id] });
+    });
   });
 </script>
 </body>
