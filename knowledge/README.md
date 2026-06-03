@@ -31,9 +31,11 @@ Ouvre-le directement dans Colab :
 (repo privé → autorise Colab à accéder à GitHub, ou télécharge le `.ipynb` et fais `Importer un notebook`).
 
 Le notebook :
-1. **Transcrit** un `.m4a` (Whisper `large-v3`, FR) + sépare les locuteurs (optionnel, pyannote).
-2. **Extrait** une fiche conseillère structurée via `claude-opus-4-8` (tool use forcé + prompt caching).
+1. **Transcrit** un ou plusieurs `.m4a` (Whisper `large-v3`, FR) — dépose plusieurs appels d'un coup.
+2. **Extrait** une fiche conseillère structurée et **anonymisée** via `claude-opus-4-8` (tool use forcé + prompt caching).
 3. **Synthétise** un playbook prêt à coller dans le prompt d'Emma.
+
+> Pas de diarization : Claude attribue les rôles (conseiller / famille) à partir du contexte — plus simple et plus robuste dans Colab.
 
 ## Arborescence
 
