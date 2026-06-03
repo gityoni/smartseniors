@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>SmartSeniors — Démo lead en direct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root{
+    --bg:#EDE5D8; --header:#3D2B1F; --accent:#D4824A; --accent2:#EAA070;
+    --brown:#7D6B5E; --bot-bg:#fff; --bot-fg:#3a2e25; --user-bg:#7D6B5E;
+    --font:'Nunito',sans-serif; --grad:linear-gradient(135deg,#D4824A 0%,#EAA070 100%);
+    --good:#6ee7b7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:var(--font);background:var(--bg);color:var(--bot-fg)}
+  /* header */
+  #header{background:var(--header);padding:11px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;box-shadow:0 3px 16px rgba(0,0,0,.28)}
+  .wordmark{font-size:1.4rem;font-weight:900;color:#EDE5D8;letter-spacing:-.5px}
+  .wordmark span{color:var(--accent2)}
+  .demo-tag{margin-left:auto;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:var(--grad);padding:5px 12px;border-radius:20px}
+  .demo-sub{font-size:.72rem;color:rgba(237,229,216,.55);margin-left:10px}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 56px)}
+  @media(max-width:920px){.grid{grid-template-columns:1fr;height:auto}}
+  .pane{display:flex;flex-direction:column;min-height:0;height:100%}
+  .pane-head{padding:10px 18px;font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+  .family .pane-head{color:var(--brown);border-bottom:1px solid rgba(125,107,94,.18)}
+  .office{background:var(--header);color:#EDE5D8}
+  .office .pane-head{color:var(--accent2);border-bottom:1px solid rgba(237,229,216,.12)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .office .dot{background:var(--good)}
+
+  /* chat */
+  .chatlog{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+  .row{display:flex;gap:9px;align-items:flex-end;max-width:88%;animation:up .25s ease both}
+  @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .row.user{align-self:flex-end;flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:50%;flex:0 0 auto;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.8rem}
+  .bubble{padding:10px 14px;border-radius:15px;line-height:1.5;font-size:.93rem}
+  .row.bot .bubble{background:var(--bot-bg);border-bottom-left-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .row.user .bubble{background:var(--user-bg);color:#fff;border-bottom-right-radius:5px}
+  .bubble p{margin:.3em 0}.bubble strong{color:var(--accent)}.bubble ul{margin:.3em 0;padding-left:1.1em}
+  .row.user .bubble strong{color:#fff}
+  .cursor{display:inline-block;width:7px;height:15px;background:var(--accent);margin-left:2px;animation:bl .65s step-end infinite;vertical-align:middle}
+  @keyframes bl{50%{opacity:0}}
+  .think{display:inline-flex;gap:4px;padding:6px 2px}
+  .think i{width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:tk 1s infinite}
+  .think i:nth-child(2){animation-delay:.15s}.think i:nth-child(3){animation-delay:.3s}
+  @keyframes tk{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+  /* input + controls */
+  .controls{padding:10px 14px;border-top:1px solid rgba(125,107,94,.18);display:flex;gap:8px;align-items:center}
+  #input{flex:1;border:1.5px solid rgba(125,107,94,.3);border-radius:12px;padding:10px 12px;font-family:inherit;font-size:.92rem;resize:none;max-height:90px;background:#fff}
+  #input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,130,74,.16)}
+  .btn{border:none;border-radius:11px;padding:10px 14px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer;white-space:nowrap}
+  .btn-send{background:var(--grad);color:#fff}
+  .btn-demo{background:var(--header);color:#EDE5D8}
+  .btn-ghost{background:transparent;color:var(--brown);border:1.5px solid rgba(125,107,94,.3)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .toolbar{padding:8px 14px;display:flex;gap:8px;align-items:center;border-top:1px solid rgba(125,107,94,.12);background:rgba(255,255,255,.4)}
+  .toolbar small{color:var(--brown);margin-left:auto;font-size:.7rem}
+
+  /* back-office */
+  .office-body{flex:1;overflow-y:auto;padding:16px 18px}
+  .lead-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .statut{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:4px 11px;border-radius:20px;background:rgba(237,229,216,.14);color:rgba(237,229,216,.7)}
+  .statut.chaud{background:rgba(255,107,107,.2);color:#ff9a9a}
+  .statut.tiede{background:rgba(255,217,61,.18);color:#ffe08a}
+  .statut.froid{background:rgba(78,205,196,.16);color:#8fe9e1}
+  .score{margin-left:auto;text-align:right}
+  .score b{font-size:1.5rem;color:var(--accent2);font-weight:900}
+  .score small{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:rgba(237,229,216,.45)}
+  .pbar{height:6px;border-radius:6px;background:rgba(237,229,216,.12);overflow:hidden;margin-bottom:16px}
+  .pbar>i{display:block;height:100%;width:0;background:var(--grad);transition:width .5s ease}
+  .sect{margin-bottom:15px}
+  .sect-t{font-size:.64rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(237,229,216,.1)}
+  .frow{display:flex;gap:10px;padding:3px 0;font-size:.84rem;align-items:baseline}
+  .flab{color:rgba(237,229,216,.5);min-width:120px;flex:0 0 auto;font-size:.78rem}
+  .fval{font-weight:700;color:rgba(237,229,216,.35)}
+  .fval.set{color:#fff}
+  .frow.flash .fval{animation:flash 1.1s ease}
+  @keyframes flash{0%{background:rgba(212,130,74,.55)}100%{background:transparent}}
+  .fval.set::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--good);margin-right:7px;vertical-align:middle}
+
+  /* sent banner + email */
+  .sent{display:none;margin-top:6px;background:linear-gradient(135deg,rgba(110,231,183,.16),rgba(110,231,183,.05));border:1px solid rgba(110,231,183,.35);border-radius:13px;padding:14px 16px}
+  .sent.show{display:block;animation:up .4s ease both}
+  .sent b{color:var(--good);font-size:.95rem}
+  .sent p{margin:4px 0 0;font-size:.78rem;color:rgba(237,229,216,.6)}
+  .mailtoggle{margin-top:10px;background:transparent;border:1px solid rgba(237,229,216,.25);color:rgba(237,229,216,.75);border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer}
+  .mail{display:none;margin-top:10px;background:#fff;color:#3a2e25;border-radius:11px;overflow:hidden;font-size:.8rem;box-shadow:0 6px 22px rgba(0,0,0,.3)}
+  .mail.show{display:block;animation:up .35s ease both}
+  .mail .mh{background:var(--grad);color:#fff;padding:13px 16px}
+  .mail .mh b{font-size:.92rem}.mail .mh .sb{display:inline-block;margin-top:6px;background:rgba(255,255,255,.22);border-radius:14px;padding:3px 10px;font-size:.72rem;font-weight:800}
+  .mail .mb{padding:13px 16px}
+  .mail .mrow{display:flex;gap:8px;padding:3px 0}
+  .mail .ml{color:#9c8578;min-width:120px;font-size:.74rem}
+  .mail .mv{font-weight:700;color:#3D2B1F}
+  .mail .mst{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:11px 0 5px}
+  .mail .cta{display:block;text-align:center;background:var(--grad);color:#fff;text-decoration:none;border-radius:9px;padding:11px;font-weight:800;margin-top:12px;font-size:.85rem}
+</style>
+</head>
+<body>
+<div id="header">
+  <div class="wordmark">Smart<span>Seniors</span></div>
+  <span class="demo-sub">Présentation partenaire — données fictives</span>
+  <span class="demo-tag">Démo lead en direct</span>
+</div>
+
+<div class="grid">
+  <!-- CÔTÉ FAMILLE -->
+  <section class="pane family">
+    <div class="pane-head"><span class="dot"></span> Côté famille — conversation avec Emma</div>
+    <div class="chatlog" id="chatlog"></div>
+    <div class="controls">
+      <textarea id="input" rows="1" placeholder="Écrivez à Emma…"></textarea>
+      <button class="btn btn-send" id="send">Envoyer</button>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-demo" id="play">▶ Rejouer la démo</button>
+      <button class="btn btn-ghost" id="reset">↺ Réinitialiser</button>
+      <small id="modeNote">Tape librement, ou lance le scénario</small>
+    </div>
+  </section>
+
+  <!-- CÔTÉ BACK-OFFICE -->
+  <section class="pane office">
+    <div class="pane-head"><span class="dot"></span> Back-office résidence — lead en temps réel</div>
+    <div class="office-body">
+      <div class="lead-head">
+        <span class="statut" id="statut">En attente</span>
+        <div class="score"><b id="scoreVal">0</b><small>score urgence /10</small></div>
+      </div>
+      <div class="pbar"><i id="pbar"></i></div>
+
+      <div class="sect">
+        <div class="sect-t">👤 Personne âgée</div>
+        <div class="frow" data-f="nom"><span class="flab">Nom complet</span><span class="fval" id="f-nom">—</span></div>
+        <div class="frow" data-f="age"><span class="flab">Âge / naissance</span><span class="fval" id="f-age">—</span></div>
+        <div class="frow" data-f="autonomie"><span class="flab">Autonomie</span><span class="fval" id="f-autonomie">—</span></div>
+        <div class="frow" data-f="situation"><span class="flab">Situation</span><span class="fval" id="f-situation">—</span></div>
+      </div>
+
+      <div class="sect">
+        <div class="sect-t">📍 Recherche</div>
+        <div class="frow" data-f="type"><span class="flab">Type</span><span class="fval" id="f-type">—</span></div>
+        <div class="frow" data-f="zone"><span class="flab">Zone</span><span class="fval" id="f-zone">—</span></div>
+        <div class="frow" data-f="delai"><span class="flab">Délai</span><span class="fval" id="f-delai">—</span></div>
+        <div class="frow" data-f="budget"><span class="flab">Budget</span><span class="fval" id="f-budget">—</span></div>
+      </div>
+
+      <div class="sect">
+        <div class="sect-t">👪 Contact famille</div>
+        <div class="frow" data-f="contact"><span class="flab">Nom</span><span class="fval" id="f-contact">—</span></div>
+        <div class="frow" data-f="tel"><span class="flab">Téléphone</span><span class="fval" id="f-tel">—</span></div>
+        <div class="frow" data-f="email"><span class="flab">Email</span><span class="fval" id="f-email">—</span></div>
+      </div>
+
+      <div class="sent" id="sent">
+        <b id="sentTitle">✅ Lead envoyé</b>
+        <p id="sentSub"></p>
+        <button class="mailtoggle" id="mailToggle">✉️ Voir l'email envoyé</button>
+        <div class="mail" id="mail"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const API_URL="/api/chat", EXTRACT_URL="/api/extract", EHPADS_URL="/api/ehpads";
+
+const GIR={autonome:"Autonome (GIR 5-6)",semi_dependant:"Semi-dépendant (GIR 3-4)",tres_dependant:"Très dépendant (GIR 1-2)"};
+const DELAI={urgent:"⚡ Dès que possible","1_mois":"Sous 1 mois","1_3_mois":"1 à 3 mois","3_6_mois":"3 à 6 mois","6_mois_plus":"Plus de 6 mois"};
+const SIT={domicile:"Domicile",domicile_aide:"Domicile avec aide",hopital:"🏥 Hospitalisé(e)",clinique:"Clinique / SSR",autre_ehpad:"Autre établissement"};
+const TYPE={ehpad_medicalise:"EHPAD médicalisé",alzheimer:"Unité Alzheimer / UHR",autonomie:"Résidence Autonomie",senior:"Résidence Sénior"};
+const LIEN={fils_fille:"Fils / Fille",conjoint:"Conjoint(e)",autre:"Proche"};
+
+const TRACKED=["nom","age","autonomie","situation","type","zone","delai","budget","contact","tel","email"];
+
+let history=[], lead={}, busy=false, sent=false;
+
+const chatlog=document.getElementById("chatlog");
+const input=document.getElementById("input");
+const sendBtn=document.getElementById("send");
+const playBtn=document.getElementById("play");
+const resetBtn=document.getElementById("reset");
+
+const render=t=>{try{return marked.parse(t)}catch{return t}};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function row(who){
+  const r=document.createElement("div");r.className="row "+who;
+  const av=document.createElement("div");av.className="av";av.textContent=who==="bot"?"E":"👤";
+  const b=document.createElement("div");b.className="bubble";
+  r.appendChild(av);r.appendChild(b);chatlog.appendChild(r);down();return b;
+}
+function down(){chatlog.scrollTop=chatlog.scrollHeight;}
+function thinking(){const b=row("bot");b.innerHTML='<span class="think"><i></i><i></i><i></i></span>';b.parentElement.id="thinkRow";return b;}
+function unthink(){const t=document.getElementById("thinkRow");if(t)t.remove();}
+
+async function sendMessage(text){
+  if(!text||busy)return;
+  busy=true;sendBtn.disabled=true;
+  const ub=row("user");ub.textContent=text;
+  history.push({role:"user",content:text});
+  thinking();
+  let full="",bb=null,cur=null;
+  try{
+    const resp=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:text,history:history.slice(0,-1),funnel:lead})});
+    if(!resp.ok)throw new Error("HTTP "+resp.status);
+    unthink();bb=row("bot");cur=document.createElement("span");cur.className="cursor";bb.appendChild(cur);
+    const reader=resp.body.getReader(),dec=new TextDecoder();let buf="";
+    while(true){
+      const {done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});const lines=buf.split("\n");buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith("data:"))continue;
+        const d=line.slice(5).trim();if(d==="[DONE]")continue;
+        try{const j=JSON.parse(d);const delta=j?.delta?.text??j?.delta?.content?.[0]?.text??null;
+          if(delta){full+=delta;bb.innerHTML=render(full);cur=document.createElement("span");cur.className="cursor";bb.appendChild(cur);down();}
+        }catch{}
+      }
+    }
+  }catch(e){unthink();if(!bb)bb=row("bot");full="Désolé, une erreur est survenue.";bb.innerHTML=render(full);console.error(e);}
+  if(cur)cur.remove();if(bb)bb.innerHTML=render(full);
+  if(full)history.push({role:"assistant",content:full});
+  busy=false;sendBtn.disabled=false;down();
+  await updateLead();
+}
+
+async function updateLead(){
+  try{
+    const r=await fetch(EXTRACT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({history})});
+    if(!r.ok)return;const {lead:got}=await r.json();
+    lead={...lead,...got};
+    renderLead();
+    maybeSend();
+  }catch(e){console.error(e);}
+}
+
+function setField(id,val){
+  const el=document.getElementById("f-"+id);if(!el)return;
+  const txt=(val===undefined||val===null||val==="")?"—":val;
+  if(el.textContent!==txt && txt!=="—"){el.parentElement.classList.remove("flash");void el.offsetWidth;el.parentElement.classList.add("flash");}
+  el.textContent=txt;el.classList.toggle("set",txt!=="—");
+}
+
+function ageStr(){
+  if(lead.date_naissance_proche){const y=+String(lead.date_naissance_proche).slice(0,4);if(y){const a=new Date().getFullYear()-y;return lead.age_proche?`${lead.age_proche} ans (${lead.date_naissance_proche})`:`${a} ans (${lead.date_naissance_proche})`;}}
+  return lead.age_proche?`${lead.age_proche} ans`:"";
+}
+function nomStr(){const n=[lead.prenom_proche,lead.nom_proche].filter(Boolean).join(" ");return n;}
+function zoneStr(){if(!lead.ville_recherche&&!lead.code_postal)return"";const v=lead.ville_recherche||lead.code_postal;return v+(lead.rayon_km?` · ${lead.rayon_km} km`:"");}
+function contactStr(){const n=[lead.contact_prenom,lead.contact_nom].filter(Boolean).join(" ");return n?(n+(lead.lien_proche?` (${LIEN[lead.lien_proche]||lead.lien_proche})`:"")):"";}
+
+function scoreOf(){
+  let s=0;
+  if(["urgent","1_mois"].includes(lead.delai))s+=4;else if(lead.delai==="1_3_mois")s+=2;
+  if(lead.situation_actuelle==="hopital")s+=3;else if(["clinique","autre_ehpad"].includes(lead.situation_actuelle))s+=2;
+  if(["tres_dependant","semi_dependant"].includes(lead.niveau_autonomie))s+=1;
+  return Math.min(s,10);
+}
+
+function renderLead(){
+  setField("nom",nomStr());
+  setField("age",ageStr());
+  setField("autonomie",GIR[lead.niveau_autonomie]||"");
+  setField("situation",SIT[lead.situation_actuelle]||"");
+  setField("type",TYPE[lead.type_residence]||"");
+  setField("zone",zoneStr());
+  setField("delai",DELAI[lead.delai]||"");
+  setField("budget",lead.budget_mensuel||"");
+  setField("contact",contactStr());
+  setField("tel",lead.contact_telephone||"");
+  setField("email",lead.contact_email||"");
+
+  const filled=TRACKED.filter(f=>{const el=document.getElementById("f-"+f);return el&&el.textContent!=="—";}).length;
+  document.getElementById("pbar").style.width=Math.round(filled/TRACKED.length*100)+"%";
+
+  const s=scoreOf();document.getElementById("scoreVal").textContent=s;
+  const st=document.getElementById("statut");
+  if(filled===0){st.className="statut";st.textContent="En attente";}
+  else{const k=s>=7?"chaud":s>=4?"tiede":"froid";st.className="statut "+k;st.textContent=k==="chaud"?"🔥 Chaud":k==="tiede"?"Tiède":"Froid";}
+}
+
+function ready(){
+  return (lead.prenom_proche||lead.contact_prenom)&&(lead.ville_recherche||lead.code_postal)
+    &&(lead.delai||lead.budget_mensuel)&&(lead.contact_telephone||lead.contact_email);
+}
+
+async function maybeSend(){
+  if(sent||!ready())return;
+  sent=true;
+  let n=3,dept="";
+  try{
+    const loc=lead.ville_recherche||lead.code_postal;
+    const r=await fetch(`${EHPADS_URL}?localite=${encodeURIComponent(loc)}`);
+    if(r.ok){const d=await r.json();const list=d.ehpads||d.results||d||[];if(Array.isArray(list)&&list.length)n=list.length;dept=d.departement||"";}
+  }catch{}
+  const sentEl=document.getElementById("sent");
+  document.getElementById("sentTitle").textContent=`✅ Lead envoyé à ${n} résidence${n>1?"s":""} partenaire${n>1?"s":""}`;
+  document.getElementById("sentSub").textContent=`Transmis en temps réel${dept?` (dép. ${dept})`:""} + notification back-office. Dossier ${scoreOf()>=7?"prioritaire 🔥":"qualifié"}.`;
+  document.getElementById("mail").innerHTML=emailHtml(n);
+  sentEl.classList.add("show");down();
+}
+
+function emailHtml(n){
+  const s=scoreOf();const stars="★".repeat(Math.round(s/2))+"☆".repeat(5-Math.round(s/2));
+  const v=(x)=>x||"—";
+  return `<div class="mh"><b>🏠 Nouveau prospect SmartSeniors</b>
+    <div class="sb">Score urgence ${s}/10 — ${stars}</div></div>
+    <div class="mb">
+      <div class="mst">Personne âgée</div>
+      <div class="mrow"><span class="ml">Nom</span><span class="mv">${v(nomStr())}</span></div>
+      <div class="mrow"><span class="ml">Âge</span><span class="mv">${v(ageStr())}</span></div>
+      <div class="mrow"><span class="ml">Autonomie</span><span class="mv">${v(GIR[lead.niveau_autonomie])}</span></div>
+      <div class="mrow"><span class="ml">Situation</span><span class="mv">${v(SIT[lead.situation_actuelle])}</span></div>
+      <div class="mst">Recherche</div>
+      <div class="mrow"><span class="ml">Type</span><span class="mv">${v(TYPE[lead.type_residence])}</span></div>
+      <div class="mrow"><span class="ml">Zone</span><span class="mv">${v(zoneStr())}</span></div>
+      <div class="mrow"><span class="ml">Délai</span><span class="mv">${v(DELAI[lead.delai])}</span></div>
+      <div class="mrow"><span class="ml">Budget</span><span class="mv">${v(lead.budget_mensuel)}</span></div>
+      <div class="mst">Contact famille — à appeler en priorité</div>
+      <div class="mrow"><span class="ml">Nom</span><span class="mv">${v(contactStr())}</span></div>
+      <div class="mrow"><span class="ml">Téléphone</span><span class="mv" style="color:#D4824A">📞 ${v(lead.contact_telephone)}</span></div>
+      <div class="mrow"><span class="ml">Email</span><span class="mv">✉️ ${v(lead.contact_email)}</span></div>
+      <a class="cta" href="#" onclick="return false">Répondre à la famille maintenant</a>
+    </div>`;
+}
+
+/* ── Scénario rejouable (anonymisé, fictif) ── */
+const DEMO_SCRIPT=[
+  "Bonjour… je suis un peu perdue. Ma maman est à l'hôpital et on me dit qu'elle ne pourra pas rentrer chez elle. Je ne sais pas par où commencer.",
+  "Elle s'appelle Jeanne Lefèvre, elle a 84 ans. Elle a fait une chute, et elle a des débuts de troubles de la mémoire.",
+  "À la maison elle ne peut plus rester seule : elle a besoin d'aide pour la toilette et les repas. Elle marche encore un peu avec une canne.",
+  "On cherche du côté de Vincennes, dans le Val-de-Marne, pour que je puisse passer la voir facilement. Une dizaine de kilomètres autour.",
+  "Côté budget c'est compliqué… elle a environ 2000 € de retraite. On peut compléter un peu en famille.",
+  "C'est assez urgent, elle sort de l'hôpital d'ici une dizaine de jours.",
+  "Moi c'est Sophie, sa fille. Vous pouvez me joindre au 06 12 34 56 78 ou sophie.martin@email.fr."
+];
+
+async function playDemo(){
+  if(busy)return;
+  resetAll();
+  playBtn.disabled=true;sendBtn.disabled=true;input.disabled=true;
+  document.getElementById("modeNote").textContent="Scénario en cours…";
+  await sleep(500);
+  for(const msg of DEMO_SCRIPT){await sendMessage(msg);await sleep(1100);}
+  playBtn.disabled=false;input.disabled=false;
+  document.getElementById("modeNote").textContent="Scénario terminé — relance ou tape librement";
+}
+
+function resetAll(){
+  history=[];lead={};sent=false;
+  chatlog.innerHTML="";
+  document.getElementById("sent").classList.remove("show");
+  document.getElementById("mail").classList.remove("show");
+  renderLead();
+  const b=row("bot");
+  b.innerHTML=render("Bonjour, je suis **Emma**, votre conseillère SmartSeniors. Je suis là pour vous accompagner, à votre rythme. Pour commencer, dites-moi simplement : **comment va votre maman ou votre papa en ce moment ?**");
+}
+
+document.getElementById("mailToggle").addEventListener("click",()=>{
+  document.getElementById("mail").classList.toggle("show");down();
+});
+sendBtn.addEventListener("click",()=>{const t=input.value.trim();if(t){input.value="";input.style.height="auto";sendMessage(t);}});
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendBtn.click();}});
+input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,90)+"px";});
+playBtn.addEventListener("click",playDemo);
+resetBtn.addEventListener("click",()=>{if(!busy)resetAll();});
+
+resetAll();
+</script>
+</body>
+</html>
