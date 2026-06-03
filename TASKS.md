@@ -22,7 +22,12 @@
 > Objectif : montrer une discussion fluide famille ↔ Emma + un back-end qui **crée le lead en temps réel** et le transmet aux résidences partenaires.
 > Approche retenue : **extraction conversationnelle** (Emma mène la découverte, le lead se remplit en direct côté back-office) + **mode démo scripté rejouable** (scénario réel Alex ↔ famille).
 
-- [ ] **Récupérer le transcript** (speech-to-text de l'appel 25 min Alex ↔ famille, labels locuteurs)
+**Outillage biblio (apprentissage Emma) :**
+- [x] Notebook Colab `notebooks/emma_transcription_biblio.ipynb` — transcription Whisper (+ diarization) → fiche conseillère (Claude `claude-opus-4-8`, tool use + prompt caching) → playbook Emma
+- [x] Biblio `knowledge/` — transcripts (raw ignoré RGPD / clean) + `fiches/` + `emma-playbook.md` + méthodologie
+
+**Démo :**
+- [ ] **Récupérer le transcript** (speech-to-text de l'appel 25 min Alex ↔ famille, labels locuteurs) — via le notebook ci-dessus
 - [ ] **Phase 1 — Scénario & calage** : reconstituer le scénario de démo à partir du transcript ; caler la phase découverte d'Emma sur le déroulé réel (santé / lieu / pathologie / cadre familial / finances)
 - [ ] **Phase 2 — Extraction conversationnelle** : couche tool-use Claude qui parse chaque échange → champs du lead (étape 1 : nom, prénom, date de naissance, CP+ville ; étape 2 : délai, ville+rayon, budget)
 - [ ] **Phase 2 — Back-office « lead en direct »** : panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
