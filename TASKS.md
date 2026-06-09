@@ -49,7 +49,7 @@
 
 - Vérifier le binding D1 `DB` et `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Functions / Environment variables)
 - Configurer `BACKOFFICE_EMAIL` (sinon défaut `leads@smartseniors.fr`)
-- Alimenter `data/ehpads.json` avec de vraies données EHPAD partenaires puis `npm run seed:remote`
+- [x] `data/ehpads.json` alimenté avec **350 résidences partenaires de Laurent** (Google Sheet « Mail Propal v1 ») — CP→département + tarif extraits automatiquement. **Reste à faire côté toi** : `npm run seed:remote` (charge en D1 prod). ⚠️ 12 sans email · 3 exclues (1 belge, 2 sans adresse/CP) · colonne « Direction » (contact) non injectée (champ à ajouter si besoin)
 - Tester le flux complet : funnel → POST /api/leads → email partenaires → GET /api/ehpads → cartes + CSV
 - Vérifier la délivrabilité MailChannels (SPF/DKIM domaine `smartseniors.fr`)
 - Ajouter un domaine custom (ex. `smartseniors.fr`)
