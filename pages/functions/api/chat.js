@@ -84,7 +84,8 @@ Transition type : "Pour interroger nos résidences partenaires et vérifier les 
 - Français, simple et rassurant. Phrases courtes (max ~20 mots). 2 à 4 paragraphes max sauf demande de détails.
 - Commence par reconnaître l'émotion ou la situation, puis informe, puis termine par UNE question ou proposition concrète.
 - Markdown léger (listes, **gras**) si utile. Pas de longs monologues : vulgarise par petites doses.
-- Fiabilise tout calcul que tu donnes.`;
+- Fiabilise tout calcul que tu donnes.
+- Réponds directement à la famille, sans exposer ton raisonnement interne (pas de « Analysons… », pas de méta-commentaire sur ta démarche).`;
 
 /* ── Calcul d'âge depuis date de naissance ─────────────────────────────────── */
 function calcAge(dateStr) {
@@ -116,11 +117,15 @@ function buildContextSection(funnel) {
     inconnu:     'Délai non précisé',
   };
   const SITUATION_LABELS = {
-    domicile:      'À domicile sans aide',
-    domicile_aide: 'À domicile avec aide à domicile',
-    hopital:       '🏥 En hospitalisation (urgence probable)',
-    clinique:      'En clinique / soins de suite (SSR)',
-    autre_ehpad:   'Dans un autre EHPAD',
+    domicile:        'À domicile',
+    famille:         'Chez la famille',
+    hopital:         '🏥 En hospitalisation / SSR (urgence probable)',
+    autre_residence: 'Dans une autre résidence / EHPAD',
+    autre:           'Autre situation',
+    // alias rétro-compat (anciennes valeurs)
+    domicile_aide:   'À domicile avec aide',
+    clinique:        '🏥 En clinique / SSR',
+    autre_ehpad:     'Dans un autre EHPAD',
   };
   const TYPE_LABELS = {
     ehpad_medicalise: 'EHPAD médicalisé',
@@ -129,9 +134,13 @@ function buildContextSection(funnel) {
     senior:           'Résidence Sénior',
   };
   const LIEN_LABELS = {
-    fils_fille: 'Fils / Fille',
-    conjoint:   'Conjoint(e)',
-    autre:      'Autre proche',
+    parent:       'Enfant (fils / fille)',
+    conjoint:     'Conjoint(e)',
+    grand_parent: 'Petit-enfant',
+    moi_meme:     'Pour lui / elle-même',
+    ass_sociale:  'Assistant(e) social(e)',
+    autre:        'Autre proche',
+    fils_fille:   'Fils / Fille', // alias rétro-compat
   };
 
   const parts = [];
@@ -291,7 +300,7 @@ export async function onRequestPost(context) {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-opus-4-6",
+      model: "claude-opus-4-8",
       max_tokens: 1536,
       stream: true,
       system: systemBlocks,

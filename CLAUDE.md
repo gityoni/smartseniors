@@ -18,7 +18,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 ## Stack technique
 - **Frontend** : HTML / JS vanilla (`pages/index.html`), PWA (manifest + service worker)
 - **API** : Cloudflare Pages Functions (`pages/functions/api/`)
-- **LLM** : Anthropic Claude (`claude-opus-4-6`) — streaming SSE
+- **LLM** : chat Emma `claude-opus-4-8` (streaming SSE) · extraction lead `claude-haiku-4-5` (tool use)
 - **Base de données** : Cloudflare D1 (SQLite edge) — binding `DB` (id `3c1a84ef-2d23-42d4-853a-748f0cc16847`)
 - **Email** : MailChannels (envoi des leads aux résidences partenaires)
 - **Hébergement** : Cloudflare Pages (auto-deploy sur push `main`)
