@@ -30,7 +30,7 @@
 
 **Démo :**
 - [ ] **Récupérer le transcript** (speech-to-text de l'appel 25 min Alex ↔ famille, labels locuteurs) — via le notebook ci-dessus
-- [ ] **Phase 1 — Scénario & calage** : reconstituer le scénario de démo à partir du transcript ; caler la phase découverte d'Emma sur le déroulé réel (santé / lieu / pathologie / cadre familial / finances)
+- [~] **Phase 1 — Scénario & calage** : **prompt d'Emma calé sur 3 vrais appels** (playbook v2 régénéré via Colab → objections APA/ASH, clarification de rôle, budget en 3 blocs, nouvelles phrases d'empathie & pièges intégrés dans `chat.js` ; `knowledge/emma-playbook.md` mis à jour). Reste : reconstituer le scénario de démo à partir de ces appels. ⚠️ Fiches JSON non committées (anonymisation Colab à durcir : lieux/hôpitaux résiduels)
 - [x] **Phase 2 — Extraction conversationnelle** : `pages/functions/api/extract.js` — tool use (haiku-4-5) qui parse la conversation → champs du lead (identité : nom/prénom/date de naissance/CP+ville ; solution : délai/ville+rayon/budget)
 - [x] **Phase 2 — Back-office « lead en direct »** : `pages/demo.html` — panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
 - [x] **Mode démo scripté** : bouton « ▶ Rejouer la démo » dans `demo.html` (scénario famille fictif rejoué sur la vraie API)

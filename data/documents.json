@@ -109,19 +109,19 @@
       "actif": true
     },
     {
-      "id": "plan_acces_metro_paris",
-      "titre": "Plan du métro parisien",
+      "id": "acces_metro_residence",
+      "titre": "Accès & métro le plus proche (résidences parisiennes)",
       "categorie": "ressource",
-      "description": "Ressource statique (non pré-remplie). À CONFIRMER : était-ce un envoi volontaire ? Un plan métro générique n'est pas un document « généré avec les infos du lead ».",
-      "source": "RATP — plan du métro de Paris",
+      "description": "Pour une résidence à Paris / petite couronne : indique la station de métro la plus proche et propose un itinéraire depuis le domicile de la famille (lien externe).",
+      "source": "Données transport Île-de-France (RATP / IDFM) — à intégrer",
       "rempli_par": "famille",
-      "emma_prefill": "aucun",
-      "mode_generation": "template_vierge",
-      "champs_lead": [],
-      "champs_a_demander": [],
-      "guardrail": "Hors périmètre « pré-remplissage ». Pertinence à valider (plan d'accès par résidence ?).",
+      "emma_prefill": "complet",
+      "mode_generation": "genere_depuis_donnees",
+      "champs_lead": ["ville_recherche"],
+      "champs_a_demander": ["adresse_depart_visite"],
+      "guardrail": "Nécessite la station/coordonnées par résidence (à ajouter aux données EHPAD) + un jeu de données métro IDF, ou un lien d'itinéraire externe (RATP / Citymapper / Maps).",
       "fichier_source": null,
-      "actif": false
+      "actif": true
     }
   ]
 }
