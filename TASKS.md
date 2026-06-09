@@ -25,6 +25,7 @@
 
 **Outillage biblio (apprentissage Emma) :**
 - [x] Notebook Colab `notebooks/emma_transcription_biblio.ipynb` — transcription Whisper (+ diarization) → fiche conseillère (Claude `claude-opus-4-8`, tool use + prompt caching) → playbook Emma
+- [x] Variante **Drive-persistante** `notebooks/emma_transcription_biblio_drive.ipynb` — `audio/`+`transcripts/`+`fiches/` persistés sur Google Drive ; transcription & extraction **idempotentes** (ne retraite que les nouveaux appels) ; playbook régénéré sur **tout** le corpus accumulé
 - [x] Biblio `knowledge/` — transcripts (raw ignoré RGPD / clean) + `fiches/` + `emma-playbook.md` + méthodologie
 
 **Démo :**
