@@ -1831,7 +1831,9 @@
       "telephone": "01 47 10 14 60",
       "email": "dir-empereur-garches@domusvi.com",
       "places_disponibles": null,
-      "tarif_jour": 145
+      "tarif_jour": 145,
+      "direction": "Laure DENJEAN BELKACEMI",
+      "promo": "110 €/jour en chambre standard — offre en cours (15 jours)"
     },
     {
       "nom": "EHPAD CLUB MONTSOURIS",
