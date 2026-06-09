@@ -23,6 +23,14 @@
   .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
   .ss-root .demo-ctrl select { font-family: var(--font); border: 1.5px solid var(--c-line); border-radius: 8px; padding: 5px 8px; font-size: .8rem; background: var(--c-surface); color: var(--c-ink); }
   .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
+  /* boutons play/pause + rejouer (groupés à droite de la barre Emma) */
+  .ss-root .chat-top .demo-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .ss-root .chat-top .demo-actions .chat-replay { margin-left: 0; }
+  .ss-root .chat-pause { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: 1.5px solid var(--c-line); background: transparent; color: var(--c-ink-soft); border-radius: 999px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; }
+  .ss-root .chat-pause:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
+  .ss-root .chat-pause svg { width: 13px; height: 13px; }
+  .ss-root .chat-pause.is-paused { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
+  .ss-root .chat-pause:disabled { opacity: .45; cursor: not-allowed; }
   /* widget AGGIR */
   .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
   .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
@@ -81,8 +89,9 @@
       </div>
       <label class="demo-note">Vitesse
         <select id="pace" aria-label="Vitesse de la démo">
+          <option value="0.4" selected>0,4×</option>
           <option value="0.5">0,5×</option>
-          <option value="1" selected>1×</option>
+          <option value="1">1×</option>
           <option value="1.5">1,5×</option>
           <option value="2">2×</option>
         </select>
@@ -115,10 +124,16 @@
             <span class="on"></span>
           </div>
           <div><div class="nm">Emma</div><div class="rl">Conseillère EHPAD · En ligne</div></div>
-          <button class="chat-replay" id="replay">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-            Rejouer
-          </button>
+          <div class="demo-actions">
+            <button class="chat-pause" id="pause" type="button" disabled aria-label="Mettre la démo en pause" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+              <span>Pause</span>
+            </button>
+            <button class="chat-replay" id="replay" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              Rejouer
+            </button>
+          </div>
         </div>
         <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma"></div>
         <form id="form" class="chat-input" novalidate>
@@ -181,11 +196,34 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 const form = document.getElementById("form");
 const replayBtn = document.getElementById("replay");
+const pauseBtn = document.getElementById("pause");
 
-let running = false, mode = 'demo';
+/* ── État du player (démo déterministe) ──
+   running  : un scénario est en cours (en lecture OU en pause)
+   paused   : l'utilisateur a mis en pause (gèle le streaming)
+   liveBusy : verrou d'un envoi en mode Live (indépendant de la démo) */
+let running = false, paused = false, liveBusy = false, mode = 'demo';
+let cancelRequested = false, runDone = Promise.resolve(), starting = false;
+let pauseWaiters = [];
+const CANCEL = Symbol("cancel");
 const pace = () => parseFloat(document.getElementById('pace').value) || 1;
-const wait = (ms) => new Promise(r => setTimeout(r, ms / pace()));
 const down = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+
+function releasePause() { const w = pauseWaiters; pauseWaiters = []; w.forEach(fn => fn()); }
+// Sas pause/annulation : bloque tant que `paused`, lève CANCEL si le run est annulé (Rejouer / bascule Live).
+async function gate() {
+  if (cancelRequested) throw CANCEL;
+  while (paused) {
+    await new Promise(res => pauseWaiters.push(res));
+    if (cancelRequested) throw CANCEL;
+  }
+}
+// Attente pace-aware et sensible à la pause (testée avant ET après le délai → gel net mi-phrase).
+async function wait(ms) {
+  await gate();
+  await new Promise(r => setTimeout(r, ms / pace()));
+  await gate();
+}
 const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
 
 function renderFieldsInit() {
@@ -358,25 +396,63 @@ const SCRIPT = [
   { t:'sent', n:5, dept:'92' },
 ];
 
-async function playScript() {
-  if (running) return;
-  running = true; setMode('demo'); resetDossier(); chatBox.innerHTML = "";
-  replayBtn.disabled = true; input.disabled = true; sendBtn.disabled = true;
+/* ── Contrôles play / pause ── */
+const PAUSE_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
+const PLAY_ICO  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+function updatePauseUI() {
+  pauseBtn.disabled = !running;
+  pauseBtn.classList.toggle('is-paused', running && paused);
+  pauseBtn.innerHTML = (paused ? PLAY_ICO : PAUSE_ICO) + '<span>' + (paused ? 'Reprendre' : 'Pause') + '</span>';
+  pauseBtn.setAttribute('aria-label', paused ? 'Reprendre la démo' : 'Mettre la démo en pause');
+  pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+}
+function setPaused(p) {
+  if (!running) return;
+  paused = p;
+  if (!paused) releasePause();
+  updatePauseUI();
+  document.getElementById("mode-note").textContent = paused ? "⏸ Démo en pause" : "Scénario en cours…";
+}
+
+// Arrête proprement le scénario en cours et attend qu'il se soit dénoué (utilisé avant la bascule Live).
+async function stopScript() {
+  if (!running && !starting) { cancelRequested = false; return; }
+  cancelRequested = true; paused = false; releasePause();
+  await runDone;
+  cancelRequested = false;
+}
+
+// (Re)lance le scénario déterministe depuis le début — annule d'abord un éventuel run en cours/en pause.
+async function startScript() {
+  if (starting) return;                       // ignore les double-clics pendant la bascule
+  starting = true;
+  if (running) { cancelRequested = true; paused = false; releasePause(); }
+  await runDone;                              // attend la fin (le dénouement) du run précédent
+  cancelRequested = false; paused = false;
+  let resolveDone; runDone = new Promise(r => resolveDone = r);
+  running = true;
+  setMode('demo'); resetDossier(); chatBox.innerHTML = "";
+  replayBtn.disabled = false; updatePauseUI();
   document.getElementById("mode-note").textContent = "Scénario en cours…";
-  await wait(400);
-  for (const step of SCRIPT) {
-    if (!running) return;
-    if (step.t === 'bot') await botSay(step.text);
-    else if (step.t === 'user') await userSay(step.text);
-    else if (step.t === 'aggir') await runAggir(step.items);
-    else if (step.t === 'card') await showCard(step);
-    else if (step.t === 'score') await showScore(step);
-    else if (step.t === 'sent') await showSent(step);
-    if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
-    await wait(step.t === 'bot' ? 320 : 220);
+  starting = false;
+  try {
+    await wait(400);
+    for (const step of SCRIPT) {
+      if (step.t === 'bot') await botSay(step.text);
+      else if (step.t === 'user') await userSay(step.text);
+      else if (step.t === 'aggir') await runAggir(step.items);
+      else if (step.t === 'card') await showCard(step);
+      else if (step.t === 'score') await showScore(step);
+      else if (step.t === 'sent') await showSent(step);
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
+      await wait(step.t === 'bot' ? 320 : 220);
+    }
+    document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
+  } catch (e) {
+    if (e !== CANCEL) throw e;                 // annulation = arrêt silencieux ; vraie erreur = on remonte
+  } finally {
+    running = false; updatePauseUI(); resolveDone();
   }
-  replayBtn.disabled = false; running = false;
-  document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
 }
 
 /* ════════ MODE LIVE (vrai pipeline) ════════ */
@@ -388,8 +464,8 @@ const TYPEL = { ehpad_medicalise:'EHPAD médicalisé', alzheimer:'Unité Alzheim
 const DELL = { urgent:'⚡ Urgent', '1_mois':'Sous 1 mois', '1_3_mois':'1 à 3 mois', '3_6_mois':'3 à 6 mois', '6_mois_plus':'+ 6 mois' };
 
 async function liveSend(text) {
-  if (!text || running) return;
-  running = true; sendBtn.disabled = true;
+  if (!text || liveBusy) return;
+  liveBusy = true; sendBtn.disabled = true;
   const ur = rowEl("user"); const ub = document.createElement("div"); ub.className = "cbub"; ub.textContent = text; ur.appendChild(ub); chatBox.appendChild(ur);
   LIVE.history.push({ role:"user", content:text }); down();
   const tk = rowEl("bot"); const tt = document.createElement("div"); tt.className = "cthink"; tt.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(tt); chatBox.appendChild(tk); down();
@@ -406,13 +482,14 @@ async function liveSend(text) {
     bb.innerHTML = mdBold(full);
   } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = "Désolé, une erreur est survenue."; }
   if (full) LIVE.history.push({ role:"assistant", content:full });
-  running = false; sendBtn.disabled = false; down();
+  liveBusy = false; sendBtn.disabled = false; down();
   liveExtract();
 }
 async function liveExtract() {
   try {
     const r = await fetch(EXTRACT_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ history: LIVE.history }) });
     if (!r.ok) return; const { lead } = await r.json(); LIVE.lead = { ...LIVE.lead, ...lead }; const l = LIVE.lead;
+    if (mode !== 'live') return;                 // basculé vers la démo entre-temps → ne pas écrire dans le dossier
     const set = (k, v) => { if (v) setField(k, v); };
     if (l.lien_proche) set('lien', LIENL[l.lien_proche] || l.lien_proche);
     const nom = [l.prenom_proche, l.nom_proche].filter(Boolean).join(" "); const dob = l.date_naissance_proche ? ` · né(e) ${l.date_naissance_proche}` : (l.age_proche ? ` · ${l.age_proche} ans` : "");
@@ -430,21 +507,25 @@ function setMode(m) {
   document.querySelectorAll('#mode-seg button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
   input.disabled = (m !== 'live'); sendBtn.disabled = (m !== 'live');
 }
-document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('click', async () => {
   const m = b.dataset.mode;
-  if (m === 'demo') { playScript(); }
-  else { if (running) return; setMode('live'); LIVE.history = []; LIVE.lead = {}; resetDossier(); chatBox.innerHTML = "";
+  if (m === 'demo') { startScript(); }
+  else {
+    await stopScript(); setMode('live'); LIVE.history = []; LIVE.lead = {}; resetDossier(); chatBox.innerHTML = ""; updatePauseUI();
     const r = rowEl("bot"); const bb = document.createElement("div"); bb.className = "cbub"; bb.innerHTML = mdBold("Bonjour, je suis **Emma** 💛 Dites-moi, avec vos mots, ce qui vous amène."); r.appendChild(bb); chatBox.appendChild(r);
-    document.getElementById("mode-note").textContent = "Mode Live — Laurent tape librement"; input.focus(); }
+    document.getElementById("mode-note").textContent = "Mode Live — Laurent tape librement"; input.focus();
+  }
 }));
-replayBtn.addEventListener("click", playScript);
+replayBtn.addEventListener("click", () => startScript());
+pauseBtn.addEventListener("click", () => setPaused(!paused));
 form.addEventListener("submit", e => { e.preventDefault(); if (mode !== 'live') return; const t = input.value.trim(); if (t) { input.value = ""; input.style.height = "auto"; liveSend(t); } });
 input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 90) + "px"; });
 
 /* ── Init : autoplay du scénario ── */
 renderFieldsInit();
-playScript();
+updatePauseUI();
+startScript();
 </script>
 </body>
 </html>
