@@ -1,60 +1,51 @@
 # SmartSeniors — Suivi des tâches
 
+> Branche de dev : `claude/trusting-cannon-hwgcfu` · prod = `main` (auto-deploy Cloudflare).
+> Previews automatiques par commit (`*.smartseniors.pages.dev`).
+
 ## ✅ Fait
 
-- `pages/index.html` — **refonte design « Aurore »** : 2 vues (Accueil landing + Conversation chat+funnel), thème via `ss-theme.css` / `ss-landing.css` / `ss-chat.css` / `ss-funnel.css`, copie hero validée + 5 chips d'entrée. JS 100 % préservé (chat streaming, funnel 13 étapes, scoring, leads, ehpads, CSV)
-- PWA : `manifest.json`, `sw.js`, icônes (installable, shell offline)
-- `pages/confidentialite.html` — page RGPD / mentions
-- `pages/functions/api/chat.js` — streaming Anthropic SSE, persona Emma enrichie (vocabulaire, qualification 7 étapes, objections, contexte funnel dynamique)
-- `pages/functions/api/ehpads.js` — GET /api/ehpads?localite= (D1 → fallback mock)
-- `pages/functions/api/leads.js` — POST /api/leads : sauvegarde D1 + **scoring d'urgence** + **email aux EHPAD partenaires** (MailChannels) + notif backoffice
-- `pages/functions/api/admin/import-ehpads.js` — import EHPAD admin
-- `data/ehpads.json` (+ schema) — source de vérité EHPAD partenaires
-- `scripts/seed.mjs` / `scripts/import-ehpads.mjs` / `scripts/gsheet-to-api.gs` — seed & import D1
-- `schema.sql` — tables `leads` (riche : contact, qualification, scoring) et `ehpads`
-- `wrangler.toml` — config Cloudflare Pages + binding D1 (`3c1a84ef-2d23-42d4-853a-748f0cc16847`)
-- `CLAUDE.md` — mémoire projet à jour (as-built + chantier démo)
-- D1 database créée : `smartseniors-db`
-- Déploiement Cloudflare Pages — prod live ✅
-- **Cerveau Emma — quick wins** : `chat.js` passé en **`claude-opus-4-8`** (+ garde anti-fuite de raisonnement) · enums `extract.js` harmonisés sur le canonical schéma/funnel (`lien_proche`, `situation_actuelle`) · **caching diagnostiqué** : no-op sur Opus tant que le prompt < 4096 tok (~2130 actuellement) → s'activera à l'enrichissement playbook
+### Frontend famille — design « Aurore »
+- `pages/index.html` : 2 vues **Accueil** (landing : hero validé « Un moment délicat… » + 5 chips) ⇄ **Conversation** (chat Emma + funnel 13 étapes + cartes EHPAD + CSV). JS d'origine 100 % préservé.
+- CSS modulaire : `ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` (funnel re-skin vert `#12463C` + cartes EHPAD).
+- `pages/confidentialite.html` (RGPD).
 
-## 🚧 En cours — Démo partenaire (présentation prospect)
+### Démo partenaire — `pages/demo.html`
+- **Player déterministe** (mode « Démo », autoplay) : scénario figé Garches/Jeanne, réponses Emma pré-écrites, streaming mot-à-mot, **curseur vitesse 0,5×–2×**, Rejouer. Zéro API → zéro surprise.
+- **Widget AGGIR interactif** (6 items A/B/C) → estimation **GIR 2** indicative.
+- **Création du lead** scénarisée : nom, prénom, date de naissance, adresse, **tél + e-mail** du contact + **consentement**.
+- **Cartes features** : GIR · PDF d'admission pré-rempli · **promo L'Empereur 110 €/j** · vidéo (youtu.be/DvSet0Rkjkk) · itinéraire vers L'Empereur (Garches).
+- **Mode Live** conservé : vrai `/api/chat` + `/api/extract` → dossier en direct.
 
-> Objectif : montrer une discussion fluide famille ↔ Emma + un back-end qui **crée le lead en temps réel** et le transmet aux résidences partenaires.
-> Approche retenue : **extraction conversationnelle** (Emma mène la découverte, le lead se remplit en direct côté back-office) + **mode démo scripté rejouable** (scénario réel Alex ↔ famille).
+### Cerveau Emma
+- `chat.js` : **`claude-opus-4-8`** + prompt nourri du **playbook v3** (vrais appels) : objections (refus, maltraitance/grille de visite, APA vs ASH, « vous êtes qui ? », pathologie lourde, qualité≠prix…), empathie, pièges, **règle de consentement**, **caching ACTIF** (prompt > 4096 tok).
+- `extract.js` : tool-use `claude-haiku-4-5`, enums harmonisés sur le schéma/funnel.
+- `knowledge/emma-playbook.md` (v3) + `notebooks/emma_transcription_biblio_drive.ipynb` (Colab Drive-persistant, idempotent).
 
-**Outillage biblio (apprentissage Emma) :**
-- [x] Notebook Colab `notebooks/emma_transcription_biblio.ipynb` — transcription Whisper (+ diarization) → fiche conseillère (Claude `claude-opus-4-8`, tool use + prompt caching) → playbook Emma
-- [x] Variante **Drive-persistante** `notebooks/emma_transcription_biblio_drive.ipynb` — `audio/`+`transcripts/`+`fiches/` persistés sur Google Drive ; transcription & extraction **idempotentes** (ne retraite que les nouveaux appels) ; playbook régénéré sur **tout** le corpus accumulé
-- [x] Biblio `knowledge/` — transcripts (raw ignoré RGPD / clean) + `fiches/` + `emma-playbook.md` + méthodologie
+### Données & API
+- `data/ehpads.json` : **350 résidences de Laurent** (CP→dept + tarif auto) ; L'Empereur enrichi (direction + promo). `data/ehpads.schema.json` (+ `direction`, `promo`).
+- `data/documents.json` + schema : **9 documents** catalogués (admission, médical, AGGIR, APA, adresses CD, aide-mémoires, métro/itinéraire, vidéo) + `data/documents/sources/` (AGGIR + admission vierges).
+- `ehpads.js` (D1 → fallback mock) · `leads.js` (D1 + scoring + email MailChannels) · `admin/import-ehpads.js`.
+- `schema.sql` (tables `leads`, `ehpads`) · D1 `smartseniors-db` créée · déploiement Cloudflare live.
 
-**Démo :**
-- [ ] **Récupérer le transcript** (speech-to-text de l'appel 25 min Alex ↔ famille, labels locuteurs) — via le notebook ci-dessus
-- [~] **Phase 1 — Scénario & calage** : **prompt d'Emma calé sur 3 vrais appels** (playbook v2 régénéré via Colab → objections APA/ASH, clarification de rôle, budget en 3 blocs, nouvelles phrases d'empathie & pièges intégrés dans `chat.js` ; `knowledge/emma-playbook.md` mis à jour). Reste : reconstituer le scénario de démo à partir de ces appels. ⚠️ Fiches JSON non committées (anonymisation Colab à durcir : lieux/hôpitaux résiduels)
-- [x] **Phase 2 — Extraction conversationnelle** : `pages/functions/api/extract.js` — tool use (haiku-4-5) qui parse la conversation → champs du lead (identité : nom/prénom/date de naissance/CP+ville ; solution : délai/ville+rayon/budget)
-- [x] **Phase 2 — Back-office « lead en direct »** : `pages/demo.html` — panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
-- [x] **Mode démo scripté** : bouton « ▶ Rejouer la démo » dans `demo.html` (scénario famille fictif rejoué sur la vraie API)
-- [ ] **Phase 3 — Répétition / sécurisation** du run en live
-- [x] **Re-skin `demo.html`** en Aurore (vitrine partenaire) : **pipeline réel conservé** (`/api/chat` streaming + `/api/extract` → dossier en direct + score d'urgence + `/api/ehpads` → « lead envoyé » + aperçu email), look « Dossier en direct » du proto, **toggle Démo scriptée ⇄ Live** pour Laurent (autoplay au chargement)
+## 🔴 À faire — prod / données (côté toi, Cloudflare)
+- [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`).
+- [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
+- [ ] **`ANTHROPIC_API_KEY` en environnement Preview** (Cloudflare → Settings → Env vars → Preview) pour tester le **mode Live** de la démo en preview.
+- [ ] Vérifier binding `DB` + `BACKOFFICE_EMAIL`.
+- [ ] Délivrabilité **MailChannels** (SPF/DKIM `smartseniors.fr`) · domaine custom.
+- [ ] Tester le flux complet : funnel → `/api/leads` → emails partenaires → `/api/ehpads` → cartes + CSV.
 
-## 🆕 Feature — documents pré-remplis (levier véracité / confiance)
+## 🚧 À faire — démo & features
+- [ ] **Démo** : Phase 3 répétition/sécurisation du run ; affiner timing/wording ; décider no-naming vs nommage résidence en mode famille.
+- [ ] **Moteur de génération de docs** (HTML→PDF pré-rempli) — pour de vrai (aujourd'hui simulé dans la démo) ; brancher sur les champs du lead ; remplacer les boutons `dl-visite`/`dl-dossier`/`dl-entree` de `index.html`.
+- [ ] **Itinéraire** : data station/coords par résidence + lien RATP/Citymapper (aujourd'hui simulé).
+- [ ] **Vidéo** : vidéothèque par résidence (aujourd'hui une vidéo placeholder).
+- [ ] **Adresses Conseils départementaux** par dept (pour le doc APA).
+- [ ] Schéma `leads` : ajouter `adresse_proche` + `contact_consent` si on persiste ces champs.
+- [ ] **Durcir l'anonymisation** du notebook Colab (lieux/hôpitaux résiduels) → committer les fiches scrubbées si besoin.
+- [ ] Continuer à enrichir le playbook avec d'autres appels (Colab Drive) → re-passe sur le prompt d'Emma.
 
-> Idée : proposer au téléchargement des **documents officiels pré-remplis** avec les infos déjà collectées par le funnel/extraction (renforce la véracité du lead + valeur perçue famille).
-> Exemples : **dossier APA en résidence**, **dossier APA à domicile**, **simulation Grille AGGIR** (GIR), **liste des adresses des conseils départementaux (CR)** où envoyer le dossier, dossier d'admission EHPAD.
-- [x] **Bibliothèque catalogue** : `data/documents.json` + `data/documents.schema.json` — 8 documents (admission, médical, estimation AGGIR, APA, adresses CD, aide-mémoires visite/entrée, +plan métro flaggé) mappés aux **champs du lead**, avec garde-fous (médical = médecin uniquement, GIR = estimation indicative)
-- [ ] Brancher sur les champs déjà collectés (GIR, situation, date de naissance, ville proche → conseil départemental, etc.)
-- [ ] Remplace/enrichit les boutons docs actuels de `index.html` (pane résultats : `dl-visite` / `dl-dossier` / `dl-entree`) qui ne font aujourd'hui que déclencher une réponse d'Emma
-- [ ] **Moteur de génération** : approche retenue = **HTML→PDF pré-rempli** (templates maison, indépendant du format source) ; AcroForm/pdf-lib en option ciblée. À implémenter (client ou edge function).
-- [ ] Constituer la source « adresses des Conseils départementaux par département » (pour le doc APA)
-- [ ] Décider quels PDF sources committer (officiels publics vierges) vs garder en réf. seule (exemples médicaux → prudence RGPD)
-
-## 🔴 À faire — infra / prod
-
-- [ ] **Rafraîchir `CLAUDE.md`** : design system (Aurore, plus beige/brun) + nouveaux fichiers CSS *(modèle LLM ✅ tranché : chat `claude-opus-4-8`, extraction `claude-haiku-4-5`)*
-
-- Vérifier le binding D1 `DB` et `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Functions / Environment variables)
-- Configurer `BACKOFFICE_EMAIL` (sinon défaut `leads@smartseniors.fr`)
-- [x] `data/ehpads.json` alimenté avec **350 résidences partenaires de Laurent** (Google Sheet « Mail Propal v1 ») — CP→département + tarif extraits automatiquement. **Reste à faire côté toi** : `npm run seed:remote` (charge en D1 prod). ⚠️ 12 sans email · 3 exclues (1 belge, 2 sans adresse/CP) · colonne « Direction » (contact) non injectée (champ à ajouter si besoin)
-- Tester le flux complet : funnel → POST /api/leads → email partenaires → GET /api/ehpads → cartes + CSV
-- Vérifier la délivrabilité MailChannels (SPF/DKIM domaine `smartseniors.fr`)
-- Ajouter un domaine custom (ex. `smartseniors.fr`)
+## 📌 Repères
+- Consentement (règle métier) : oui → tél famille · **non → lead transmis avec le conseiller `07 57 99 11 40`**.
+- Démo : URL preview du dernier commit + `/demo.html` ; le mode Démo tourne sans clé API.
