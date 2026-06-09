@@ -33,7 +33,7 @@
 - [x] **Phase 2 — Back-office « lead en direct »** : `pages/demo.html` — panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
 - [x] **Mode démo scripté** : bouton « ▶ Rejouer la démo » dans `demo.html` (scénario famille fictif rejoué sur la vraie API)
 - [ ] **Phase 3 — Répétition / sécurisation** du run en live
-- [ ] **Re-skin `demo.html`** en Aurore (vitrine partenaire) — attend le **Lot 2** (`ss-chat.jsx` = `CHAT_SCRIPT`/`LEAD_FIELDS`, `ss-app.jsx` = nav/shell) + toggle **Démo (auto) ⇄ Live** pour Laurent
+- [x] **Re-skin `demo.html`** en Aurore (vitrine partenaire) : **pipeline réel conservé** (`/api/chat` streaming + `/api/extract` → dossier en direct + score d'urgence + `/api/ehpads` → « lead envoyé » + aperçu email), look « Dossier en direct » du proto, **toggle Démo scriptée ⇄ Live** pour Laurent (autoplay au chargement)
 
 ## 🆕 Feature — documents pré-remplis (levier véracité / confiance)
 
