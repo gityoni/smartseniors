@@ -41,9 +41,12 @@
 
 > Idée : proposer au téléchargement des **documents officiels pré-remplis** avec les infos déjà collectées par le funnel/extraction (renforce la véracité du lead + valeur perçue famille).
 > Exemples : **dossier APA en résidence**, **dossier APA à domicile**, **simulation Grille AGGIR** (GIR), **liste des adresses des conseils départementaux (CR)** où envoyer le dossier, dossier d'admission EHPAD.
+- [x] **Bibliothèque catalogue** : `data/documents.json` + `data/documents.schema.json` — 8 documents (admission, médical, estimation AGGIR, APA, adresses CD, aide-mémoires visite/entrée, +plan métro flaggé) mappés aux **champs du lead**, avec garde-fous (médical = médecin uniquement, GIR = estimation indicative)
 - [ ] Brancher sur les champs déjà collectés (GIR, situation, date de naissance, ville proche → conseil départemental, etc.)
 - [ ] Remplace/enrichit les boutons docs actuels de `index.html` (pane résultats : `dl-visite` / `dl-dossier` / `dl-entree`) qui ne font aujourd'hui que déclencher une réponse d'Emma
-- [ ] Génération PDF pré-rempli (côté edge function ou client)
+- [ ] **Moteur de génération** : approche retenue = **HTML→PDF pré-rempli** (templates maison, indépendant du format source) ; AcroForm/pdf-lib en option ciblée. À implémenter (client ou edge function).
+- [ ] Constituer la source « adresses des Conseils départementaux par département » (pour le doc APA)
+- [ ] Décider quels PDF sources committer (officiels publics vierges) vs garder en réf. seule (exemples médicaux → prudence RGPD)
 
 ## 🔴 À faire — infra / prod
 
