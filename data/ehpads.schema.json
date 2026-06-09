@@ -18,7 +18,9 @@
           "telephone":          { "type": "string",  "description": "Numéro de téléphone principal" },
           "email":              { "type": "string",  "format": "email", "description": "Email de reception des leads — CRITIQUE" },
           "places_disponibles": { "type": ["integer","null"], "minimum": 0 },
-          "tarif_jour":         { "type": ["number","null"],  "minimum": 0, "description": "Tarif hébergement hors GIR chambre individuelle €/jour" }
+          "tarif_jour":         { "type": ["number","null"],  "minimum": 0, "description": "Tarif hébergement hors GIR chambre individuelle €/jour" },
+          "direction":          { "type": "string", "description": "Nom du directeur / contact direction" },
+          "promo":              { "type": "string", "description": "Offre tarifaire en cours, ex: '110 €/jour chambre standard — 15 jours'" }
         },
         "additionalProperties": false
       }

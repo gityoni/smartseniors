@@ -4,24 +4,55 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex" />
-<title>SmartSeniors — Démo partenaire · lead en direct</title>
+<title>SmartSeniors — Démo partenaire · Emma en action</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="/ss-theme.css" />
 <link rel="stylesheet" href="/ss-chat.css" />
 <style>
   html, body { margin: 0; padding: 0; background: #F1F7F5; }
+  .ss-root .ss-view .chat-scroll { max-height: none; }
   .ss-root .chat-input textarea { resize: none; max-height: 90px; line-height: 1.45; }
   .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled, .ss-root .chat-replay:disabled { opacity: .5; cursor: not-allowed; }
-  .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
-  .ss-root #demo-split { min-height: min(720px, calc(100vh - 170px)); }
+  .ss-root #demo-split { min-height: min(760px, calc(100vh - 175px)); }
   @media (max-width: 900px) { .ss-root #demo-split { min-height: 0; } }
   .ss-root .lead-fields { overflow-y: auto; }
-  .ss-root .cbub p { margin: .3em 0; } .ss-root .cbub p:first-child { margin-top: 0; } .ss-root .cbub p:last-child { margin-bottom: 0; }
-  .ss-root .cbub ul { margin: .3em 0; padding-left: 1.1em; }
-  .ss-root .email-cta { display: block; text-align: center; background: var(--grad); color: #fff; border-radius: 9px; padding: 10px; font-weight: 800; margin-top: 11px; font-size: .82rem; cursor: pointer; border: none; width: 100%; font-family: var(--font); }
+  .ss-root .cbub strong { color: var(--c-accent); }
+  /* barre de contrôle démo */
+  .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
+  .ss-root .demo-ctrl select { font-family: var(--font); border: 1.5px solid var(--c-line); border-radius: 8px; padding: 5px 8px; font-size: .8rem; background: var(--c-surface); color: var(--c-ink); }
+  .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
+  /* widget AGGIR */
+  .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
+  .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
+  .ss-root .aggir-sub { font-size: .72rem; color: var(--c-ink-soft); margin-bottom: 8px; }
+  .ss-root .aggir-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--c-line); }
+  .ss-root .aggir-row .q { flex: 1; font-size: .85rem; color: var(--c-ink); font-weight: 600; }
+  .ss-root .aggir-opts { display: flex; gap: 5px; flex-shrink: 0; }
+  .ss-root .aggir-opt { width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--c-line); background: var(--c-bg); font-weight: 800; font-size: .82rem; color: var(--c-ink-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s; }
+  .ss-root .aggir-opt.sel { color: #fff; border-color: transparent; transform: scale(1.08); }
+  .ss-root .aggir-opt.sel[data-v="A"] { background: #15B79E; }
+  .ss-root .aggir-opt.sel[data-v="B"] { background: #F59E0B; }
+  .ss-root .aggir-opt.sel[data-v="C"] { background: #EF4444; }
+  .ss-root .aggir-leg { font-size: .64rem; color: var(--c-ink-soft); margin-top: 8px; line-height: 1.4; }
+  /* cartes features */
+  .ss-root .dcard { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-soft); max-width: 86%; animation: ss-slideup .3s ease both; }
+  .ss-root .dcard .dc-h { display: flex; align-items: center; gap: 11px; }
+  .ss-root .dcard .dc-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; background: var(--c-bg-alt); }
+  .ss-root .dcard .dc-t { font-weight: 800; color: var(--c-ink); font-size: .92rem; line-height: 1.2; }
+  .ss-root .dcard .dc-s { font-size: .8rem; color: var(--c-ink-soft); margin-top: 5px; line-height: 1.5; }
+  .ss-root .dcard .dc-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 11px; background: var(--grad); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; font-size: .82rem; cursor: pointer; font-family: var(--font); text-decoration: none; }
+  .ss-root .dcard-gir .dc-gauge { height: 10px; border-radius: 99px; background: var(--c-bg-alt); overflow: hidden; margin: 11px 0 4px; }
+  .ss-root .dcard-gir .dc-gauge i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#3B82F6,#FFD93D,#EF4444); border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .ss-root .dcard-gir .dc-scale { display: flex; justify-content: space-between; font-size: .62rem; color: var(--c-ink-soft); font-weight: 700; }
+  .ss-root .dcard-video iframe { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 11px; margin-top: 9px; }
+  .ss-root .dcard-promo { border: 1.5px solid var(--c-accent); }
+  .ss-root .dcard-promo .dc-ico { background: rgba(91,141,239,.14); }
+  .ss-root .dcard-promo .dc-prix { font-size: 1.45rem; font-weight: 900; color: var(--c-accent); margin-top: 8px; }
+  .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
+  .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
+  .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
 </style>
 </head>
 <body>
@@ -43,25 +74,33 @@
       </div>
       <div class="wm-sub">Démo partenaire · données fictives</div>
     </div>
-    <nav class="ss-nav" aria-label="Mode de démonstration">
+    <nav class="ss-nav demo-ctrl" aria-label="Contrôles démo">
       <div class="ss-nav-seg" id="mode-seg" role="tablist" aria-label="Mode">
-        <button class="active" data-mode="demo" role="tab" aria-selected="true">▶ Démo scriptée</button>
-        <button data-mode="live" role="tab" aria-selected="false">✍ Live (Laurent)</button>
+        <button class="active" data-mode="demo" role="tab" aria-selected="true">▶ Démo</button>
+        <button data-mode="live" role="tab" aria-selected="false">✍ Live</button>
       </div>
-      <span class="demo-note" id="mode-note">Le scénario se rejoue tout seul</span>
+      <label class="demo-note">Vitesse
+        <select id="pace" aria-label="Vitesse de la démo">
+          <option value="0.5">0,5×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.5">1,5×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
+      <span class="demo-note" id="mode-note">Scénario rejoué automatiquement</span>
     </nav>
   </header>
 
   <section class="ss-convo">
     <div class="ss-convo-head">
       <span class="ss-kicker" style="justify-content:center">Démo partenaire</span>
-      <h2 class="ss-sec-title">La conversation à gauche, le lead à droite</h2>
-      <p class="ss-sec-lede">Emma mène la découverte. Pendant qu'elle écoute, le dossier qualifié se remplit en temps réel côté résidences.</p>
+      <h2 class="ss-sec-title">Emma en action · le dossier se crée en direct</h2>
+      <p class="ss-sec-lede">Une famille parle à Emma. Pendant qu'elle écoute, rassure et qualifie, le dossier se remplit à droite — jusqu'à la transmission aux résidences.</p>
     </div>
 
     <div class="ss-split" id="demo-split">
 
-      <!-- ───── CHAT ───── -->
+      <!-- CHAT -->
       <div class="chat-side">
         <div class="chat-top">
           <div class="emma-av">
@@ -75,57 +114,39 @@
             </svg>
             <span class="on"></span>
           </div>
-          <div>
-            <div class="nm">Emma</div>
-            <div class="rl">Conseillère EHPAD · En ligne</div>
-          </div>
+          <div><div class="nm">Emma</div><div class="rl">Conseillère EHPAD · En ligne</div></div>
           <button class="chat-replay" id="replay">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
             Rejouer
           </button>
         </div>
-
         <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma"></div>
-
         <form id="form" class="chat-input" novalidate>
-          <textarea id="input" rows="1" placeholder="Écrivez à Emma…" aria-label="Votre message" maxlength="2000"></textarea>
+          <textarea id="input" rows="1" placeholder="Mode Live : écrivez à Emma…" aria-label="Votre message" maxlength="2000" disabled></textarea>
           <button type="submit" id="send" class="chat-send" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </form>
       </div>
 
-      <!-- ───── DOSSIER EN DIRECT ───── -->
+      <!-- DOSSIER EN DIRECT -->
       <div class="lead-side">
         <div class="lead-head">
           <div class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></div>
-          <div>
-            <div class="lh-t">Dossier en direct</div>
-            <div class="lh-s">Back-office résidences partenaires</div>
-          </div>
+          <div><div class="lh-t">Dossier en direct</div><div class="lh-s">Back-office résidences partenaires</div></div>
           <span class="lead-live"><span class="ss-dot"></span> Live</span>
         </div>
-
         <div class="lead-prog"><i id="pbar"></i></div>
-
         <div class="lead-fields" id="lead-fields"></div>
-
         <div class="lead-score" id="lead-score">
-          <div class="ls-top">
-            <span class="ls-label">Score d'urgence</span>
-            <span class="ls-badge froid" id="ls-badge">—</span>
-          </div>
+          <div class="ls-top"><span class="ls-label">Score d'urgence</span><span class="ls-badge froid" id="ls-badge">—</span></div>
           <div class="ls-meter"><i id="ls-meter"></i></div>
           <div class="ls-scale"><span>Froid</span><span>Tiède</span><span>Chaud</span></div>
         </div>
-
         <div class="lead-sent" id="lead-sent">
           <div class="lead-sent-banner">
             <div class="sb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div>
-              <div class="sb-t" id="sent-t">Lead envoyé</div>
-              <div class="sb-s" id="sent-s"></div>
-            </div>
+            <div><div class="sb-t" id="sent-t">Lead envoyé</div><div class="sb-s" id="sent-s"></div></div>
           </div>
           <div class="email-card" id="email-card"></div>
         </div>
@@ -133,106 +154,39 @@
 
     </div>
   </section>
-
 </div>
 
 <script>
-const API_URL = "/api/chat", EXTRACT_URL = "/api/extract", EHPADS_URL = "/api/ehpads";
+const API_URL = "/api/chat", EXTRACT_URL = "/api/extract";
+const CONSEILLER_TEL = "07 57 99 11 40"; // backend : si consentement = non, le lead part avec ce numéro
 
-const GIR = { autonome:"Autonome (GIR 5-6)", semi_dependant:"Semi-dépendant (GIR 3-4)", tres_dependant:"Très dépendant (GIR 1-2)" };
-const DELAI = { urgent:"⚡ Dès que possible", "1_mois":"Sous 1 mois", "1_3_mois":"1 à 3 mois", "3_6_mois":"3 à 6 mois", "6_mois_plus":"Plus de 6 mois", inconnu:"à préciser" };
-const SIT = { domicile:"Domicile", domicile_aide:"Domicile avec aide", famille:"Chez la famille", hopital:"🏥 Hospitalisé(e)", clinique:"Clinique / SSR", autre_ehpad:"Autre établissement", autre_residence:"Autre résidence", autre:"Autre" };
-const TYPE = { ehpad_medicalise:"EHPAD médicalisé", alzheimer:"Unité Alzheimer / UHR", autonomie:"Résidence Autonomie", senior:"Résidence Sénior", autre:"EHPAD", inconnu:"EHPAD" };
-const LIEN = { parent:"Parent", fils_fille:"Fils / Fille", conjoint:"Conjoint(e)", grand_parent:"Petit-enfant", moi_meme:"Pour soi-même", ass_sociale:"Assistante sociale", autre:"Proche" };
-const BUDGET = { moins_2000:"< 2 000 €/mois", "2000_3000":"2 000 – 3 000 €/mois", "3000_plus":"> 3 000 €/mois", inconnu:"à préciser" };
-
-let history = [], lead = {}, busy = false, sent = false, mode = 'demo';
+/* ── Dossier (lead-side) ── */
+const FIELDS = [
+  { key:'lien',     label:'Lien familial',      hint:'en attente…' },
+  { key:'proche',   label:'La personne âgée',   hint:'nom · prénom · naissance' },
+  { key:'adresse',  label:'Adresse',            hint:'rue · CP · ville' },
+  { key:'situation',label:'Situation actuelle', hint:'en attente…' },
+  { key:'autonomie',label:'Autonomie (GIR)',    hint:'en attente…' },
+  { key:'type',     label:'Type de résidence',  hint:'en attente…' },
+  { key:'zone',     label:'Zone de recherche',  hint:'ville + rayon' },
+  { key:'budget',   label:'Budget / aides',     hint:'en attente…' },
+  { key:'delai',    label:'Délai',              hint:'en attente…' },
+  { key:'contact',  label:'Contact famille',    hint:'tél + e-mail' },
+  { key:'consent',  label:'Contact souhaité',   hint:'en attente…' },
+];
 
 const chatBox = document.getElementById("chat-box");
-const input   = document.getElementById("input");
-const sendBtn = document.getElementById("send");
-const form    = document.getElementById("form");
-const replayBtn = document.getElementById("replay");
 const fieldsEl = document.getElementById("lead-fields");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const form = document.getElementById("form");
+const replayBtn = document.getElementById("replay");
 
-const render = t => { try { marked.setOptions({ gfm:true, breaks:true }); return marked.parse(t); } catch { return t; } };
-const sleep  = ms => new Promise(r => setTimeout(r, ms));
-const down   = () => { chatBox.scrollTop = chatBox.scrollHeight; };
-
-function avatarSVG() {
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
-}
-function row(who) {
-  const r = document.createElement("div"); r.className = "crow " + who;
-  if (who === "bot") { const av = document.createElement("div"); av.className = "cav"; av.innerHTML = avatarSVG(); r.appendChild(av); }
-  const b = document.createElement("div"); b.className = "cbub";
-  r.appendChild(b); chatBox.appendChild(r); down(); return b;
-}
-function thinking() {
-  const r = document.createElement("div"); r.className = "crow bot"; r.id = "thinkRow";
-  const av = document.createElement("div"); av.className = "cav"; av.innerHTML = avatarSVG();
-  const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>";
-  r.appendChild(av); r.appendChild(t); chatBox.appendChild(r); down();
-}
-function unthink() { document.getElementById("thinkRow")?.remove(); }
-
-async function sendMessage(text) {
-  if (!text || busy) return;
-  busy = true; sendBtn.disabled = true;
-  const ub = row("user"); ub.textContent = text;
-  history.push({ role:"user", content:text });
-  thinking();
-  let full = "", bb = null, cur = null;
-  try {
-    const resp = await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ message:text, history:history.slice(0,-1), funnel:lead }) });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    unthink(); bb = row("bot"); cur = document.createElement("span"); cur.className = "ccursor"; bb.appendChild(cur);
-    const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
-    while (true) {
-      const { done, value } = await reader.read(); if (done) break;
-      buf += dec.decode(value, { stream:true }); const lines = buf.split("\n"); buf = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        const d = line.slice(5).trim(); if (d === "[DONE]") continue;
-        try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null;
-          if (delta) { full += delta; bb.innerHTML = render(full); cur = document.createElement("span"); cur.className = "ccursor"; bb.appendChild(cur); down(); }
-        } catch {}
-      }
-    }
-  } catch (e) { unthink(); if (!bb) bb = row("bot"); full = "Désolé, une erreur est survenue."; bb.innerHTML = render(full); console.error(e); }
-  if (cur) cur.remove(); if (bb) bb.innerHTML = render(full);
-  if (full) history.push({ role:"assistant", content:full });
-  busy = false; sendBtn.disabled = false; down();
-  await updateLead();
-}
-
-async function updateLead() {
-  try {
-    const r = await fetch(EXTRACT_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ history }) });
-    if (!r.ok) return;
-    const { lead: got } = await r.json();
-    lead = { ...lead, ...got };
-    renderLead(); maybeSend();
-  } catch (e) { console.error(e); }
-}
-
-/* ── Dossier en direct ── */
-function procheStr() { const n = [lead.prenom_proche, lead.nom_proche].filter(Boolean).join(" "); const a = lead.age_proche ? `${lead.age_proche} ans` : (lead.date_naissance_proche ? `né(e) ${lead.date_naissance_proche}` : ""); return [n, a].filter(Boolean).join(" · "); }
-function zoneStr() { const v = lead.ville_recherche || lead.code_postal; if (!v) return ""; return v + (lead.rayon_km ? ` · ${lead.rayon_km} km` : ""); }
-function lienStr() { const who = [lead.contact_prenom, lead.contact_nom].filter(Boolean).join(" "); const l = LIEN[lead.lien_proche] || ""; return [l, who].filter(Boolean).join(" — "); }
-function budgetStr() { return BUDGET[lead.budget_mensuel] || lead.budget_mensuel || ""; }
-
-const FIELDS = [
-  { key:'lien',         label:'Lien familial',      hint:'en attente…',      get: lienStr },
-  { key:'proche',       label:'La personne âgée',   hint:'nom · âge',        get: procheStr },
-  { key:'situation',    label:'Situation actuelle', hint:'en attente…',      get: () => SIT[lead.situation_actuelle] || "" },
-  { key:'autonomie',    label:'Autonomie (GIR)',    hint:'en attente…',      get: () => GIR[lead.niveau_autonomie] || "" },
-  { key:'localisation', label:'Localisation',       hint:'ville + rayon',    get: zoneStr },
-  { key:'budget',       label:'Budget mensuel',     hint:'en attente…',      get: budgetStr },
-  { key:'delai',        label:'Délai',              hint:'en attente…',      get: () => DELAI[lead.delai] || "" },
-  { key:'type',         label:'Type de résidence',  hint:'en attente…',      get: () => TYPE[lead.type_residence] || "" },
-];
+let running = false, mode = 'demo';
+const pace = () => parseFloat(document.getElementById('pace').value) || 1;
+const wait = (ms) => new Promise(r => setTimeout(r, ms / pace()));
+const down = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
 
 function renderFieldsInit() {
   fieldsEl.innerHTML = FIELDS.map(f => `
@@ -240,140 +194,257 @@ function renderFieldsInit() {
       <div class="lf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="lf-body"><div class="lf-label">${f.label}</div><div class="lf-value">${f.hint}</div></div>
     </div>`).join("");
+  updateProgress();
+}
+function setField(key, val) {
+  const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
+  const v = el.querySelector(".lf-value");
+  v.textContent = val; el.classList.add("filled");
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  updateProgress(); down();
+}
+function updateProgress() {
+  const n = fieldsEl.querySelectorAll(".lfield.filled").length;
+  document.getElementById("pbar").style.width = Math.round(n / FIELDS.length * 100) + "%";
+}
+function resetDossier() {
+  renderFieldsInit();
+  document.getElementById("lead-sent").classList.remove("show");
+  const sc = document.getElementById("lead-score"); sc.classList.remove("on");
+  document.getElementById("ls-meter").style.width = "0%";
+  document.getElementById("ls-badge").className = "ls-badge froid"; document.getElementById("ls-badge").textContent = "—";
 }
 
-function renderLead() {
-  FIELDS.forEach(f => {
-    const el = fieldsEl.querySelector(`.lfield[data-key="${f.key}"]`);
-    if (!el) return;
-    const valEl = el.querySelector(".lf-value");
-    const v = (f.get() || "").trim();
-    const filled = !!v;
-    const changed = filled && valEl.textContent !== v;
-    valEl.textContent = filled ? v : f.hint;
-    el.classList.toggle("filled", filled);
-    if (changed) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
-  });
-  const filledCount = FIELDS.filter(f => (f.get() || "").trim()).length;
-  document.getElementById("pbar").style.width = Math.round(filledCount / FIELDS.length * 100) + "%";
+/* ── Rendu chat ── */
+function avatarSVG() { return `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`; }
+function rowEl(who) {
+  const r = document.createElement("div"); r.className = "crow " + who;
+  if (who === "bot") { const a = document.createElement("div"); a.className = "cav"; a.innerHTML = avatarSVG(); r.appendChild(a); }
+  return r;
+}
+async function botSay(text) {
+  // thinking
+  const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
+  chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  // stream
+  const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
+  const words = text.split(" "); let acc = "";
+  for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
+  b.innerHTML = mdBold(acc);
+}
+async function userSay(text) {
+  await wait(520);
+  const r = rowEl("user"); const b = document.createElement("div"); b.className = "cbub"; b.textContent = text; r.appendChild(b); chatBox.appendChild(r); down();
+}
 
-  const s = scoreOf();
-  const scoreBox = document.getElementById("lead-score");
-  const badge = document.getElementById("ls-badge");
-  document.getElementById("ls-meter").style.width = (s * 10) + "%";
-  if (filledCount === 0) {
-    scoreBox.classList.remove("on"); badge.className = "ls-badge froid"; badge.textContent = "—";
-  } else {
-    scoreBox.classList.add("on");
-    const k = s >= 7 ? "chaud" : s >= 4 ? "tiede" : "froid";
-    badge.className = "ls-badge " + k;
-    badge.textContent = (k === "chaud" ? "🔥 Chaud" : k === "tiede" ? "⚡ Tiède" : "❄ Froid") + ` · ${s}/10`;
+/* ── Widget AGGIR interactif ── */
+async function runAggir(items) {
+  const r = rowEl("bot");
+  const w = document.createElement("div"); w.className = "aggir";
+  w.innerHTML = `<div class="aggir-t">🧩 Estimation rapide de l'autonomie (grille AGGIR)</div>
+    <div class="aggir-sub">6 repères clés · validez A, B ou C</div>` +
+    items.map((it, i) => `
+      <div class="aggir-row" data-i="${i}">
+        <span class="q"><b>${it[0]}</b> — ${it[1]}</span>
+        <span class="aggir-opts">
+          <span class="aggir-opt" data-v="A">A</span><span class="aggir-opt" data-v="B">B</span><span class="aggir-opt" data-v="C">C</span>
+        </span>
+      </div>`).join("") +
+    `<div class="aggir-leg">A : fait seul, correctement · B : partiellement / pas correctement · C : ne fait pas</div>`;
+  r.appendChild(w); chatBox.appendChild(r); down();
+  for (let i = 0; i < items.length; i++) {
+    await wait(700);
+    const opt = w.querySelector(`.aggir-row[data-i="${i}"] .aggir-opt[data-v="${items[i][2]}"]`);
+    if (opt) opt.classList.add("sel");
+    down();
+  }
+  await wait(400);
+}
+
+/* ── Cartes features ── */
+function cardWrap(kind, html) {
+  const r = rowEl("bot"); const c = document.createElement("div"); c.className = "dcard dcard-" + kind; c.innerHTML = html;
+  r.appendChild(c); chatBox.appendChild(r); down(); return c;
+}
+async function showCard(step) {
+  await wait(300);
+  if (step.kind === "gir") {
+    const c = cardWrap("gir", `<div class="dc-h"><div class="dc-ico">🟢</div><div><div class="dc-t">Estimation du GIR — ${step.value}</div><div class="dc-s">${step.note}</div></div></div>
+      <div class="dc-gauge"><i></i></div><div class="dc-scale"><span>GIR 6</span><span>GIR 4</span><span>GIR 2</span><span>GIR 1</span></div>`);
+    await wait(150); c.querySelector(".dc-gauge i").style.width = (step.pct || 80) + "%";
+  } else if (step.kind === "pdf") {
+    cardWrap("pdf", `<div class="dc-h"><div class="dc-ico">📄</div><div><div class="dc-t">${step.titre}</div><div class="dc-s">${step.sous}</div></div></div>
+      <a class="dc-btn" href="#" onclick="return false">⬇ Télécharger le PDF</a>`);
+  } else if (step.kind === "promo") {
+    cardWrap("promo", `<div class="dc-h"><div class="dc-ico">🏷️</div><div><div class="dc-t">${step.residence}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-prix">${step.prix} <small>chambre standard</small></div>`);
+  } else if (step.kind === "video") {
+    cardWrap("video", `<div class="dc-h"><div class="dc-ico">▶️</div><div class="dc-t">${step.titre}</div></div>
+      <iframe loading="lazy" src="${step.embed}" title="Visite vidéo" allowfullscreen></iframe>`);
+  } else if (step.kind === "itineraire") {
+    cardWrap("itineraire", `<div class="dc-h"><div class="dc-ico">🚇</div><div><div class="dc-t">Itinéraire jusqu'à ${step.to}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;→&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
   }
 }
-
-function scoreOf() {
-  let s = 0;
-  if (["urgent","1_mois"].includes(lead.delai)) s += 4; else if (lead.delai === "1_3_mois") s += 2;
-  if (lead.situation_actuelle === "hopital") s += 3; else if (["clinique","autre_ehpad","autre_residence"].includes(lead.situation_actuelle)) s += 2;
-  if (["ehpad_medicalise","alzheimer"].includes(lead.type_residence)) s += 1;
-  if (["tres_dependant","semi_dependant"].includes(lead.niveau_autonomie)) s += 1;
-  return Math.min(s, 10);
+async function showScore(step) {
+  await wait(300);
+  const sc = document.getElementById("lead-score"); sc.classList.add("on");
+  document.getElementById("ls-meter").style.width = (step.value * 10) + "%";
+  const b = document.getElementById("ls-badge");
+  b.className = "ls-badge " + step.statut;
+  b.textContent = (step.statut === "chaud" ? "🔥 Chaud" : step.statut === "tiede" ? "⚡ Tiède" : "❄ Froid") + ` · ${step.value}/10`;
+  down();
 }
-
-function ready() {
-  return (lead.prenom_proche || lead.contact_prenom)
-    && (lead.ville_recherche || lead.code_postal)
-    && (lead.delai || lead.budget_mensuel)
-    && (lead.contact_telephone || lead.contact_email);
-}
-
-async function maybeSend() {
-  if (sent || !ready()) return;
-  sent = true;
-  let n = 4, dept = "";
-  try {
-    const loc = lead.ville_recherche || lead.code_postal;
-    const r = await fetch(`${EHPADS_URL}?localite=${encodeURIComponent(loc)}`);
-    if (r.ok) { const d = await r.json(); const list = d.ehpads || []; if (list.length) n = list.length; dept = d.departement || ""; }
-  } catch {}
-  const s = scoreOf();
-  document.getElementById("sent-t").textContent = `Lead envoyé à ${n} résidence${n>1?"s":""} partenaire${n>1?"s":""}`;
-  document.getElementById("sent-s").textContent = `Transmission temps réel${dept ? ` · dép. ${dept}` : ""} · dossier ${s>=7 ? "prioritaire 🔥" : "qualifié"}`;
-  document.getElementById("email-card").innerHTML = emailHtml(n, dept, s);
+async function showSent(step) {
+  await wait(350);
+  document.getElementById("sent-t").textContent = `Lead envoyé à ${step.n} résidences partenaires`;
+  document.getElementById("sent-s").textContent = `Transmission temps réel · département ${step.dept}`;
+  document.getElementById("email-card").innerHTML = `
+    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences</div></div></div>
+    <div class="email-subj">🔥 Nouveau lead chaud · Garches (92) · besoin urgent</div>
+    <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. Contact <b>Sylvie (07 57 99 11 40 si non-consentement)</b>. Recontactez la famille au plus vite.</div>`;
   document.getElementById("lead-sent").classList.add("show"); down();
 }
 
-function emailHtml(n, dept, s) {
-  const v = x => x || "—";
-  return `
-    <div class="email-from">
-      <div class="ef-dot">S</div>
-      <div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${n} résidence${n>1?"s":""}</div></div>
-    </div>
-    <div class="email-subj">${s>=7 ? "🔥 Nouveau lead chaud" : "Nouveau lead qualifié"}${zoneStr() ? " · " + zoneStr() : ""}</div>
-    <div class="email-body">
-      Une famille recherche une place pour <b>${v(procheStr())}</b>, ${v(GIR[lead.niveau_autonomie] || "autonomie à préciser")}${SIT[lead.situation_actuelle] ? ` (${SIT[lead.situation_actuelle]})` : ""}.
-      Localisation <b>${v(zoneStr())}</b>, budget <b>${v(budgetStr())}</b>, délai <b>${v(DELAI[lead.delai])}</b>.
-      Score <b>${s}/10</b> — contact famille : <b>${v(lead.contact_telephone || lead.contact_email)}</b>. Recontactez la famille au plus vite.
-    </div>
-    <button class="email-cta" type="button" onclick="return false">Répondre à la famille maintenant</button>`;
-}
-
-/* ── Scénario rejouable (anonymisé, fictif) — tourne sur la vraie API ── */
-const DEMO_SCRIPT = [
-  "Bonjour… je suis un peu perdue. Ma maman est à l'hôpital et on me dit qu'elle ne pourra pas rentrer chez elle. Je ne sais pas par où commencer.",
-  "Elle s'appelle Jeanne Lefèvre, elle a 84 ans. Elle a fait une chute, et elle a des débuts de troubles de la mémoire.",
-  "À la maison elle ne peut plus rester seule : elle a besoin d'aide pour la toilette et les repas. Elle marche encore un peu avec une canne.",
-  "On cherche du côté de Vincennes, dans le Val-de-Marne, pour que je puisse passer la voir facilement. Une dizaine de kilomètres autour.",
-  "Côté budget c'est compliqué… elle a environ 2000 € de retraite. On peut compléter un peu en famille.",
-  "C'est assez urgent, elle sort de l'hôpital d'ici une dizaine de jours.",
-  "Moi c'est Sophie, sa fille. Vous pouvez me joindre au 06 12 34 56 78 ou sophie.martin@email.fr."
+/* ════════ SCÉNARIO (déterministe) ════════ */
+const SCRIPT = [
+  { t:'bot',  text:"Bonjour, je suis Emma 💛 Ce genre de démarche n'est jamais simple — prenez votre temps. Dites-moi, avec vos mots, ce qui vous amène." },
+  { t:'user', text:"C'est pour ma mère… je n'en peux plus, je culpabilise, mais je n'y arrive plus. 82 ans, et ça se dégrade vite.", fills:[['lien','Fille']] },
+  { t:'bot',  text:"Vous avez fait un **maximum**, bravo — peu de familles s'occupent de leurs parents aussi longtemps. Il y a un moment où ça dépasse ce qu'on peut faire, même pour ceux qu'on aime. Comment va votre maman, en ce moment ?" },
+  { t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
+  { t:'bot',  text:"Ces sorties nocturnes — la déambulation — beaucoup de familles les décrivent. Je ne pose aucun diagnostic, c'est au médecin ; mais il existe des **unités protégées**, pensées pour qu'elle aille et vienne sans danger. A-t-on mis un nom médical là-dessus ?" },
+  { t:'user', text:"Le médecin a parlé d'Alzheimer, rien d'officiel. Et elle refuse, « pas dans un mouroir ».", fills:[['type','Alzheimer / unité protégée']] },
+  { t:'bot',  text:"Réaction très fréquente : l'angoisse de l'inconnu. Et on est loin du « mouroir » — aujourd'hui c'est un **lieu de vie** : jardin, animations, présence. Pour bien la situer, je vous propose une estimation rapide de son autonomie — 6 questions, vous répondez A, B ou C. On y va ?" },
+  { t:'user', text:"Oui, d'accord." },
+  { t:'aggir', items:[
+      ['Cohérence','suit une conversation, se comporte de façon sensée ?','C'],
+      ['Orientation','se repère dans le temps et les lieux ?','C'],
+      ['Toilette','se lave seule (haut et bas) ?','C'],
+      ['Habillage',"s'habille seule ?",'C'],
+      ['Alimentation','mange seule une fois servie ?','B'],
+      ['Déplacements','se lève / marche seule chez elle ?','B'],
+    ], fills:[['autonomie','Dépendante · GIR 2 (estimé)']] },
+  { t:'card', kind:'gir', value:'GIR 2', pct:82, note:"Estimation indicative — le classement officiel sera fixé par l'équipe médico-sociale du département." },
+  { t:'bot',  text:"Fonctions mentales nettement altérées, aide importante pour la toilette et l'habillage, mais elle mange et se déplace encore partiellement → une dépendance importante, **autour d'un GIR 2**. C'est indicatif, mais ça nous donne une vraie base. Vous habitez près d'elle ?" },
+  { t:'user', text:"Oui, à Garches, tout près. Mais attendez — vous êtes qui ? Une commerciale ? On m'a déjà appelée trois fois.", fills:[['zone','Garches (92)']] },
+  { t:'bot',  text:"Question légitime. Je suis Emma, la conseillère **IA de SmartSeniors** : gratuit, indépendant, liée à aucune résidence. Je comprends, je transmets aux résidences adaptées — et **c'est vous qui gardez la main**. On reste sur Garches ; dans quel rayon ?" },
+  { t:'user', text:"Le plus près possible, 5 km, j'y vais tous les jours.", fills:[['zone','Garches (92) · 5 km']] },
+  { t:'bot',  text:"Parfait. Franchement, sur le budget — ce qui angoisse tout le monde : quels sont les revenus de votre maman ?" },
+  { t:'user', text:"1 600 € de retraite. À 3-4 000 €/mois, c'est mort." },
+  { t:'bot',  text:"Le prix affiché n'est jamais ce qu'on paie. Hébergement + dépendance ; avec un GIR élevé, l'**APA** réduit la dépendance à un ticket modérateur (~4-5 €/j), + le **crédit d'impôt de 25 %**. Un peu d'épargne en complément ?" },
+  { t:'user', text:"Un livret, ~15 000 €. Locataire." },
+  { t:'bot',  text:"15 000 €, c'est une vraie marge : **elle a le temps de voir venir**, c'est finançable. C'est urgent, ou vous avez un peu de temps ?", fills:[['budget',"Retraite 1 600 € + épargne ~15 000 € · APA + crédit d'impôt"]] },
+  { t:'user', text:"Urgent. Je suis à bout, et avec les sorties la nuit, j'ai trop peur." },
+  { t:'bot',  text:"Vous avez raison de ne pas attendre.", fills:[['delai','Urgent']] },
+  { t:'score', value:9, statut:'chaud' },
+  { t:'bot',  text:"Une question importante : **souhaitez-vous que les résidences vous recontactent directement ?**" },
+  { t:'user', text:"Oui, qu'elles m'appellent, c'est plus simple." },
+  { t:'bot',  text:"Parfait, **elles vous appelleront pour une prise de contact.**", fills:[['consent','Oui — résidences recontactent directement']] },
+  { t:'bot',  text:"On crée le dossier de votre maman. Son nom et prénom ?" },
+  { t:'user', text:"Jeanne Belkacem." },
+  { t:'bot',  text:"Merci. Sa date de naissance ? *(dossier d'admission + APA)*" },
+  { t:'user', text:"Le 12 mars 1942.", fills:[['proche','Jeanne Belkacem · née le 12/03/1942']] },
+  { t:'bot',  text:"Son adresse — rue, code postal, ville ? C'est ce qui détermine le bon Conseil départemental pour l'APA." },
+  { t:'user', text:"8 rue de Buzenval, 92380 Garches.", fills:[['adresse','8 rue de Buzenval · 92380 Garches']] },
+  { t:'bot',  text:"Enfin, pour **vous** joindre — pas votre maman : votre portable et un e-mail pour le récapitulatif ?" },
+  { t:'user', text:"06 24 18 52 40, sylvie.belkacem@gmail.com.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 · sylvie.belkacem@gmail.com']] },
+  { t:'bot',  text:"Parfait, le dossier de Jeanne est créé. Pendant que les résidences vous répondent, **je vous prépare déjà tout** :" },
+  { t:'card', kind:'pdf', titre:"Dossier d'admission — Jeanne Belkacem", sous:"Pré-rempli (identité, adresse, contact) · reste : votre signature + le volet médical (médecin)." },
+  { t:'bot',  text:"Et une bonne nouvelle côté budget : une résidence partenaire de Garches, **L'Empereur**, propose en ce moment un **tarif avantageux**." },
+  { t:'card', kind:'promo', residence:"EHPAD L'Empereur — Garches", prix:"110 €/jour", detail:"Offre en cours (15 jours) · au lieu de ~145 €/jour" },
+  { t:'card', kind:'video', titre:"Visite vidéo — EHPAD L'Empereur (Garches)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
+  { t:'card', kind:'itineraire', from:"8 rue de Buzenval, Garches", to:"L'Empereur (Garches)", detail:"≈ 7 min à pied · ou gare Garches–Marnes-la-Coquette (Transilien L) à 5 min" },
+  { t:'bot',  text:"Vous n'avez plus à courir partout : les résidences vous rappellent, et **tout est déjà prêt** de votre côté. Et surtout, Sylvie : jamais une résidence ne pourra vous remplacer, vous. 💛" },
+  { t:'sent', n:5, dept:'92' },
 ];
 
-async function playDemo() {
-  if (busy) return;
-  resetAll();
-  setMode('demo');
-  replayBtn.disabled = true; sendBtn.disabled = true; input.disabled = true;
+async function playScript() {
+  if (running) return;
+  running = true; setMode('demo'); resetDossier(); chatBox.innerHTML = "";
+  replayBtn.disabled = true; input.disabled = true; sendBtn.disabled = true;
   document.getElementById("mode-note").textContent = "Scénario en cours…";
-  await sleep(500);
-  for (const msg of DEMO_SCRIPT) { await sendMessage(msg); await sleep(1100); }
-  replayBtn.disabled = false; input.disabled = false;
-  document.getElementById("mode-note").textContent = "Scénario terminé — relancez ou passez en Live";
+  await wait(400);
+  for (const step of SCRIPT) {
+    if (!running) return;
+    if (step.t === 'bot') await botSay(step.text);
+    else if (step.t === 'user') await userSay(step.text);
+    else if (step.t === 'aggir') await runAggir(step.items);
+    else if (step.t === 'card') await showCard(step);
+    else if (step.t === 'score') await showScore(step);
+    else if (step.t === 'sent') await showSent(step);
+    if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
+    await wait(step.t === 'bot' ? 320 : 220);
+  }
+  replayBtn.disabled = false; running = false;
+  document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
 }
 
-function resetAll() {
-  history = []; lead = {}; sent = false;
-  chatBox.innerHTML = "";
-  document.getElementById("lead-sent").classList.remove("show");
-  renderFieldsInit(); renderLead();
-  const b = row("bot");
-  b.innerHTML = render("Bonjour, je suis **Emma** 💛 Je vous accompagne à votre rythme. Pour commencer, dites-moi simplement : **comment va votre maman ou votre papa en ce moment ?**");
+/* ════════ MODE LIVE (vrai pipeline) ════════ */
+const LIVE = { history: [], lead: {} };
+const LIENL = { parent:'Enfant (fils/fille)', fils_fille:'Fils / Fille', conjoint:'Conjoint(e)', grand_parent:'Petit-enfant', moi_meme:'Pour lui/elle-même', ass_sociale:'Assistant(e) social(e)', autre:'Proche' };
+const GIRL = { autonome:'Autonome (GIR 5-6)', semi_dependant:'Semi-dépendant (GIR 3-4)', tres_dependant:'Très dépendant (GIR 1-2)' };
+const SITL = { domicile:'À domicile', famille:'Chez la famille', hopital:'🏥 Hospitalisé(e)', clinique:'🏥 Clinique / SSR', autre_residence:'Autre résidence', autre:'Autre' };
+const TYPEL = { ehpad_medicalise:'EHPAD médicalisé', alzheimer:'Unité Alzheimer', autonomie:'Résidence Autonomie', senior:'Résidence Sénior' };
+const DELL = { urgent:'⚡ Urgent', '1_mois':'Sous 1 mois', '1_3_mois':'1 à 3 mois', '3_6_mois':'3 à 6 mois', '6_mois_plus':'+ 6 mois' };
+
+async function liveSend(text) {
+  if (!text || running) return;
+  running = true; sendBtn.disabled = true;
+  const ur = rowEl("user"); const ub = document.createElement("div"); ub.className = "cbub"; ub.textContent = text; ur.appendChild(ub); chatBox.appendChild(ur);
+  LIVE.history.push({ role:"user", content:text }); down();
+  const tk = rowEl("bot"); const tt = document.createElement("div"); tt.className = "cthink"; tt.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(tt); chatBox.appendChild(tk); down();
+  let full = "", bb = null;
+  try {
+    const resp = await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ message:text, history:LIVE.history.slice(0,-1), funnel:LIVE.lead }) });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    tk.remove(); const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r);
+    const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+    while (true) { const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream:true }); const lines = buf.split("\n"); buf = lines.pop();
+      for (const line of lines) { if (!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if (d === "[DONE]") continue;
+        try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
+    bb.innerHTML = mdBold(full);
+  } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = "Désolé, une erreur est survenue."; }
+  if (full) LIVE.history.push({ role:"assistant", content:full });
+  running = false; sendBtn.disabled = false; down();
+  liveExtract();
+}
+async function liveExtract() {
+  try {
+    const r = await fetch(EXTRACT_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ history: LIVE.history }) });
+    if (!r.ok) return; const { lead } = await r.json(); LIVE.lead = { ...LIVE.lead, ...lead }; const l = LIVE.lead;
+    const set = (k, v) => { if (v) setField(k, v); };
+    if (l.lien_proche) set('lien', LIENL[l.lien_proche] || l.lien_proche);
+    const nom = [l.prenom_proche, l.nom_proche].filter(Boolean).join(" "); const dob = l.date_naissance_proche ? ` · né(e) ${l.date_naissance_proche}` : (l.age_proche ? ` · ${l.age_proche} ans` : "");
+    if (nom) set('proche', nom + dob);
+    set('situation', SITL[l.situation_actuelle]); set('autonomie', GIRL[l.niveau_autonomie]); set('type', TYPEL[l.type_residence]);
+    const zone = l.ville_recherche || l.code_postal; if (zone) set('zone', zone + (l.rayon_km ? ` · ${l.rayon_km} km` : ""));
+    set('budget', l.budget_mensuel); set('delai', DELL[l.delai]);
+    const c = [l.contact_prenom, l.contact_nom].filter(Boolean).join(" "); const co = [c, l.contact_telephone, l.contact_email].filter(Boolean).join(" · "); if (co) set('contact', co);
+  } catch {}
 }
 
-/* ── Mode Démo ⇄ Live ── */
+/* ── Modes & wiring ── */
 function setMode(m) {
   mode = m;
-  document.querySelectorAll('#mode-seg button').forEach(b => {
-    const on = b.dataset.mode === m;
-    b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
-  });
+  document.querySelectorAll('#mode-seg button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  input.disabled = (m !== 'live'); sendBtn.disabled = (m !== 'live');
 }
 document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('click', () => {
   const m = b.dataset.mode;
-  if (m === 'demo') { playDemo(); }
-  else { if (busy) return; setMode('live'); resetAll(); document.getElementById("mode-note").textContent = "Mode live — Laurent tape librement"; input.focus(); }
+  if (m === 'demo') { playScript(); }
+  else { if (running) return; setMode('live'); LIVE.history = []; LIVE.lead = {}; resetDossier(); chatBox.innerHTML = "";
+    const r = rowEl("bot"); const bb = document.createElement("div"); bb.className = "cbub"; bb.innerHTML = mdBold("Bonjour, je suis **Emma** 💛 Dites-moi, avec vos mots, ce qui vous amène."); r.appendChild(bb); chatBox.appendChild(r);
+    document.getElementById("mode-note").textContent = "Mode Live — Laurent tape librement"; input.focus(); }
 }));
-
-replayBtn.addEventListener("click", playDemo);
-form.addEventListener("submit", e => { e.preventDefault(); const t = input.value.trim(); if (t) { input.value = ""; input.style.height = "auto"; sendMessage(t); } });
+replayBtn.addEventListener("click", playScript);
+form.addEventListener("submit", e => { e.preventDefault(); if (mode !== 'live') return; const t = input.value.trim(); if (t) { input.value = ""; input.style.height = "auto"; liveSend(t); } });
 input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 90) + "px"; });
 
-/* ── Init : on lance directement la démo scriptée ── */
+/* ── Init : autoplay du scénario ── */
 renderFieldsInit();
-resetAll();
-playDemo();
+playScript();
 </script>
 </body>
 </html>
