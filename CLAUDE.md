@@ -36,6 +36,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/confidentialite.html` | Page RGPD / mentions |
 | `pages/manifest.json`, `pages/sw.js`, `pages/icon-*.png` | PWA (installable, offline shell) |
 | `data/ehpads.json` + `data/ehpads.schema.json` | Source de vérité des EHPAD partenaires (seedés en D1) |
+| `data/documents.json` + `data/documents.schema.json` | Bibliothèque des documents qu'Emma génère pré-remplis (admission, médical, AGGIR, APA…) — mappés aux champs du lead |
 | `scripts/seed.mjs`, `scripts/import-ehpads.mjs`, `scripts/gsheet-to-api.gs` | Seed D1 + import EHPAD |
 | `schema.sql` | Schéma D1 : tables `leads` (riche) et `ehpads` |
 | `wrangler.toml` | Config Cloudflare Pages / D1 |

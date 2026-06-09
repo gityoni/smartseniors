@@ -25,11 +25,12 @@
 
 **Outillage biblio (apprentissage Emma) :**
 - [x] Notebook Colab `notebooks/emma_transcription_biblio.ipynb` — transcription Whisper (+ diarization) → fiche conseillère (Claude `claude-opus-4-8`, tool use + prompt caching) → playbook Emma
+- [x] Variante **Drive-persistante** `notebooks/emma_transcription_biblio_drive.ipynb` — `audio/`+`transcripts/`+`fiches/` persistés sur Google Drive ; transcription & extraction **idempotentes** (ne retraite que les nouveaux appels) ; playbook régénéré sur **tout** le corpus accumulé
 - [x] Biblio `knowledge/` — transcripts (raw ignoré RGPD / clean) + `fiches/` + `emma-playbook.md` + méthodologie
 
 **Démo :**
 - [ ] **Récupérer le transcript** (speech-to-text de l'appel 25 min Alex ↔ famille, labels locuteurs) — via le notebook ci-dessus
-- [ ] **Phase 1 — Scénario & calage** : reconstituer le scénario de démo à partir du transcript ; caler la phase découverte d'Emma sur le déroulé réel (santé / lieu / pathologie / cadre familial / finances)
+- [~] **Phase 1 — Scénario & calage** : **prompt d'Emma calé sur 3 vrais appels** (playbook v2 régénéré via Colab → objections APA/ASH, clarification de rôle, budget en 3 blocs, nouvelles phrases d'empathie & pièges intégrés dans `chat.js` ; `knowledge/emma-playbook.md` mis à jour). Reste : reconstituer le scénario de démo à partir de ces appels. ⚠️ Fiches JSON non committées (anonymisation Colab à durcir : lieux/hôpitaux résiduels)
 - [x] **Phase 2 — Extraction conversationnelle** : `pages/functions/api/extract.js` — tool use (haiku-4-5) qui parse la conversation → champs du lead (identité : nom/prénom/date de naissance/CP+ville ; solution : délai/ville+rayon/budget)
 - [x] **Phase 2 — Back-office « lead en direct »** : `pages/demo.html` — panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
 - [x] **Mode démo scripté** : bouton « ▶ Rejouer la démo » dans `demo.html` (scénario famille fictif rejoué sur la vraie API)
@@ -40,9 +41,12 @@
 
 > Idée : proposer au téléchargement des **documents officiels pré-remplis** avec les infos déjà collectées par le funnel/extraction (renforce la véracité du lead + valeur perçue famille).
 > Exemples : **dossier APA en résidence**, **dossier APA à domicile**, **simulation Grille AGGIR** (GIR), **liste des adresses des conseils départementaux (CR)** où envoyer le dossier, dossier d'admission EHPAD.
+- [x] **Bibliothèque catalogue** : `data/documents.json` + `data/documents.schema.json` — 8 documents (admission, médical, estimation AGGIR, APA, adresses CD, aide-mémoires visite/entrée, +plan métro flaggé) mappés aux **champs du lead**, avec garde-fous (médical = médecin uniquement, GIR = estimation indicative)
 - [ ] Brancher sur les champs déjà collectés (GIR, situation, date de naissance, ville proche → conseil départemental, etc.)
 - [ ] Remplace/enrichit les boutons docs actuels de `index.html` (pane résultats : `dl-visite` / `dl-dossier` / `dl-entree`) qui ne font aujourd'hui que déclencher une réponse d'Emma
-- [ ] Génération PDF pré-rempli (côté edge function ou client)
+- [ ] **Moteur de génération** : approche retenue = **HTML→PDF pré-rempli** (templates maison, indépendant du format source) ; AcroForm/pdf-lib en option ciblée. À implémenter (client ou edge function).
+- [ ] Constituer la source « adresses des Conseils départementaux par département » (pour le doc APA)
+- [ ] Décider quels PDF sources committer (officiels publics vierges) vs garder en réf. seule (exemples médicaux → prudence RGPD)
 
 ## 🔴 À faire — infra / prod
 
