@@ -1963,7 +1963,7 @@
       "telephone": "01 81 93 32 00",
       "email": "malik.nait-djoudi@casabarbara.com",
       "places_disponibles": null,
-      "tarif_jour": 960
+      "tarif_jour": null
     },
     {
       "nom": "EHPAD BICETRE",
@@ -2401,7 +2401,7 @@
       "telephone": "01 40 92 88 88",
       "email": "michel.padilla@villabeausoleil.com",
       "places_disponibles": null,
-      "tarif_jour": 1583
+      "tarif_jour": null
     },
     {
       "nom": "LA BRUYERE",
@@ -2434,7 +2434,7 @@
       "telephone": "01 43 93 31 10",
       "email": "m.moussa@orpea.net",
       "places_disponibles": null,
-      "tarif_jour": 27
+      "tarif_jour": null
     },
     {
       "nom": "LES PINS",
@@ -2445,7 +2445,7 @@
       "telephone": "09 74 13 34 01",
       "email": "pins.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 974
+      "tarif_jour": null
     },
     {
       "nom": "LE BOCAGE",
@@ -2456,7 +2456,7 @@
       "telephone": "01 49 44 76 00",
       "email": "bocage.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 30
+      "tarif_jour": null
     },
     {
       "nom": "LE PARC",
@@ -2467,7 +2467,7 @@
       "telephone": "01 46 45 71 82",
       "email": "lf.issy.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 31
+      "tarif_jour": null
     },
     {
       "nom": "VILLA BORGHESE",
@@ -2478,7 +2478,7 @@
       "telephone": "01 75 61 88 10",
       "email": "direction.ehpad@ehpad-villa-borghese.fr",
       "places_disponibles": null,
-      "tarif_jour": 26
+      "tarif_jour": null
     },
     {
       "nom": "RABELAIS",
@@ -2609,7 +2609,7 @@
       "departement": "78",
       "telephone": "01 30 63 91 62",
       "places_disponibles": null,
-      "tarif_jour": 700.5
+      "tarif_jour": null
     },
     {
       "nom": "LA VALLEE AUX RENARDS",
@@ -2620,7 +2620,7 @@
       "telephone": "01 43 50 98 43",
       "email": "vallee-aux-renards.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 663
+      "tarif_jour": null
     },
     {
       "nom": "LE CHENE ROUGE",
@@ -2631,7 +2631,7 @@
       "telephone": "01 46 87 59 17",
       "email": "chene-rouge.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 605
+      "tarif_jour": null
     },
     {
       "nom": "MARTIGNON",
@@ -2641,7 +2641,7 @@
       "departement": "92",
       "telephone": "01 47 49 68 34",
       "places_disponibles": null,
-      "tarif_jour": 4.4
+      "tarif_jour": null
     },
     {
       "nom": "LE CORBUSIER",
@@ -2696,7 +2696,7 @@
       "telephone": "01 61 04 71 00",
       "email": "fermettes.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 900
+      "tarif_jour": null
     },
     {
       "nom": "LE CLOS MONTEBELLO MAISONS LAFFITTE",
@@ -2707,7 +2707,7 @@
       "telephone": "01 30 08 16 10",
       "email": "dvandervliet@jardins-arcadie.fr",
       "places_disponibles": null,
-      "tarif_jour": 1800
+      "tarif_jour": null
     },
     {
       "nom": "Les Portiques",
@@ -2718,7 +2718,7 @@
       "telephone": "01 30 53 05 25",
       "email": "portiques.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 791
+      "tarif_jour": null
     },
     {
       "nom": "LES TEMPLITUDES OSNY",
@@ -2729,7 +2729,7 @@
       "telephone": "01 30 17 48 00",
       "email": "dir-templitudes-osny@domusvi.com",
       "places_disponibles": null,
-      "tarif_jour": 995
+      "tarif_jour": null
     },
     {
       "nom": "ST ANTOINE DE PADOUE",
@@ -2762,7 +2762,7 @@
       "telephone": "01 41 88 12 00",
       "email": "emmanuelle.demaret@emeis.com",
       "places_disponibles": null,
-      "tarif_jour": 980
+      "tarif_jour": null
     },
     {
       "nom": "LA MAISON DE L'ERABLE ARGENTE",
@@ -2850,7 +2850,7 @@
       "telephone": "07 50 62 73 05",
       "email": "rueilmalmaison.aca@jardins-arcadie.fr",
       "places_disponibles": null,
-      "tarif_jour": 1500
+      "tarif_jour": null
     },
     {
       "nom": "LES PIVOINES",
@@ -2861,7 +2861,7 @@
       "telephone": "01 34 28 83 41",
       "email": "pivoines.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 891
+      "tarif_jour": null
     },
     {
       "nom": "LE BEGUINAGE",
@@ -2872,7 +2872,7 @@
       "telephone": "01 60 76 87 00",
       "email": "beguinage.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 799
+      "tarif_jour": null
     },
     {
       "nom": "LE PARC",
@@ -3059,7 +3059,7 @@
       "telephone": "01 46 56 18 72",
       "email": "vanne.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 1080
+      "tarif_jour": null
     },
     {
       "nom": "VILLA IMPERATRICE",
@@ -3169,7 +3169,7 @@
       "telephone": "02 38 49 72 00",
       "email": "cigogne.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 848
+      "tarif_jour": null
     },
     {
       "nom": "Résidence Les Mésanges",
@@ -3180,7 +3180,7 @@
       "telephone": "01 81 84 02 48",
       "email": "mesanges.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 773
+      "tarif_jour": null
     },
     {
       "nom": "Résidence Le Béguinage",
@@ -3191,7 +3191,7 @@
       "telephone": "01 60 76 87 00",
       "email": "beguinage.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 799
+      "tarif_jour": null
     },
     {
       "nom": "LE CHAMP DE L'ORMEAU",
@@ -3290,7 +3290,7 @@
       "telephone": "05 57 81 10 60",
       "email": "dir-templitudes-bordeaux@domusvi.com",
       "places_disponibles": null,
-      "tarif_jour": 1100
+      "tarif_jour": null
     },
     {
       "nom": "Les Templitudes \"Les Jardins d'Occitanie\"",
@@ -3301,7 +3301,7 @@
       "telephone": "05 62 56 66 00",
       "email": "templitudes-tarbes@domusvi.com",
       "places_disponibles": null,
-      "tarif_jour": 1585
+      "tarif_jour": null
     },
     {
       "nom": "Villa Beausoleil La Rochelle",
@@ -3312,7 +3312,7 @@
       "telephone": "05 17 81 07 07",
       "email": "emmanuelle.janvier@villabeausoleil.com",
       "places_disponibles": null,
-      "tarif_jour": 1420
+      "tarif_jour": null
     },
     {
       "nom": "Les Amandiers",
@@ -3730,7 +3730,7 @@
       "telephone": "01 55 25 56 00",
       "email": "orteaux.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 1200
+      "tarif_jour": null
     },
     {
       "nom": "Résidence Les heures Claires",
@@ -3741,7 +3741,7 @@
       "telephone": "01 47 71 09 11",
       "email": "heures-claires.direction@arpavie.fr",
       "places_disponibles": null,
-      "tarif_jour": 1022
+      "tarif_jour": null
     },
     {
       "nom": "LES JARDINS DE L'AUNETTE",
@@ -3829,7 +3829,7 @@
       "telephone": "01 41 74 69 04",
       "email": "diradj-templitudes-vincennes@domusvi.com",
       "places_disponibles": null,
-      "tarif_jour": 1452
+      "tarif_jour": null
     },
     {
       "nom": "OBEO - MONTREUIL",
@@ -3840,7 +3840,7 @@
       "telephone": "01 76 36 06 86",
       "email": "mp.tate@obeo-residences.com",
       "places_disponibles": null,
-      "tarif_jour": 1618
+      "tarif_jour": null
     }
   ]
 }
