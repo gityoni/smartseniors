@@ -24,8 +24,8 @@ const LEAD_TOOL = {
       date_naissance_proche: { type: "string",  description: "Date de naissance AAAA-MM-JJ, uniquement si donnée" },
       age_proche:            { type: "integer", description: "Âge du senior si donné" },
       genre_proche:          { type: "string",  enum: ["homme", "femme"] },
-      lien_proche:           { type: "string",  enum: ["fils_fille", "conjoint", "autre"], description: "Lien entre le contact famille et le senior" },
-      situation_actuelle:    { type: "string",  enum: ["domicile", "domicile_aide", "hopital", "clinique", "autre_ehpad"] },
+      lien_proche:           { type: "string",  enum: ["parent", "conjoint", "grand_parent", "moi_meme", "ass_sociale", "autre"], description: "Lien du contact avec le senior : parent (cherche pour son père/mère), conjoint, grand_parent (cherche pour un grand-parent), moi_meme, ass_sociale, autre" },
+      situation_actuelle:    { type: "string",  enum: ["domicile", "famille", "hopital", "autre_residence", "autre"], description: "Lieu actuel du senior : domicile, famille (chez un proche), hopital (hospitalisé OU en SSR/clinique), autre_residence (déjà en EHPAD/résidence), autre" },
       niveau_autonomie:      { type: "string",  enum: ["autonome", "semi_dependant", "tres_dependant"], description: "tres_dependant si troubles cognitifs marqués / aide totale ; semi_dependant si aide partielle" },
       type_residence:        { type: "string",  enum: ["ehpad_medicalise", "alzheimer", "autonomie", "senior"] },
       ville_recherche:       { type: "string",  description: "Ville ou secteur où chercher l'établissement" },
@@ -48,7 +48,7 @@ Règles strictes :
 - N'invente jamais. Ne remplis un champ que si l'information est clairement dite.
 - Mappe vers les valeurs autorisées (enums).
 - delai = urgent si "dès que possible", "sortie d'hôpital imminente", ou moins de 15 jours.
-- situation_actuelle = hopital si la personne est hospitalisée ; clinique pour un SSR/soins de suite.
+- situation_actuelle = hopital si la personne est hospitalisée OU en SSR/clinique/soins de suite ; autre_residence si déjà en EHPAD/résidence ; famille si hébergée chez un proche.
 - niveau_autonomie : déduis-le de la description (troubles cognitifs, aide toilette/repas, mobilité).
 Appelle TOUJOURS l'outil maj_lead.`;
 

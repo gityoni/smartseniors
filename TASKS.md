@@ -16,6 +16,7 @@
 - `CLAUDE.md` — mémoire projet à jour (as-built + chantier démo)
 - D1 database créée : `smartseniors-db`
 - Déploiement Cloudflare Pages — prod live ✅
+- **Cerveau Emma — quick wins** : `chat.js` passé en **`claude-opus-4-8`** (+ garde anti-fuite de raisonnement) · enums `extract.js` harmonisés sur le canonical schéma/funnel (`lien_proche`, `situation_actuelle`) · **caching diagnostiqué** : no-op sur Opus tant que le prompt < 4096 tok (~2130 actuellement) → s'activera à l'enrichissement playbook
 
 ## 🚧 En cours — Démo partenaire (présentation prospect)
 
@@ -45,7 +46,7 @@
 
 ## 🔴 À faire — infra / prod
 
-- [ ] **Rafraîchir `CLAUDE.md`** : design system (Aurore, plus beige/brun), nouveaux fichiers CSS, modèle LLM (`claude-opus-4-6` vs `-4-8` à trancher)
+- [ ] **Rafraîchir `CLAUDE.md`** : design system (Aurore, plus beige/brun) + nouveaux fichiers CSS *(modèle LLM ✅ tranché : chat `claude-opus-4-8`, extraction `claude-haiku-4-5`)*
 
 - Vérifier le binding D1 `DB` et `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Functions / Environment variables)
 - Configurer `BACKOFFICE_EMAIL` (sinon défaut `leads@smartseniors.fr`)
