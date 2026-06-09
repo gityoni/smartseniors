@@ -122,6 +122,21 @@
       "guardrail": "Nécessite la station/coordonnées par résidence (à ajouter aux données EHPAD) + un jeu de données métro IDF, ou un lien d'itinéraire externe (RATP / Citymapper / Maps).",
       "fichier_source": null,
       "actif": true
+    },
+    {
+      "id": "video_residence",
+      "titre": "Visite vidéo d'une résidence",
+      "categorie": "ressource",
+      "description": "Une vidéo de présentation d'une résidence partenaire du secteur, pour aider la famille à se projeter avant la visite.",
+      "source": "Vidéothèque des résidences partenaires (à constituer avec Laurent)",
+      "rempli_par": "famille",
+      "emma_prefill": "complet",
+      "mode_generation": "genere_depuis_donnees",
+      "champs_lead": ["ville_recherche", "type_residence"],
+      "champs_a_demander": [],
+      "guardrail": "Nécessite une vidéothèque par résidence. Respecter le no-naming tant que la mise en relation n'est pas validée par la famille.",
+      "fichier_source": null,
+      "actif": true
     }
   ]
 }
