@@ -77,6 +77,12 @@ export async function onRequestPost(context) {
   const history = Array.isArray(body.history) ? body.history : [];
   if (history.length === 0) return jsonResponse({ lead: {} }, 200, cors);
 
+  // Garde explicite : erreur lisible si la clé n'est pas configurée (Preview/Prod).
+  if (!env.ANTHROPIC_API_KEY) {
+    console.error("ANTHROPIC_API_KEY manquante dans l'environnement Cloudflare.");
+    return jsonResponse({ error: "Service IA non configuré (ANTHROPIC_API_KEY manquante)." }, 503, cors);
+  }
+
   const transcript = history
     .map((h) => `${h.role === "assistant" ? "Emma" : "Famille"}: ${String(h.content)}`)
     .join("\n");
