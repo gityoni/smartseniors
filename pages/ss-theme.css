@@ -1,0 +1,175 @@
+/* ============================================================
+   SmartSeniors — Thème prototype (landing + conversation)
+   Palette « Aube » — lumineuse, espoir. 3 directions via [data-direction].
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+.ss-root {
+  --font: 'Nunito', system-ui, sans-serif;
+  --font-display: var(--font);
+
+  /* accent (surchargé par le tweak Accent) */
+  --c-accent:  #15B79E;
+  --c-accent2: #5BA8F5;
+  --grad: linear-gradient(135deg, var(--c-accent) 0%, var(--c-accent2) 100%);
+
+  --c-brown:  #5E7E78;
+  --c-header: #0E3B33;
+  --c-online: #6ee7b7;
+
+  /* joy palette */
+  --joy1:#FF6B6B; --joy2:#4ECDC4; --joy3:#FFD93D;
+  --joy4:#A855F7; --joy5:#3B82F6; --joy6:#F97316;
+
+  font-family: var(--font);
+  color: var(--c-ink);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+}
+.ss-root *, .ss-root *::before, .ss-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ───────────── TYPO (tweak police) ───────────── */
+.ss-root[data-font="nunito"]    { --font: 'Nunito', system-ui, sans-serif; --font-display: 'Nunito', system-ui, sans-serif; }
+.ss-hero h1, .ss-sec-title, .ss-ctaband-inner h2 { font-family: var(--font-display); }
+
+/* ───────────── DIRECTION : AURORE (doux, organique, aéré) ───────────── */
+.ss-root[data-direction="aurore"] {
+  --c-bg:        #F1F7F5;
+  --c-bg-alt:    #E4F0EC;
+  --c-surface:   #FFFFFF;
+  --c-ink:       #16302B;
+  --c-ink-soft:  #5E7E78;
+  --c-line:      rgba(94,126,120,.14);
+  --radius-card: 28px;
+  --radius-pill: 999px;
+  --radius-btn:  999px;
+  --shadow-card: 0 18px 50px rgba(14,59,51,.10);
+  --shadow-soft: 0 6px 22px rgba(14,59,51,.08);
+  --hero-ink:    #0E3B33;
+  --hero-sub:    #5E7E78;
+}
+
+/* ───────────── DIRECTION : ATELIER (éditorial, contrasté, premium) ───────────── */
+.ss-root[data-direction="atelier"] {
+  --c-bg:        #E7F0EC;
+  --c-bg-alt:    #D8E8E2;
+  --c-surface:   #F4FBF9;
+  --c-ink:       #10302A;
+  --c-ink-soft:  #4E6862;
+  --c-line:      rgba(14,59,51,.18);
+  --radius-card: 10px;
+  --radius-pill: 8px;
+  --radius-btn:  8px;
+  --shadow-card: 0 1px 0 rgba(14,59,51,.05);
+  --shadow-soft: 0 2px 0 rgba(14,59,51,.05);
+  --hero-ink:    #F1F7F5;
+  --hero-sub:    rgba(241,247,245,.66);
+}
+
+/* ───────────── DIRECTION : SOLSTICE (graphique, joyeux, énergique) ───────────── */
+.ss-root[data-direction="solstice"] {
+  --c-bg:        #E9F4F0;
+  --c-bg-alt:    #DCEEE8;
+  --c-surface:   #FFFFFF;
+  --c-ink:       #143029;
+  --c-ink-soft:  #5E7E78;
+  --c-line:      rgba(94,126,120,.16);
+  --radius-card: 22px;
+  --radius-pill: 16px;
+  --radius-btn:  16px;
+  --shadow-card: 0 14px 40px rgba(14,59,51,.12);
+  --shadow-soft: 0 8px 24px rgba(14,59,51,.10);
+  --hero-ink:    #143029;
+  --hero-sub:    #4E6862;
+}
+
+/* ════════════════════ PRIMITIVES ════════════════════ */
+.ss-root a { color: inherit; text-decoration: none; }
+
+.ss-btn {
+  font-family: var(--font); font-weight: 800; cursor: pointer;
+  border: none; border-radius: var(--radius-btn);
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  transition: transform .18s, box-shadow .18s, opacity .18s, background .2s;
+  white-space: nowrap;
+}
+.ss-btn-lg { font-size: 1.05rem; padding: 16px 34px; }
+.ss-btn-md { font-size: .92rem; padding: 11px 22px; }
+.ss-btn-primary { background: var(--grad); color: #fff; box-shadow: 0 8px 28px rgba(21,183,158,.40); }
+.ss-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 38px rgba(21,183,158,.52); }
+.ss-btn-primary svg { width: 19px; height: 19px; }
+.ss-btn-ghost { background: transparent; color: var(--c-accent); border: 1.5px solid var(--c-line); }
+.ss-root[data-direction="atelier"] .ss-btn-ghost { border-color: var(--c-ink); color: var(--c-ink); }
+.ss-btn-ghost:hover { background: rgba(21,183,158,.08); }
+.ss-btn-ondark { background: rgba(255,255,255,.10); color: #F1F7F5; border: 1.5px solid rgba(241,247,245,.28); }
+.ss-btn-ondark:hover { background: rgba(255,255,255,.18); }
+
+.ss-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 999px; padding: 6px 15px;
+  font-size: .76rem; font-weight: 800; letter-spacing: .03em;
+}
+.ss-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-online); flex-shrink: 0; animation: ss-pulse 2.2s infinite; }
+@keyframes ss-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+
+.ss-kicker {
+  font-size: .74rem; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--c-accent);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.ss-root[data-direction="atelier"] .ss-kicker::before {
+  content: ''; width: 28px; height: 1.5px; background: var(--c-accent);
+}
+
+/* ════════════════════ TOP BAR ════════════════════ */
+.ss-topbar {
+  display: flex; align-items: center; gap: 18px;
+  padding: 16px clamp(18px, 5vw, 56px);
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in srgb, var(--c-bg) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--c-line);
+}
+.ss-root[data-direction="atelier"] .ss-topbar { border-bottom: 1.5px solid var(--c-ink); background: var(--c-bg); }
+
+.wordmark { font-size: 1.5rem; font-weight: 900; letter-spacing: -.5px; line-height: 1; display: flex; align-items: baseline; color: var(--c-header); }
+.wordmark .wm-accent { color: var(--c-accent); }
+.wm-chi { position: relative; display: inline-block; color: var(--c-accent); }
+.wm-chip { position: absolute; top: -.30em; left: 50%; transform: translateX(-50%); width: .50em; height: .50em; }
+.ss-topbar .wm-sub { font-size: .68rem; color: var(--c-ink-soft); font-weight: 600; margin-top: 2px; }
+
+.ss-nav { margin-left: auto; display: flex; align-items: center; gap: clamp(8px,2vw,22px); }
+.ss-nav-link { font-size: .86rem; font-weight: 700; color: var(--c-ink-soft); cursor: pointer; transition: color .18s; }
+.ss-nav-link:hover, .ss-nav-link.active { color: var(--c-accent); }
+.ss-nav-seg { display: flex; gap: 4px; background: rgba(94,126,120,.10); border-radius: 999px; padding: 4px; }
+.ss-root[data-direction="atelier"] .ss-nav-seg { border-radius: 6px; }
+.ss-nav-seg button {
+  font-family: var(--font); font-size: .82rem; font-weight: 800; cursor: pointer;
+  border: none; background: transparent; color: var(--c-ink-soft);
+  padding: 7px 16px; border-radius: 999px; transition: all .18s;
+}
+.ss-root[data-direction="atelier"] .ss-nav-seg button { border-radius: 5px; }
+.ss-nav-seg button.active { background: var(--c-surface); color: var(--c-accent); box-shadow: var(--shadow-soft); }
+
+/* ════════════════════ section scaffolding ════════════════════ */
+.ss-section { padding: clamp(48px,8vw,104px) clamp(18px,5vw,56px); }
+.ss-wrap { max-width: 1180px; margin: 0 auto; }
+.ss-sec-title { font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 900; color: var(--c-ink); line-height: 1.12; letter-spacing: -.01em; margin: 12px 0; text-wrap: balance; }
+.ss-sec-lede { font-size: 1.06rem; color: var(--c-ink-soft); line-height: 1.6; font-weight: 600; max-width: 56ch; text-wrap: pretty; }
+
+/* ════════════════════ CARD ════════════════════ */
+.ss-card {
+  background: var(--c-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--c-line);
+}
+.ss-root[data-direction="atelier"] .ss-card { border: 1.5px solid var(--c-ink); }
+.ss-root[data-direction="solstice"] .ss-card { border: 2px solid var(--c-ink); box-shadow: 6px 6px 0 rgba(14,59,51,.12); }
+
+footer.ss-footer { background: var(--c-header); color: rgba(241,247,245,.6); padding: 40px clamp(18px,5vw,56px); text-align: center; }
+footer.ss-footer .fl { font-size: 1.2rem; font-weight: 900; color: #F1F7F5; margin-bottom: 8px; }
+footer.ss-footer .fl span { color: var(--c-accent2); }
+footer.ss-footer .fs { font-size: .8rem; }

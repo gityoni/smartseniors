@@ -2,7 +2,7 @@
 
 ## ✅ Fait
 
-- `pages/index.html` — interface lead gen 2 colonnes (Emma chat + funnel de qualification 13 étapes + résultats EHPAD + CSV)
+- `pages/index.html` — **refonte design « Aurore »** : 2 vues (Accueil landing + Conversation chat+funnel), thème via `ss-theme.css` / `ss-landing.css` / `ss-chat.css` / `ss-funnel.css`, copie hero validée + 5 chips d'entrée. JS 100 % préservé (chat streaming, funnel 13 étapes, scoring, leads, ehpads, CSV)
 - PWA : `manifest.json`, `sw.js`, icônes (installable, shell offline)
 - `pages/confidentialite.html` — page RGPD / mentions
 - `pages/functions/api/chat.js` — streaming Anthropic SSE, persona Emma enrichie (vocabulaire, qualification 7 étapes, objections, contexte funnel dynamique)
@@ -33,8 +33,19 @@
 - [x] **Phase 2 — Back-office « lead en direct »** : `pages/demo.html` — panneau qui se remplit au fil de la conversation (identité → GIR → budget → délai → score d'urgence) jusqu'à « lead envoyé à X résidences » + aperçu email
 - [x] **Mode démo scripté** : bouton « ▶ Rejouer la démo » dans `demo.html` (scénario famille fictif rejoué sur la vraie API)
 - [ ] **Phase 3 — Répétition / sécurisation** du run en live
+- [ ] **Re-skin `demo.html`** en Aurore (vitrine partenaire) — attend le **Lot 2** (`ss-chat.jsx` = `CHAT_SCRIPT`/`LEAD_FIELDS`, `ss-app.jsx` = nav/shell) + toggle **Démo (auto) ⇄ Live** pour Laurent
+
+## 🆕 Feature — documents pré-remplis (levier véracité / confiance)
+
+> Idée : proposer au téléchargement des **documents officiels pré-remplis** avec les infos déjà collectées par le funnel/extraction (renforce la véracité du lead + valeur perçue famille).
+> Exemples : **dossier APA en résidence**, **dossier APA à domicile**, **simulation Grille AGGIR** (GIR), **liste des adresses des conseils départementaux (CR)** où envoyer le dossier, dossier d'admission EHPAD.
+- [ ] Brancher sur les champs déjà collectés (GIR, situation, date de naissance, ville proche → conseil départemental, etc.)
+- [ ] Remplace/enrichit les boutons docs actuels de `index.html` (pane résultats : `dl-visite` / `dl-dossier` / `dl-entree`) qui ne font aujourd'hui que déclencher une réponse d'Emma
+- [ ] Génération PDF pré-rempli (côté edge function ou client)
 
 ## 🔴 À faire — infra / prod
+
+- [ ] **Rafraîchir `CLAUDE.md`** : design system (Aurore, plus beige/brun), nouveaux fichiers CSS, modèle LLM (`claude-opus-4-6` vs `-4-8` à trancher)
 
 - Vérifier le binding D1 `DB` et `ANTHROPIC_API_KEY` dans Cloudflare Pages (Settings → Functions / Environment variables)
 - Configurer `BACKOFFICE_EMAIL` (sinon défaut `leads@smartseniors.fr`)
