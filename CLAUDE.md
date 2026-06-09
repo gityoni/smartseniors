@@ -10,13 +10,13 @@ Répond en français, dans un langage simple, rassurant et structuré.
 - **Rôle** : Conseillère senior SmartSeniors, spécialisée EHPAD
 - **Ton** : Empathique, bienveillant, professionnel
 - **Mission** : Accueillir les familles, comprendre leurs besoins, les orienter vers les bons EHPAD
-- **Règles** : Jamais de conseil médical direct, toujours orienter vers un professionnel pour les questions de santé. **Jamais de promesse de disponibilité / lit réservé** (SmartSeniors transmet le lead aux résidences, ce sont elles qui confirment). Jamais citer d'établissement réel par son nom.
+- **Règles** : Jamais de conseil médical direct, toujours orienter vers un professionnel pour les questions de santé. **Jamais de promesse de disponibilité / lit réservé** (SmartSeniors transmet le lead aux résidences, ce sont elles qui confirment). Jamais citer d'établissement réel par son nom (sauf la démo partenaire, contrôlée). **Consentement** : demande toujours si les résidences peuvent recontacter directement (oui → tél famille ; non → transmission via le conseiller `07 57 99 11 40`).
 - **Source du prompt** : le `BASE_SYSTEM_PROMPT` de `chat.js` est nourri par `knowledge/emma-playbook.md` (synthèse de vrais appels conseiller ↔ famille, via `notebooks/emma_transcription_biblio.ipynb`).
 - **Vocabulaire imposé** : « votre maman / votre papa » (jamais « votre proche »), « solution d'accompagnement » (jamais « placement »), « établissement / résidence » (jamais « maison de retraite »). Une seule question à la fois, toujours valider l'émotion avant de questionner.
 - **Process de qualification (ordre strict)** : 1) contexte émotionnel → 2) profil du senior → 3) autonomie/GIR → 4) localisation → 5) budget → 6) délai/urgence → 7) critères spéciaux. Le prompt complet vit dans `pages/functions/api/chat.js`.
 
 ## Stack technique
-- **Frontend** : HTML / JS vanilla (`pages/index.html`), PWA (manifest + service worker)
+- **Frontend** : HTML / JS vanilla, design **« Aurore »** (`ss-theme.css` + `ss-landing.css` + `ss-chat.css` + `ss-funnel.css`, `data-direction="aurore"`). `pages/index.html` = Accueil ⇄ Conversation ; `pages/demo.html` = démo partenaire
 - **API** : Cloudflare Pages Functions (`pages/functions/api/`)
 - **LLM** : chat Emma `claude-opus-4-8` (streaming SSE) · extraction lead `claude-haiku-4-5` (tool use)
 - **Base de données** : Cloudflare D1 (SQLite edge) — binding `DB` (id `3c1a84ef-2d23-42d4-853a-748f0cc16847`)
@@ -28,15 +28,20 @@ Répond en français, dans un langage simple, rassurant et structuré.
 ## Fichiers clés
 | Fichier | Rôle |
 |---|---|
-| `pages/index.html` | Interface lead gen : chat Emma + funnel de qualification (13 étapes) + résultats EHPAD + PWA |
-| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma + contexte funnel dynamique) |
+| `pages/index.html` | **Accueil famille (Aurore)** : 2 vues — landing (hero validé + 5 chips) ⇄ Conversation (chat Emma + funnel 13 étapes + cartes EHPAD + CSV) |
+| `pages/demo.html` | **Démo partenaire** : player déterministe (scénario Garches/Jeanne · AGGIR interactif A/B/C · cartes GIR/PDF/promo/vidéo/itinéraire) + mode **Live** (vrai `/api/chat` + `/api/extract`) |
+| `pages/ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` | Design system Aurore : tokens/top-bar · landing · chat+dossier · funnel re-skin + cartes EHPAD |
+| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma `opus-4-8` + prompt v3 nourri du playbook + contexte funnel + prompt caching) |
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback mock) |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
 | `pages/confidentialite.html` | Page RGPD / mentions |
 | `pages/manifest.json`, `pages/sw.js`, `pages/icon-*.png` | PWA (installable, offline shell) |
 | `data/ehpads.json` + `data/ehpads.schema.json` | Source de vérité des EHPAD partenaires (seedés en D1) |
-| `data/documents.json` + `data/documents.schema.json` | Bibliothèque des documents qu'Emma génère pré-remplis (admission, médical, AGGIR, APA…) — mappés aux champs du lead |
+| `data/documents.json` + `data/documents.schema.json` | Bibliothèque des documents qu'Emma génère pré-remplis (admission, médical, AGGIR, APA, itinéraire, vidéo…) — mappés aux champs du lead |
+| `data/documents/sources/` | PDF officiels vierges (grille AGGIR, dossier d'admission Cerfa) — réf. de structure |
+| `knowledge/emma-playbook.md` | Playbook (v3) issu de vrais appels → nourrit le `BASE_SYSTEM_PROMPT` |
+| `notebooks/emma_transcription_biblio_drive.ipynb` | Pipeline Colab **Drive-persistant** : appels → fiches → playbook (idempotent) |
 | `scripts/seed.mjs`, `scripts/import-ehpads.mjs`, `scripts/gsheet-to-api.gs` | Seed D1 + import EHPAD |
 | `schema.sql` | Schéma D1 : tables `leads` (riche) et `ehpads` |
 | `wrangler.toml` | Config Cloudflare Pages / D1 |
@@ -103,17 +108,18 @@ places_disponibles, tarif_jour, created_at
 1. `npx wrangler d1 execute smartseniors-db --file=schema.sql --remote`
 2. `npm run seed:remote` (charge `data/ehpads.json` en D1)
 
-## Démo partenaire — chantier en cours (présentation prospect)
-Objectif : démontrer à une société partenaire « seniors » un **workflow fluide** : une famille discute avec Emma → le **lead se crée en temps réel** côté back-office → il part vers les résidences partenaires.
+## Démo partenaire — `pages/demo.html` (player construit)
+Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie ET délivre** — le lead se crée en direct côté back-office + Emma produit tout (GIR, PDF, promo, vidéo, itinéraire).
 
-**Approche retenue :**
-- **Extraction conversationnelle** : Emma mène toute la découverte en chat libre (santé / lieu / pathologie / cadre familial / finances). Une couche d'extraction (tool-use Claude) parse chaque échange en champs structurés ; un **panneau back-office « lead en direct »** se remplit au fil de la conversation (identité → autonomie → budget → délai → score d'urgence) jusqu'à « **lead envoyé à X résidences partenaires** » + aperçu de l'email.
-- **Mode scripté rejouable** : un bouton « Démo » rejoue le scénario réel **Alex (conseiller) ↔ famille** à un rythme maîtrisé, via la vraie API, sur un script connu (zéro surprise en live).
+**2 modes (toggle dans la top-bar) :**
+- **Démo scriptée (déterministe)** — *mode par défaut, autoplay* : scénario figé rejoué (réponses Emma **pré-écrites**, streaming mot-à-mot, **curseur vitesse 0,5×–2×**, bouton Rejouer). **Zéro API, zéro surprise** pour le pitch. Durée ~2-3 min à 1×.
+- **Live** : Laurent tape, **vrai pipeline** `/api/chat` + `/api/extract` → le dossier se remplit pour de vrai (nécessite `ANTHROPIC_API_KEY`).
 
-**Source du scénario** : transcript (speech-to-text) d'un appel réel de 25 min, conseiller Alex ↔ famille (phase découverte).
-Les 2 étapes métier à mettre en scène :
-1. **Valider les infos & créer le lead** : nom, prénom, date de naissance, CP + ville.
-2. **Valider les solutions** selon les réponses : délai / villes + rayon / budget.
+**Scénario démo (fictif)** : Sylvie ↔ Emma pour sa mère **Jeanne, 82 ans** (Garches, déambulation/Alzheimer non confirmé, refus, budget serré). Déroulé : émotion → objections (refus, maltraitance→grille de visite, « vous êtes qui ? ») → **AGGIR interactif (6 items A/B/C → GIR 2 indicatif)** → consentement → **création du lead** (nom, prénom, date de naissance, adresse, tél + e-mail du contact) → **final features** : carte GIR · PDF d'admission pré-rempli · **promo L'Empereur 110 €/j** · vidéo (youtu.be/DvSet0Rkjkk) · itinéraire vers L'Empereur (Garches) → score chaud + « lead envoyé à N résidences ».
+
+**Consentement (règle métier)** : Emma demande toujours « souhaitez-vous que les résidences vous recontactent directement ? » — oui → tél famille ; **non → le lead part avec le n° du conseiller `07 57 99 11 40`** (la famille n'est pas appelée).
+
+> Apprentissage : `knowledge/emma-playbook.md` (v3, vrais appels) nourrit le prompt ; régénéré via le notebook Colab Drive-persistant. Fiches brutes **non committées** (anonymisation Colab à durcir — lieux/hôpitaux résiduels).
 
 ## Workflow de déploiement
 ```
@@ -133,18 +139,20 @@ modifier fichiers
 
 ## Design system
 
-### Palette identitaire
+### Palette identitaire — design « Aurore »
 | Rôle | Couleur |
 |---|---|
-| Fond général | `#EDE5D8` (beige chaud) |
-| Header / form-side | `#3D2B1F` (brun foncé) |
-| Bulles user | `#7D6B5E` (brun doux) |
-| Accent principal | `#D4824A` (cuivré) |
-| Accent doux | `#EAA070` (abricot) |
+| Fond général | `#F1F7F5` (blanc vert d'eau) · alt `#E4F0EC` |
+| Header / panneau foncé | `#0E3B33` (vert profond) · « dossier en direct » `#12463C` |
+| Encre | `#16302B` · douce `#5E7E78` |
+| Accent principal | `#5B8DEF` (bleu) |
+| Accent doux | `#9D8CF0` (violet) |
 
-### Dégradé cuivré
+> Porté par `data-direction="aurore"` sur `.ss-root` + accent injecté inline (`--c-accent:#5B8DEF; --c-accent2:#9D8CF0`). 2 autres directions existent (atelier, solstice) mais on est figé sur Aurore.
+
+### Dégradé de marque
 ```css
-linear-gradient(135deg, #D4824A 0%, #EAA070 100%)
+linear-gradient(135deg, #5B8DEF 0%, #9D8CF0 100%)
 ```
 
 ### Joy palette (chips, dots)
@@ -156,21 +164,17 @@ linear-gradient(135deg, #D4824A 0%, #EAA070 100%)
 - **Font** : `Nunito` (Google Fonts) — ronde, lisible, accessible seniors
 - Taille corps : minimum `1rem` (accessibilité)
 
-### Layout principal
-- `#main-section` : grille 2 colonnes `55fr 45fr`
-- Colonne gauche (`.chat-side`) : interface chat Emma
-- Colonne droite (`.form-side`) : fond `#3D2B1F`, funnel de qualification (`.step-pane`, `.step-progress`)
-- Mobile `≤ 900px` : colonne unique, funnel en haut
+### Layout principal — 2 vues
+- `index.html` : **Accueil** (`.ss-hero` landing + sections) ⇄ **Conversation** (`.ss-split` = `.chat-side` + funnel `.form-side` vert `#12463C`), bascule par la nav (`.ss-nav-seg`).
+- `demo.html` : `.ss-split` = `.chat-side` + `.lead-side` (« dossier en direct »).
+- Scope : `.ss-root` · bulles `.crow`/`.cbub`/`.cav` · champs dossier `.lfield` · funnel `.s-*` / `.step-*`.
+- Mobile `≤ 900px` : colonne unique.
 
 ### UI chat
-- Bulles assistant : fond blanc, avatar SVG cuivré à gauche
-- Bulles user : fond `#7D6B5E`, texte blanc
-- Animations `slideUp` sur apparition des bulles
-- Curseur clignotant pendant le streaming
-- Chips de démarrage cliquables + CTA « Lancer ma recherche »
-- `marked.js` (CDN) pour rendu markdown
-- Cartes EHPAD résultats : `.ehpad-result-card` dans le chat
-- Bouton CSV `.csv-btn` sous les cartes
+- Bulles : assistant `.cbub` blanc + avatar `.cav` (dégradé) ; user `.cbub` fond `#5E7E78`.
+- Curseur `.ccursor` (streaming) · `.cthink` (3 points « réflexion »).
+- `marked.js` (CDN) markdown · cartes EHPAD `.ehpad-result-card` · CSV `.csv-btn`.
+- Démo : widget `.aggir` (A/B/C) + cartes features `.dcard-{gir,pdf,promo,video,itineraire}`.
 
 ## Règles importantes
 - Ne jamais committer `ANTHROPIC_API_KEY` ou tout autre secret
