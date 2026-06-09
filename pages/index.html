@@ -3,872 +3,221 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartSeniors — Trouvez le bon EHPAD pour votre proche</title>
-  <meta name="description" content="SmartSeniors vous aide à trouver le bon EHPAD pour votre proche. Emma, votre conseillère, vous accompagne gratuitement." />
+  <title>SmartSeniors — Simplifier votre recherche d'EHPAD grâce à l'intelligence artificielle</title>
+  <meta name="description" content="Un moment délicat. Emma, l'IA bienveillante de SmartSeniors, facilite votre recherche de résidence à votre rythme, sans relance ni jugement. Gratuit, sans engagement." />
+  <meta name="theme-color" content="#0E3B33" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:       #EDE5D8;
-      --header:   #3D2B1F;
-      --accent:   #D4824A;
-      --accent2:  #EAA070;
-      --brown:    #7D6B5E;
-      --bot-bg:   #fff;
-      --bot-fg:   #3a2e25;
-      --user-bg:  #7D6B5E;
-      --font:     'Nunito', sans-serif;
-      --joy1: #FF6B6B; --joy2: #4ECDC4; --joy3: #FFD93D;
-      --joy4: #A855F7; --joy5: #3B82F6; --joy6: #F97316;
-    }
-
-    html { font-family: var(--font); background: var(--bg); color: var(--bot-fg); scroll-behavior: smooth; }
-    body { min-height: 100vh; }
-
-    /* ── HEADER ─────────────────────────────── */
-    #header {
-      background: var(--header);
-      padding: 12px 20px;
-      display: flex; align-items: center; gap: 14px;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 3px 16px rgba(0,0,0,.28);
-    }
-
-    .wordmark {
-      font-size: 1.55rem; font-weight: 900;
-      letter-spacing: -.5px; line-height: 1;
-      display: flex; align-items: baseline; gap: 0;
-    }
-    .wm-smart { color: #EDE5D8; }
-    .wm-s     { color: var(--accent2); }
-    .wm-enio  { color: var(--accent2); }
-    .wm-chi   { position: relative; display: inline-block; color: var(--accent2); }
-    .wm-stem  { display: inline-block; line-height: 1; }
-    .wm-chip  {
-      position: absolute; top: -.28em; left: 50%;
-      transform: translateX(-50%);
-      width: .52em; height: .52em;
-    }
-    .wm-rs { color: var(--accent2); }
-
-    .header-sub { font-size: .7rem; color: rgba(237,229,216,.55); font-weight: 400; margin-top: 2px; }
-
-    .header-nav { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-    .nav-link {
-      color: rgba(237,229,216,.7); font-size: .82rem; font-weight: 600;
-      text-decoration: none; transition: color .18s;
-    }
-    .nav-link:hover { color: var(--accent2); }
-    .nav-cta {
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; font-family: var(--font); font-size: .82rem; font-weight: 700;
-      border: none; border-radius: 20px; padding: 7px 18px;
-      cursor: pointer; transition: opacity .18s, transform .15s;
-    }
-    .nav-cta:hover { opacity: .9; transform: translateY(-1px); }
-
-    .status-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: #6ee7b7; flex-shrink: 0;
-      animation: pulse-dot 2.2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%,100% { opacity:1; transform:scale(1); }
-      50%      { opacity:.4; transform:scale(.65); }
-    }
-
-    /* ── HERO ─────────────────────────────── */
-    #hero {
-      background: linear-gradient(160deg, #3D2B1F 0%, #5c3d28 55%, #7D6B5E 100%);
-      padding: 72px 24px 80px;
-      text-align: center;
-      position: relative; overflow: hidden;
-    }
-    #hero::before, #hero::after {
-      content: ''; position: absolute; border-radius: 50%;
-      background: rgba(212,130,74,.12);
-    }
-    #hero::before { width: 500px; height: 500px; top: -180px; right: -140px; }
-    #hero::after  { width: 340px; height: 340px; bottom: -120px; left: -80px; }
-
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(212,130,74,.18); border: 1px solid rgba(212,130,74,.35);
-      border-radius: 20px; padding: 5px 14px;
-      font-size: .78rem; font-weight: 700; color: var(--accent2);
-      letter-spacing: .04em; text-transform: uppercase;
-      margin-bottom: 24px;
-      position: relative; z-index: 1;
-    }
-    .hero-badge-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: #6ee7b7;
-      animation: pulse-dot 2s infinite;
-    }
-
-    #hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
-      color: #fff; line-height: 1.15;
-      max-width: 720px; margin: 0 auto 20px;
-      position: relative; z-index: 1;
-    }
-    #hero h1 em {
-      font-style: normal;
-      background: linear-gradient(90deg, #D4824A, #EAA070);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    #hero p.hero-sub {
-      font-size: 1.1rem; color: rgba(237,229,216,.75);
-      max-width: 560px; margin: 0 auto 40px;
-      line-height: 1.7; position: relative; z-index: 1;
-    }
-
-    .hero-actions {
-      display: flex; align-items: center; justify-content: center;
-      gap: 14px; flex-wrap: wrap;
-      position: relative; z-index: 1;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; border: none; border-radius: 28px;
-      padding: 15px 36px; font-family: var(--font); font-size: 1.05rem; font-weight: 800;
-      cursor: pointer; box-shadow: 0 6px 28px rgba(212,130,74,.45);
-      transition: transform .18s, box-shadow .18s;
-      display: flex; align-items: center; gap: 9px;
-    }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(212,130,74,.55); }
-    .btn-primary:active { transform: translateY(0); }
-    .btn-primary svg { width: 19px; height: 19px; }
-
-    .btn-secondary {
-      background: rgba(255,255,255,.08); color: rgba(237,229,216,.85);
-      border: 1.5px solid rgba(237,229,216,.25); border-radius: 28px;
-      padding: 14px 28px; font-family: var(--font); font-size: .95rem; font-weight: 700;
-      cursor: pointer; transition: background .18s, border-color .18s;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,.14); border-color: rgba(237,229,216,.4); }
-
-    .hero-stats {
-      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
-      margin-top: 52px; padding-top: 36px;
-      border-top: 1px solid rgba(237,229,216,.12);
-      position: relative; z-index: 1;
-    }
-    .stat-item { text-align: center; }
-    .stat-num {
-      font-size: 2rem; font-weight: 900; color: var(--accent2);
-      line-height: 1;
-    }
-    .stat-label { font-size: .78rem; color: rgba(237,229,216,.55); margin-top: 4px; font-weight: 600; }
-
-    .section-label {
-      font-size: .76rem; font-weight: 800; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 10px;
-    }
-    .section-title {
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; color: var(--header);
-      line-height: 1.2; margin-bottom: 12px;
-    }
-    .section-sub { font-size: .95rem; color: var(--brown); max-width: 480px; margin: 0 auto 44px; line-height: 1.65; }
-
-    /* ── MAIN SECTION ───────────────────────── */
-    #main-section {
-      max-width: 1200px; margin: 0 auto;
-      padding: 0 0 72px;
-    }
-
-    .main-layout {
-      display: flex;
-      gap: 0;
-      min-height: 600px;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 12px 56px rgba(61,43,31,.16);
-      margin: 0 16px;
-    }
-
-    /* ── CHAT SIDE ───────────────────────────── */
-    .chat-side {
-      background: var(--bg);
-      display: flex; flex-direction: column;
-      min-height: 640px;
-      flex: 1 0 0; min-width: 0;
-    }
-
-    .chat-side-head {
-      padding: 20px 20px 0;
-      text-align: center;
-    }
-    .chat-side-head .section-label { margin-bottom: 4px; }
-    .chat-side-head .section-title { font-size: 1.3rem; margin-bottom: 4px; }
-    .chat-side-head .section-sub { font-size: .85rem; margin-bottom: 0; }
-
-    #chat-wrap {
-      flex: 1;
-      display: flex; flex-direction: column;
-      overflow: hidden;
-    }
-
-    #chat-box {
-      flex: 1; overflow-y: auto;
-      padding: 20px 16px 12px;
-      display: flex; flex-direction: column; gap: 16px;
-      scroll-behavior: smooth;
-      position: relative;
-      background: var(--bg);
-      min-height: 400px;
-    }
-    #chat-box::-webkit-scrollbar { width: 5px; }
-    #chat-box::-webkit-scrollbar-thumb { background: #cbbfb3; border-radius: 4px; }
-
-    /* ── FLOATING DOTS ────────────────────────── */
-    #dots-bg {
-      position: absolute; inset: 0;
-      pointer-events: none; overflow: hidden; z-index: 0;
-    }
-    .fdot {
-      position: absolute; border-radius: 50%;
-      bottom: -40px; opacity: 0;
-      animation: floatDot linear infinite;
-    }
-    @keyframes floatDot {
-      0%   { transform: translateY(0) scale(0);   opacity: 0; }
-      8%   { opacity: .28;  transform: scale(1); }
-      90%  { opacity: .18; }
-      100% { transform: translateY(-560px) scale(.7); opacity: 0; }
-    }
-
-    /* ── WELCOME ─────────────────────────────── */
-    #welcome {
-      position: relative; z-index: 1;
-      display: flex; flex-direction: column;
-      align-self: center;        /* center horizontally in chat-box */
-      align-items: stretch;      /* children fill the width */
-      gap: 14px;
-      padding: 28px 28px 20px;
-      animation: slideUp .55s ease both;
-      width: 100%; max-width: 600px;
-      margin: auto;              /* center vertically in flex container */
-    }
-
-    /* Emma identity card */
-    .emma-card {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 18px; background: rgba(255,255,255,.85);
-      border-radius: 16px; border: 1.5px solid rgba(125,107,94,.12);
-      box-shadow: 0 3px 18px rgba(61,43,31,.1);
-      width: 100%;
-    }
-    .emma-av-wrap {
-      width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
-      background: linear-gradient(135deg, #4ECDC4 0%, #A855F7 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 18px rgba(168,85,247,.35); position: relative;
-    }
-    .emma-av-wrap svg { width: 32px; height: 32px; }
-    .emma-av-online {
-      position: absolute; bottom: 1px; right: 1px;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: #6ee7b7; border: 2.5px solid var(--bg);
-      animation: pulse-dot 2s infinite;
-    }
-    .emma-card-name { font-weight: 900; font-size: 1.08rem; color: var(--header); line-height: 1.2; }
-    .emma-card-role { font-size: .74rem; color: #9a7060; font-weight: 600; margin-top: 2px; }
-
-    /* Emma's opening message bubble */
-    .emma-first-msg {
-      background: #fff; border-radius: 4px 16px 16px 16px;
-      padding: 15px 18px; box-shadow: 0 2px 12px rgba(125,107,94,.1);
-      font-size: .92rem; color: var(--bot-fg); line-height: 1.68;
-      width: 100%;
-    }
-    .emma-first-msg p { margin-bottom: .55em; }
-    .emma-first-msg p:last-child { margin-bottom: 0; }
-
-    /* Big primary launch button */
-    .launch-chip {
-      width: 100%;
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; border: none; border-radius: 14px;
-      padding: 16px 22px; font-family: var(--font);
-      cursor: pointer; text-align: left;
-      box-shadow: 0 6px 26px rgba(212,130,74,.44);
-      transition: transform .18s, box-shadow .18s;
-      display: flex; align-items: center; gap: 14px;
-    }
-    .launch-chip:hover  { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,130,74,.54); }
-    .launch-chip:active { transform: translateY(0); }
-    .lc-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .lc-text { flex: 1; }
-    .lc-text strong { display: block; font-size: 1.03rem; font-weight: 800; }
-    .lc-text small   { display: block; font-size: .75rem; opacity: .78; margin-top: 3px; font-weight: 600; }
-    .lc-arr { font-size: 1.2rem; flex-shrink: 0; opacity: .8; transition: transform .18s; }
-    .launch-chip:hover .lc-arr { transform: translateX(4px); }
-
-    /* ── SUGGESTION CHIPS ───────────────────── */
-    #suggestions {
-      display: flex; flex-wrap: wrap;
-      gap: 8px; width: 100%;
-    }
-    .sugg-chip {
-      border-radius: 12px; padding: 9px 13px;
-      font-family: var(--font); font-size: .78rem; font-weight: 700;
-      cursor: pointer; text-align: left; line-height: 1.3;
-      border: 2px solid transparent;
-      transition: transform .15s, box-shadow .18s, filter .15s;
-      flex: 1 1 auto; white-space: nowrap;
-    }
-    .sugg-chip:hover  { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 5px 14px rgba(0,0,0,.12); }
-    .sugg-chip:active { transform: translateY(0); }
-    .sugg-chip.c1 { background: #FFF0F0; border-color: var(--joy1); color: #b91c1c; }
-    .sugg-chip.c2 { background: #EDFAF9; border-color: var(--joy2); color: #0f766e; }
-    .sugg-chip.c3 { background: #FFFBEB; border-color: var(--joy3); color: #92400e; }
-    .sugg-chip.c4 { background: #F5F3FF; border-color: var(--joy4); color: #7e22ce; }
-
-    /* ── ROWS & BUBBLES ─────────────────────── */
-    .row {
-      position: relative; z-index: 1;
-      display: flex; gap: 10px;
-      animation: slideUp .32s ease both;
-    }
-    @keyframes slideUp {
-      from { opacity:0; transform:translateY(14px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .row.user { flex-direction: row-reverse; }
-    .row.bot  { flex-direction: row; }
-
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      flex-shrink: 0; align-self: flex-end;
-      background: linear-gradient(135deg, #D4824A 0%, #4ECDC4 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 10px rgba(212,130,74,.35);
-    }
-    .avatar svg { width: 17px; height: 17px; }
-
-    .bubble {
-      max-width: 78%; padding: 11px 15px;
-      border-radius: 16px; font-size: .93rem;
-      line-height: 1.6; word-break: break-word;
-      box-shadow: 0 2px 10px rgba(125,107,94,.1);
-    }
-    .row.bot  .bubble { background: var(--bot-bg); color: var(--bot-fg); border-bottom-left-radius: 4px; }
-    .row.user .bubble { background: var(--user-bg); color: #fff; border-bottom-right-radius: 4px; }
-
-    .bubble p          { margin-bottom: .5em; }
-    .bubble p:last-child { margin-bottom: 0; }
-    .bubble ul, .bubble ol { padding-left: 1.4em; margin: .4em 0; }
-    .bubble li         { margin-bottom: .25em; }
-    .bubble strong     { color: var(--accent); }
-    .bubble h1,.bubble h2,.bubble h3 {
-      font-weight: 700; margin-bottom: .35em;
-      background: linear-gradient(90deg, #D4824A, #EAA070);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .bubble h1 { font-size: 1.1em; }
-    .bubble h2 { font-size: 1.05em; }
-    .bubble h3 { font-size: 1em; }
-
-    .cursor {
-      display: inline-block; width: 2px; height: 1em;
-      background: var(--accent); margin-left: 2px;
-      vertical-align: text-bottom;
-      animation: blink .65s step-end infinite;
-    }
-    @keyframes blink { 50% { opacity:0; } }
-
-    .thinking-dots span {
-      display: inline-block; width: 7px; height: 7px;
-      border-radius: 50%; margin: 0 2px;
-      animation: bounce .9s ease-in-out infinite;
-    }
-    .thinking-dots span:nth-child(1) { background: var(--joy1); }
-    .thinking-dots span:nth-child(2) { background: var(--joy2); animation-delay:.15s; }
-    .thinking-dots span:nth-child(3) { background: var(--joy3); animation-delay:.3s; }
-    @keyframes bounce {
-      0%,100% { transform:translateY(0); }
-      50%      { transform:translateY(-7px); }
-    }
-
-    /* ── EHPAD RESULT CARDS (in chat) ──────── */
-    .ehpad-results-wrap {
-      position: relative; z-index: 1;
-      animation: slideUp .32s ease both;
-    }
-    .ehpad-results-title {
-      font-size: .82rem; font-weight: 700; color: var(--brown);
-      margin-bottom: 10px; padding-left: 44px;
-    }
-    .ehpad-result-card {
-      background: #fff; border-radius: 14px; padding: 14px 16px;
-      margin-bottom: 10px; margin-left: 44px;
-      box-shadow: 0 3px 16px rgba(61,43,31,.09);
-      border: 1.5px solid rgba(125,107,94,.12);
-      transition: transform .18s, box-shadow .18s;
-    }
-    .ehpad-result-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(61,43,31,.13);
-    }
-    .ehpad-card-top {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
-      margin-bottom: 8px;
-    }
-    .ehpad-card-nom {
-      font-size: .93rem; font-weight: 800; color: var(--header); line-height: 1.2;
-    }
-    .ehpad-card-ville {
-      font-size: .78rem; color: var(--brown); margin-top: 2px; font-weight: 600;
-    }
-    .badge-places {
-      font-size: .72rem; font-weight: 800; border-radius: 8px; padding: 3px 9px;
-      white-space: nowrap; flex-shrink: 0;
-    }
-    .badge-places.available { background: #DCFCE7; color: #15803d; }
-    .badge-places.limited   { background: #FEF9C3; color: #92400e; }
-    .badge-places.full      { background: #FEE2E2; color: #b91c1c; }
-    .ehpad-card-info {
-      display: flex; flex-wrap: wrap; gap: 8px; font-size: .78rem; color: var(--brown);
-      margin-bottom: 8px;
-    }
-    .ehpad-card-tarif {
-      background: #FFF7ED; color: #7c3a10;
-      border-radius: 7px; padding: 6px 10px;
-      font-size: .78rem; line-height: 1.4; font-weight: 500;
-      margin-bottom: 6px;
-    }
-    .ehpad-card-tarif strong { color: #c2410c; font-weight: 800; }
-    .ehpad-card-contact { display: flex; flex-wrap: wrap; gap: 10px; }
-    .ehpad-card-contact a {
-      font-size: .78rem; font-weight: 700; color: var(--accent);
-      text-decoration: none; display: flex; align-items: center; gap: 4px;
-    }
-    .ehpad-card-contact a:hover { text-decoration: underline; }
-
-    .csv-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin-top: 6px; margin-left: 44px;
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; border: none; border-radius: 20px;
-      padding: 9px 18px; font-family: var(--font); font-size: .82rem; font-weight: 700;
-      cursor: pointer; box-shadow: 0 3px 14px rgba(212,130,74,.4);
-      transition: transform .15s, box-shadow .15s;
-    }
-    .csv-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,130,74,.5); }
-
-    /* ── INPUT AREA ──────────────────────────── */
-    #input-area {
-      flex-shrink: 0; background: #e4d9ca;
-      padding: 10px 14px 13px;
-      border-top: 1px solid #d5c9ba;
-    }
-    #form { display: flex; gap: 9px; align-items: flex-end; }
-    #input {
-      flex: 1; resize: none;
-      border: 1.5px solid #c9b9a7; border-radius: 13px;
-      padding: 11px 15px; font-family: var(--font); font-size: .93rem;
-      background: #fdf8f3; color: var(--bot-fg); outline: none;
-      line-height: 1.5; max-height: 120px; overflow-y: auto;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    #input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,130,74,.18); }
-    #input::placeholder { color: #a9927e; }
-
-    #send-btn {
-      width: 44px; height: 44px; border: none; border-radius: 50%;
-      cursor: pointer; flex-shrink: 0;
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 14px rgba(212,130,74,.45);
-      transition: transform .15s, box-shadow .15s, opacity .15s;
-    }
-    #send-btn:hover  { transform:scale(1.08); box-shadow:0 5px 18px rgba(212,130,74,.55); }
-    #send-btn:active { transform:scale(.95); }
-    #send-btn:disabled { opacity:.4; cursor:default; transform:none; }
-    #send-btn svg { width: 20px; height: 20px; }
-
-    /* ── FORM SIDE ───────────────────────────── */
-    .form-side {
-      background: var(--header);
-      padding: 36px 32px 40px;
-      display: none; flex-direction: column;
-      position: relative; overflow: hidden;
-      flex: 0 0 44%;
-    }
-    .form-side.funnel-open {
-      display: flex;
-      animation: panelSlideIn 0.42s cubic-bezier(0.4,0,0.2,1) both;
-    }
-    @keyframes panelSlideIn {
-      from { opacity: 0; transform: translateX(36px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes panelSlideDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .form-side::before {
-      content: ''; position: absolute;
-      width: 300px; height: 300px; border-radius: 50%;
-      background: rgba(212,130,74,.08);
-      top: -100px; right: -80px; pointer-events: none;
-    }
-    .form-side::after {
-      content: ''; position: absolute;
-      width: 200px; height: 200px; border-radius: 50%;
-      background: rgba(212,130,74,.06);
-      bottom: -60px; left: -50px; pointer-events: none;
-    }
-
-    .form-side-head {
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 28px;
-      position: relative; z-index: 1;
-    }
-    .form-emma-avatar {
-      width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
-      background: linear-gradient(135deg, #4ECDC4, #A855F7);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(78,205,196,.35);
-    }
-    .form-emma-avatar svg { width: 28px; height: 28px; }
-    .form-emma-name {
-      font-size: 1.1rem; font-weight: 900; color: #EDE5D8; line-height: 1.1;
-    }
-    .form-emma-role {
-      font-size: .75rem; color: rgba(237,229,216,.55); font-weight: 600; margin-top: 2px;
-    }
-
-    .form-intro {
-      font-size: .88rem; color: rgba(237,229,216,.7);
-      line-height: 1.6; margin-bottom: 24px;
-      position: relative; z-index: 1;
-    }
-    .form-intro strong { color: var(--accent2); }
-
-    .lead-form {
-      display: flex; flex-direction: column; gap: 14px;
-      position: relative; z-index: 1;
-    }
-
-    .lead-field {
-      display: flex; flex-direction: column; gap: 5px;
-    }
-    .lead-field label {
-      font-size: .78rem; font-weight: 700; color: rgba(237,229,216,.65);
-      letter-spacing: .03em; text-transform: uppercase;
-    }
-    .lead-field input {
-      background: rgba(255,255,255,.08); border: 1.5px solid rgba(237,229,216,.18);
-      border-radius: 10px; padding: 12px 14px;
-      font-family: var(--font); font-size: .95rem; color: #EDE5D8;
-      outline: none; transition: border-color .2s, box-shadow .2s, background .2s;
-    }
-    .lead-field input::placeholder { color: rgba(237,229,216,.3); }
-    .lead-field input:focus {
-      border-color: var(--accent2);
-      background: rgba(255,255,255,.12);
-      box-shadow: 0 0 0 3px rgba(234,160,112,.2);
-    }
-
-    .lead-submit-btn {
-      background: linear-gradient(135deg, #D4824A 0%, #EAA070 100%);
-      color: #fff; border: none; border-radius: 14px;
-      padding: 15px 24px; font-family: var(--font); font-size: 1rem; font-weight: 800;
-      cursor: pointer; margin-top: 6px;
-      box-shadow: 0 5px 24px rgba(212,130,74,.45);
-      transition: transform .18s, box-shadow .18s, opacity .2s;
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-    }
-    .lead-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(212,130,74,.55); }
-    .lead-submit-btn:active { transform: translateY(0); }
-    .lead-submit-btn:disabled { opacity: .5; cursor: default; transform: none; }
-    .lead-submit-btn svg { width: 18px; height: 18px; }
-
-    .form-status {
-      font-size: .82rem; font-weight: 600; border-radius: 10px;
-      padding: 10px 14px; margin-top: 4px; display: none;
-      position: relative; z-index: 1;
-    }
-    .form-status.success { background: rgba(110,231,183,.15); color: #6ee7b7; display: block; }
-    .form-status.error   { background: rgba(255,107,107,.15); color: #fca5a5; display: block; }
-    .form-status.loading { background: rgba(234,160,112,.1); color: rgba(237,229,216,.6); display: block; }
-
-    .form-trust {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 16px; font-size: .74rem; color: rgba(237,229,216,.35);
-      font-weight: 600; position: relative; z-index: 1;
-    }
-    .form-trust svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-    /* ── FOOTER ──────────────────────────────── */
-    #footer {
-      background: var(--header);
-      padding: 28px 24px;
-      text-align: center;
-    }
-    .footer-logo {
-      font-size: 1.1rem; font-weight: 900; color: #EDE5D8; margin-bottom: 8px;
-    }
-    .footer-logo span { color: var(--accent2); }
-    .footer-sub { font-size: .78rem; color: rgba(237,229,216,.4); }
-
-    /* ── RESPONSIVE ──────────────────────────── */
-    @media (max-width: 900px) {
-      .main-layout {
-        flex-direction: column;
-        margin: 0 10px;
-      }
-      .form-side {
-        flex: none;
-        width: 100%;
-        order: -1;
-      }
-      .form-side.funnel-open {
-        animation: panelSlideDown 0.4s ease both;
-      }
-      .chat-side { min-height: 520px; }
-      #chat-box { min-height: 320px; }
-    }
-    @media (max-width: 640px) {
-      #hero { padding: 52px 20px 60px; }
-      .hero-stats { gap: 24px; }
-      #suggestions { gap: 6px; }
-      .sugg-chip { flex: 1 1 100%; }
-      .bubble { max-width: 88%; }
-      .header-nav .nav-link { display: none; }
-      .form-side { padding: 24px 16px 28px; }
-    }
-
-    /* ── STEPPER ────────────────────────────────── */
-    .stepper-wrap { display: flex; flex-direction: column; height: 100%; min-height: 560px; }
-
-    .step-progress {
-      display: flex; align-items: flex-start; gap: 0;
-      margin-bottom: 18px; overflow-x: auto; overflow-y: visible;
-      position: relative; z-index: 1; scrollbar-width: none;
-    }
-    .step-progress::-webkit-scrollbar { display: none; }
-
-    .step-prog-item { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
-    .step-prog-dot {
-      width: 27px; height: 27px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800;
-      background: rgba(255,255,255,.07); color: rgba(237,229,216,.3);
-      border: 1.5px solid rgba(237,229,216,.1); transition: all .3s; flex-shrink: 0;
-    }
-    .step-prog-dot.active { background: linear-gradient(135deg,#D4824A,#EAA070); color:#fff; border-color:transparent; box-shadow:0 2px 10px rgba(212,130,74,.4); }
-    .step-prog-dot.done   { background: rgba(110,231,183,.16); color:#6ee7b7; border-color:rgba(110,231,183,.28); }
-    .step-prog-lbl { font-size:.5rem; font-weight:700; color:rgba(237,229,216,.28); text-transform:uppercase; letter-spacing:.03em; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; transition:color .3s; }
-    .step-prog-lbl.active { color:var(--accent2); }
-    .step-prog-lbl.done   { color:rgba(110,231,183,.55); }
-    .step-prog-sep { flex: 0 0 12px; height:1.5px; background:rgba(237,229,216,.1); margin-top:12px; align-self:flex-start; transition:background .3s; }
-    .step-prog-sep.done { background:rgba(110,231,183,.3); }
-
-    .step-pane { display:none; flex-direction:column; flex:1; position:relative; z-index:1; }
-    .step-pane.active { display:flex; animation:stepIn .22s ease both; }
-    @keyframes stepIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
-
-    .step-q { font-size:.93rem; font-weight:800; color:#EDE5D8; margin-bottom:3px; line-height:1.3; }
-    .step-sub { font-size:.73rem; color:rgba(237,229,216,.48); margin-bottom:12px; line-height:1.5; }
-
-    .s-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
-    .s-grid.cols1 { grid-template-columns:1fr; }
-    .s-card {
-      background:rgba(255,255,255,.07); border:1.5px solid rgba(237,229,216,.12);
-      border-radius:10px; padding:10px 11px;
-      font-family:var(--font); font-size:.78rem; font-weight:700; color:rgba(237,229,216,.72);
-      cursor:pointer; text-align:left; line-height:1.3;
-      transition:all .18s; display:flex; align-items:center; gap:6px;
-    }
-    .s-card:hover { background:rgba(255,255,255,.12); border-color:rgba(237,229,216,.26); color:#EDE5D8; transform:translateY(-1px); }
-    .s-card.sel   { background:rgba(212,130,74,.17); border-color:var(--accent); color:var(--accent2); }
-    .s-card .ce   { font-size:1.05rem; flex-shrink:0; }
-
-    .s-radio { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
-    .s-radio-item {
-      background:rgba(255,255,255,.06); border:1.5px solid rgba(237,229,216,.1);
-      border-radius:9px; padding:10px 13px;
-      font-family:var(--font); font-size:.83rem; font-weight:600; color:rgba(237,229,216,.68);
-      cursor:pointer; display:flex; align-items:flex-start; gap:10px; transition:all .18s; text-align:left;
-    }
-    .s-radio-item:hover { background:rgba(255,255,255,.1); border-color:rgba(237,229,216,.2); }
-    .s-radio-item.sel   { background:rgba(212,130,74,.15); border-color:var(--accent); color:var(--accent2); }
-    .s-radio-dot { width:15px; height:15px; border-radius:50%; border:2px solid rgba(237,229,216,.25); flex-shrink:0; margin-top:2px; transition:all .18s; }
-    .s-radio-item.sel .s-radio-dot { border-color:var(--accent); background:var(--accent); }
-    .s-radio-desc { font-size:.7rem; color:rgba(237,229,216,.38); font-weight:400; margin-top:2px; line-height:1.4; }
-
-    .s-fields { display:flex; flex-direction:column; gap:9px; margin-bottom:12px; }
-    .s-field-g { display:flex; flex-direction:column; gap:4px; }
-    .s-field-lbl { font-size:.7rem; font-weight:700; color:rgba(237,229,216,.48); text-transform:uppercase; letter-spacing:.03em; }
-    .s-input {
-      background:rgba(255,255,255,.08); border:1.5px solid rgba(237,229,216,.15);
-      border-radius:9px; padding:10px 12px;
-      font-family:var(--font); font-size:.88rem; color:#EDE5D8;
-      outline:none; width:100%; transition:border-color .2s,background .2s;
-    }
-    .s-input::placeholder { color:rgba(237,229,216,.24); }
-    .s-input:focus { border-color:var(--accent2); background:rgba(255,255,255,.11); }
-
-    .s-slider-w { margin-bottom:12px; }
-    .s-slider-lbl { font-size:.76rem; color:rgba(237,229,216,.58); margin-bottom:6px; font-weight:600; }
-    .s-slider-val { color:var(--accent2); font-weight:800; }
-    .s-slider { width:100%; accent-color:var(--accent); cursor:pointer; }
-
-    .s-nav { display:flex; gap:7px; align-items:center; margin-top:auto; padding-top:8px; }
-    .s-prev {
-      background:transparent; border:1.5px solid rgba(237,229,216,.16);
-      border-radius:8px; padding:9px 13px;
-      font-family:var(--font); font-size:.78rem; font-weight:700; color:rgba(237,229,216,.42);
-      cursor:pointer; transition:all .18s; flex-shrink:0;
-    }
-    .s-prev:hover { border-color:rgba(237,229,216,.32); color:rgba(237,229,216,.72); }
-    .s-next {
-      flex:1; background:linear-gradient(135deg,#D4824A 0%,#EAA070 100%);
-      color:#fff; border:none; border-radius:8px; padding:12px 14px;
-      font-family:var(--font); font-size:.86rem; font-weight:800;
-      cursor:pointer; transition:opacity .18s,transform .15s;
-      box-shadow:0 4px 14px rgba(212,130,74,.36);
-    }
-    .s-next:hover    { opacity:.92; transform:translateY(-1px); }
-    .s-next:disabled { opacity:.35; cursor:default; transform:none; box-shadow:none; }
-
-    .s-trust { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:.68rem; color:rgba(237,229,216,.26); font-weight:600; position:relative; z-index:1; flex-shrink:0; }
-
-    /* Results pane */
-    .s-success-box { background:rgba(110,231,183,.1); border:1px solid rgba(110,231,183,.2); border-radius:11px; padding:13px 15px; margin-bottom:12px; }
-    .s-success-box .rs-t { font-size:.92rem; font-weight:800; color:#6ee7b7; margin-bottom:3px; }
-    .s-success-box .rs-s { font-size:.75rem; color:rgba(110,231,183,.65); line-height:1.5; }
-
-    .s-docs { display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
-    .s-doc {
-      background:rgba(255,255,255,.07); border:1px solid rgba(237,229,216,.1);
-      border-radius:9px; padding:10px 13px;
-      display:flex; align-items:center; gap:9px;
-      font-size:.8rem; font-weight:700; color:rgba(237,229,216,.72);
-      text-decoration:none; transition:all .18s; cursor:pointer; border:none; font-family:var(--font); text-align:left; width:100%;
-    }
-    .s-doc:hover { background:rgba(255,255,255,.12); color:#EDE5D8; }
-    .s-doc .di { font-size:1.1rem; flex-shrink:0; }
-    .s-doc .dt .dn { font-weight:800; color:#EDE5D8; margin-bottom:1px; }
-    .s-doc .dt .dd { font-size:.69rem; color:rgba(237,229,216,.42); font-weight:400; }
-    .s-newsearch {
-      background:rgba(255,255,255,.07); border:1.5px solid rgba(237,229,216,.18);
-      border-radius:8px; padding:9px 14px; width:100%;
-      font-family:var(--font); font-size:.8rem; font-weight:700; color:rgba(237,229,216,.55);
-      cursor:pointer; transition:all .18s; margin-top:3px;
-    }
-    .s-newsearch:hover { background:rgba(255,255,255,.11); color:#EDE5D8; }
-  </style>
+  <link rel="stylesheet" href="/ss-theme.css" />
+  <link rel="stylesheet" href="/ss-landing.css" />
+  <link rel="stylesheet" href="/ss-chat.css" />
+  <link rel="stylesheet" href="/ss-funnel.css" />
+  <style> html, body { margin: 0; padding: 0; background: #F1F7F5; } </style>
 </head>
 <body>
 
-  <!-- ── HEADER ── -->
-  <header id="header">
+<div class="ss-root" data-direction="aurore" data-font="nunito" style="--c-accent:#5B8DEF; --c-accent2:#9D8CF0;">
+
+  <!-- ── TOP BAR ── -->
+  <header class="ss-topbar">
     <div>
       <div class="wordmark" aria-label="SmartSeniors">
-        <span class="wm-smart">Smart</span><!--
-        --><span class="wm-s">S</span><!--
-        --><span class="wm-enio">enio</span><!--
-        --><span class="wm-chi">
-          <span class="wm-stem">ı</span>
-          <svg class="wm-chip" viewBox="0 0 14 14" fill="none">
-            <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#D4824A"/>
-            <rect x="6" y="0" width="2" height="3" rx=".8" fill="#EAA070"/>
-            <rect x="6" y="11" width="2" height="3" rx=".8" fill="#EAA070"/>
-            <rect x="0" y="6" width="3" height="2" rx=".8" fill="#EAA070"/>
-            <rect x="11" y="6" width="3" height="2" rx=".8" fill="#EAA070"/>
-            <rect x="5.5" y="5.5" width="3" height="3" rx=".5" fill="#EAA070"/>
-          </svg>
-        </span><!--
-        --><span class="wm-rs">rs</span>
+        <span>Smart</span><span class="wm-accent">Sen</span><span class="wm-chi"><span>ı</span><svg class="wm-chip" viewBox="0 0 14 14" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="1.5" fill="var(--c-accent)"/>
+          <rect x="6" y="0" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="6" y="11" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="0" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="11" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="5.5" y="5.5" width="3" height="3" rx=".5" fill="var(--c-accent2)"/>
+        </svg></span><span class="wm-accent">ors</span>
       </div>
-      <div class="header-sub">Votre conseillère EHPAD bienveillante</div>
+      <div class="wm-sub">Votre conseillère EHPAD bienveillante</div>
     </div>
-    <nav class="header-nav" aria-label="Navigation principale">
-      <a class="nav-link" href="#main-section">Parler à Emma</a>
-      <button class="nav-cta" onclick="openFunnel()">Lancer ma recherche</button>
-      <div class="status-dot" title="Emma en ligne"></div>
+    <nav class="ss-nav" aria-label="Navigation principale">
+      <div class="ss-nav-seg" role="tablist" aria-label="Sections">
+        <button id="nav-accueil" class="active" data-view="accueil" role="tab" aria-selected="true">Accueil</button>
+        <button id="nav-conversation" data-view="conversation" role="tab" aria-selected="false">Conversation</button>
+      </div>
+      <span class="ss-pill" style="background:rgba(110,231,183,.18); color:var(--c-header);"><span class="ss-dot"></span> Emma en ligne</span>
     </nav>
   </header>
 
-  <!-- ── HERO ── -->
-  <section id="hero" aria-labelledby="hero-title">
+  <!-- ══════════════════ VUE : ACCUEIL ══════════════════ -->
+  <div id="view-accueil" class="ss-view active">
 
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      Gratuit · Sans engagement · Réponse immédiate
-    </div>
+    <!-- HERO -->
+    <section class="ss-hero" data-hero="sobre" aria-labelledby="hero-title">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="ss-hero-grid">
+        <div class="ss-hero-left">
+          <p class="ss-hero-tagline"><span class="ss-dot"></span> SmartSeniors — L'IA au service des familles</p>
+          <h1 id="hero-title">Un moment délicat. <em>L'accompagnement discret d'une IA</em> pour avancer sereinement.</h1>
+          <p class="hero-sub">Emma est l'IA bienveillante qui facilite votre recherche de résidence, à votre rythme et sans jugement. <strong>Pas de relance, pas de commercial : elle ne vous rappellera pas</strong> — c'est vous qui choisissez quand être mis en relation avec les résidences.</p>
+          <div class="ss-hero-actions">
+            <button class="ss-btn ss-btn-primary ss-btn-lg" data-go="conversation">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Parler à Emma
+            </button>
+            <button class="ss-btn ss-btn-ghost ss-btn-lg" data-scroll="how">Voir comment ça marche</button>
+          </div>
+          <div class="ss-hero-trust">
+            <div class="ht"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> +3 000 familles accompagnées</div>
+            <div class="ht"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Données confidentielles · RGPD</div>
+          </div>
+        </div>
 
-    <h1 id="hero-title">
-      La bonne résidence<br>
-      pour <em>votre maman, votre papa</em>
-    </h1>
-
-    <p class="hero-sub">
-      Des milliers de familles traversent ce moment difficile. Emma, votre conseillère dédiée, vous accompagne gratuitement — avec empathie et sans jugement.
-    </p>
-
-    <div class="hero-actions">
-      <button class="btn-primary" onclick="scrollToMain()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        Parler à Emma maintenant
-      </button>
-      <button class="btn-secondary" onclick="scrollToMain()">
-        Parler à Emma d'abord
-      </button>
-    </div>
-
-    <div class="hero-stats" aria-label="Chiffres clés">
-      <div class="stat-item">
-        <div class="stat-num">+7 500</div>
-        <div class="stat-label">Familles accompagnées</div>
+        <div class="ss-hero-right">
+          <div class="emma-live">
+            <div class="emma-head">
+              <div class="emma-av">
+                <svg viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                  <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
+                  <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
+                  <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+                  <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+                  <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
+                  <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                </svg>
+                <span class="on"></span>
+              </div>
+              <div>
+                <div class="emma-name">Emma</div>
+                <div class="emma-role">Conseillère EHPAD · En ligne maintenant</div>
+              </div>
+            </div>
+            <div class="emma-msg">
+              <p>Bonjour 💛 Je sais que cette démarche n'est pas simple. Je suis là pour vous aider, à votre rythme.</p>
+              <p style="margin-top:.5em"><strong>Dites-moi simplement où vous en êtes.</strong></p>
+            </div>
+            <div class="emma-chips">
+              <button class="emma-chip" data-chip="Mon parent vient d'être hospitalisé et ne peut plus rentrer seul chez lui."><span class="ce">🏥</span> Mon parent vient d'être hospitalisé</button>
+              <button class="emma-chip" data-chip="Je n'arrive plus à m'occuper de mon parent à la maison, je suis épuisé·e."><span class="ce">😣</span> Je n'y arrive plus à la maison</button>
+              <button class="emma-chip" data-chip="Je ne sais pas par où commencer pour trouver une résidence."><span class="ce">🧭</span> Je ne sais pas par où commencer</button>
+              <button class="emma-chip" data-chip="Mon parent refuse d'aller en résidence, comment l'aborder ?"><span class="ce">😔</span> Il refuse d'aller en résidence</button>
+              <button class="emma-chip" data-chip="Je ne sais pas comment financer une résidence, quelles aides existent ?"><span class="ce">💰</span> Je ne sais pas comment financer</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">98 %</div>
-        <div class="stat-label">Satisfaction familles</div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="ss-section" id="how">
+      <div class="ss-wrap" style="text-align:center">
+        <span class="ss-kicker">Comment ça marche</span>
+        <h2 class="ss-sec-title">Trois étapes, zéro paperasse</h2>
+        <p class="ss-sec-lede" style="margin:0 auto">Pas de formulaire interminable. Une conversation, et c'est nous qui faisons le reste.</p>
+        <div class="ss-steps">
+          <div class="ss-card ss-step">
+            <div class="sn">1</div>
+            <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6 6 0 0 1 12 0c0 2.5-1.5 3.5-2.5 4.8C14.3 14.8 14 16 14 17a3 3 0 0 1-6 .3"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+            <h3>Vous parlez à Emma</h3>
+            <p>Racontez votre situation, à votre rythme. Emma écoute, comprend et pose les bonnes questions — une à la fois.</p>
+          </div>
+          <div class="ss-card ss-step">
+            <div class="sn">2</div>
+            <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+            <h3>Votre dossier se construit</h3>
+            <p>Au fil de l'échange, Emma rassemble l'essentiel : autonomie, lieu souhaité, budget, délai. Sans formulaire fastidieux.</p>
+          </div>
+          <div class="ss-card ss-step">
+            <div class="sn">3</div>
+            <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M19 21V11l-4-2"/><path d="M9 7h2M9 11h2M9 15h2"/></svg>
+            <h3>Les bonnes résidences vous recontactent</h3>
+            <p>Nous transmettons votre demande aux établissements adaptés près de chez vous. Ce sont eux qui vous recontactent — quand vous le décidez.</p>
+          </div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">24 / 7</div>
-        <div class="stat-label">Disponibilité Emma</div>
+    </section>
+
+    <!-- REASSURANCE -->
+    <section class="ss-section ss-reassure">
+      <div class="ss-wrap">
+        <div class="ss-reassure-grid">
+          <div>
+            <span class="ss-kicker">Vous n'êtes pas seul·e</span>
+            <h2 class="ss-sec-title">Un moment difficile mérite un vrai accompagnement</h2>
+            <p class="ss-sec-lede">Chercher une résidence pour un parent, c'est lourd émotionnellement. Emma n'est pas un robot qui coche des cases : elle écoute d'abord, et vous guide ensuite.</p>
+            <div style="margin-top:28px">
+              <button class="ss-btn ss-btn-primary ss-btn-lg" data-go="conversation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Démarrer la conversation
+              </button>
+            </div>
+          </div>
+          <div class="ss-values">
+            <div class="ss-value">
+              <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+              <div><div class="vt">Empathie, jamais de jugement</div><div class="vd">Emma a été formée à partir de vraies conversations de conseillers. Elle accueille l'émotion avant tout.</div></div>
+            </div>
+            <div class="ss-value">
+              <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M12 8S10 2 7 4s5 4 5 4zM12 8s2-6 5-4-5 4-5 4z"/></svg></div>
+              <div><div class="vt">Entièrement gratuit</div><div class="vd">Notre accompagnement ne vous coûte rien, à aucun moment. Aucune carte bancaire, aucun engagement.</div></div>
+            </div>
+            <div class="ss-value">
+              <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div><div class="vt">Vos données protégées</div><div class="vd">Conforme RGPD. Vos informations ne servent qu'à vous mettre en relation avec les bonnes résidences.</div></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">+500</div>
-        <div class="stat-label">EHPAD référencés</div>
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="ss-ctaband">
+      <div class="ss-ctaband-inner">
+        <h2>Et si vous en parliez maintenant ?</h2>
+        <p>Quelques minutes avec Emma suffisent pour avancer. Gratuit, sans engagement.</p>
+        <button class="ss-btn ss-btn-lg" data-go="conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Parler à Emma
+        </button>
       </div>
-    </div>
+    </section>
 
-  </section>
+    <footer class="ss-footer">
+      <div class="fl">Smart<span>Seniors</span></div>
+      <div class="fs">Votre conseillère EHPAD bienveillante · Service gratuit · <a href="/confidentialite.html" style="color:rgba(241,247,245,.7);text-decoration:underline">RGPD / Confidentialité</a></div>
+    </footer>
+  </div><!-- /#view-accueil -->
 
-  <!-- ── MAIN SECTION ── -->
-  <section id="main-section" aria-labelledby="main-title">
-    <h2 id="main-title" class="sr-only">Parler à Emma et lancer la recherche</h2>
+  <!-- ══════════════════ VUE : CONVERSATION ══════════════════ -->
+  <div id="view-conversation" class="ss-view">
+    <section class="ss-convo" aria-labelledby="convo-title">
+      <div class="ss-convo-head">
+        <span class="ss-kicker" style="justify-content:center">Votre conversation avec Emma</span>
+        <h2 class="ss-sec-title" id="convo-title">Parlez-en à Emma, votre dossier se construit</h2>
+        <p class="ss-sec-lede">Discutez librement ou laissez-vous guider — Emma vous oriente vers les bonnes résidences, sans pression.</p>
+      </div>
 
-    <div class="main-layout">
+      <div class="ss-split">
 
-      <!-- LEFT: Chat with Emma -->
-      <div class="chat-side">
+        <!-- CHAT SIDE -->
+        <div class="chat-side">
+          <div class="chat-top">
+            <div class="emma-av">
+              <svg viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
+                <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
+                <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+                <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+                <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
+                <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              </svg>
+              <span class="on"></span>
+            </div>
+            <div>
+              <div class="nm">Emma</div>
+              <div class="rl">Conseillère EHPAD · En ligne</div>
+            </div>
+          </div>
 
-        <div id="chat-wrap">
-
-          <main id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma">
-
+          <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma">
             <div id="dots-bg"></div>
 
             <div id="welcome">
-
-              <!-- Emma identity card -->
               <div class="emma-card" aria-label="Emma, conseillère EHPAD en ligne">
                 <div class="emma-av-wrap" aria-hidden="true">
                   <svg viewBox="0 0 52 52" fill="none">
@@ -887,14 +236,11 @@
                 </div>
               </div>
 
-              <!-- Emma's opening message (chat bubble style) -->
               <div class="emma-first-msg">
-                <p>Bonjour ! Je suis là pour vous aider à trouver la bonne résidence pour votre maman ou votre papa. 💚</p>
-                <p>Cette démarche est souvent difficile. Je vous accompagne <strong>gratuitement</strong>, sans jugement, à chaque étape.</p>
-                <p><strong>Comment puis-je vous aider aujourd'hui ?</strong></p>
+                <p>Bonjour 💛 Je sais que cette démarche n'est pas simple. Je vous accompagne <strong>gratuitement</strong>, à votre rythme et sans jugement.</p>
+                <p><strong>Dites-moi simplement où vous en êtes.</strong></p>
               </div>
 
-              <!-- Primary CTA -->
               <button id="launch-funnel-btn" class="launch-chip" aria-label="Lancer ma recherche d'EHPAD personnalisée">
                 <span class="lc-icon">🔍</span>
                 <span class="lc-text">
@@ -904,306 +250,294 @@
                 <span class="lc-arr" aria-hidden="true">→</span>
               </button>
 
-              <!-- Secondary chips -->
-              <div id="suggestions" role="list" aria-label="Suggestions de questions">
-                <button class="sugg-chip c1" role="listitem">🏥 Mon parent vient d'être hospitalisé</button>
-                <button class="sugg-chip c2" role="listitem">😔 Il refuse d'aller en résidence</button>
-                <button class="sugg-chip c4" role="listitem">💰 Je ne sais pas comment financer</button>
+              <div id="suggestions" role="list" aria-label="Suggestions"></div>
+            </div>
+          </div>
+
+          <form id="form" class="chat-input" novalidate>
+            <textarea id="input" rows="1" placeholder="Écrivez votre message à Emma…" aria-label="Votre message" maxlength="2000"></textarea>
+            <button type="submit" id="send-btn" class="chat-send" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </form>
+        </div><!-- /.chat-side -->
+
+        <!-- FUNNEL SIDE -->
+        <div class="form-side funnel-open">
+          <div class="stepper-wrap">
+
+            <div class="step-progress" id="step-progress" aria-label="Étapes de qualification"></div>
+
+            <!-- Pane 0: TYPE -->
+            <div class="step-pane active" id="pane-0">
+              <div class="step-q">Quel type de résidence recherchez-vous ?</div>
+              <div class="s-grid">
+                <button class="s-card" data-val="ehpad_medicalise"><span class="ce">🏥</span>EHPAD médicalisé</button>
+                <button class="s-card" data-val="alzheimer"><span class="ce">🧠</span>Spécialisé Alzheimer</button>
+                <button class="s-card" data-val="autonomie"><span class="ce">🏡</span>Résidence Autonomie</button>
+                <button class="s-card" data-val="senior"><span class="ce">🌿</span>Résidence Sénior</button>
+                <button class="s-card" data-val="autre"><span class="ce">🔍</span>Autres types</button>
+                <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
               </div>
-
+              <div class="s-nav"><button class="s-next" id="n0" disabled>CONTINUER →</button></div>
             </div>
 
-          </main>
-
-          <div id="input-area">
-            <form id="form" novalidate>
-              <textarea id="input" rows="1" placeholder="Posez votre question à Emma…"
-                aria-label="Votre message" maxlength="2000"></textarea>
-              <button type="submit" id="send-btn" aria-label="Envoyer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-              </button>
-            </form>
-          </div>
-
-        </div><!-- /#chat-wrap -->
-
-      </div><!-- /.chat-side -->
-
-      <!-- RIGHT: Qualification Stepper -->
-      <div class="form-side">
-        <div class="stepper-wrap">
-
-          <!-- Progress bar (built by JS) -->
-          <div class="step-progress" id="step-progress" aria-label="Étapes de qualification"></div>
-
-          <!-- Pane 0: TYPE -->
-          <div class="step-pane active" id="pane-0">
-            <div class="step-q">Quel type de résidence recherchez-vous ?</div>
-            <div class="s-grid">
-              <button class="s-card" data-val="ehpad_medicalise"><span class="ce">🏥</span>EHPAD médicalisé</button>
-              <button class="s-card" data-val="alzheimer"><span class="ce">🧠</span>Spécialisé Alzheimer</button>
-              <button class="s-card" data-val="autonomie"><span class="ce">🏡</span>Résidence Autonomie</button>
-              <button class="s-card" data-val="senior"><span class="ce">🌿</span>Résidence Sénior</button>
-              <button class="s-card" data-val="autre"><span class="ce">🔍</span>Autres types</button>
-              <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
-            </div>
-            <div class="s-nav"><button class="s-next" id="n0" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 1: LIEN -->
-          <div class="step-pane" id="pane-1">
-            <div class="step-q">Pour qui recherchez-vous ?</div>
-            <div class="s-grid">
-              <button class="s-card" data-val="parent"><span class="ce">👨‍👧</span>Un parent</button>
-              <button class="s-card" data-val="conjoint"><span class="ce">💑</span>Mon conjoint</button>
-              <button class="s-card" data-val="grand_parent"><span class="ce">👴</span>Un grand-parent</button>
-              <button class="s-card" data-val="moi_meme"><span class="ce">🙋</span>Moi-même</button>
-              <button class="s-card" data-val="ass_sociale"><span class="ce">👩‍💼</span>Ass. Sociale</button>
-              <button class="s-card" data-val="autre"><span class="ce">👥</span>Autre</button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="0">← Retour</button><button class="s-next" id="n1" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 2: DÉLAI -->
-          <div class="step-pane" id="pane-2">
-            <div class="step-q">Quel est le délai d'entrée souhaité ?</div>
-            <div class="s-grid">
-              <button class="s-card" data-val="urgent"><span class="ce">⚡</span>Le plus tôt possible</button>
-              <button class="s-card" data-val="1_mois"><span class="ce">📅</span>Dans 1 mois</button>
-              <button class="s-card" data-val="1_3_mois"><span class="ce">🗓️</span>Entre 1 et 3 mois</button>
-              <button class="s-card" data-val="3_6_mois"><span class="ce">📆</span>Entre 3 et 6 mois</button>
-              <button class="s-card" data-val="6_mois_plus"><span class="ce">📅</span>Plus de 6 mois</button>
-              <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="1">← Retour</button><button class="s-next" id="n2" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 3: LISTE (quick contact) -->
-          <div class="step-pane" id="pane-3">
-            <div class="step-q">Recevez la liste des EHPAD</div>
-            <div class="step-sub">Gratuit · Sans engagement · Données protégées.</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-cnom">Votre nom</label>
-                <input class="s-input" type="text" id="s-cnom" placeholder="ex : Dupont" autocomplete="family-name" />
+            <!-- Pane 1: LIEN -->
+            <div class="step-pane" id="pane-1">
+              <div class="step-q">Pour qui recherchez-vous ?</div>
+              <div class="s-grid">
+                <button class="s-card" data-val="parent"><span class="ce">👨‍👧</span>Un parent</button>
+                <button class="s-card" data-val="conjoint"><span class="ce">💑</span>Mon conjoint</button>
+                <button class="s-card" data-val="grand_parent"><span class="ce">👴</span>Un grand-parent</button>
+                <button class="s-card" data-val="moi_meme"><span class="ce">🙋</span>Moi-même</button>
+                <button class="s-card" data-val="ass_sociale"><span class="ce">👩‍💼</span>Ass. Sociale</button>
+                <button class="s-card" data-val="autre"><span class="ce">👥</span>Autre</button>
               </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-ctel">Votre téléphone</label>
-                <input class="s-input" type="tel" id="s-ctel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
+              <div class="s-nav"><button class="s-prev" data-to="0">← Retour</button><button class="s-next" id="n1" disabled>CONTINUER →</button></div>
+            </div>
+
+            <!-- Pane 2: DÉLAI -->
+            <div class="step-pane" id="pane-2">
+              <div class="step-q">Quel est le délai d'entrée souhaité ?</div>
+              <div class="s-grid">
+                <button class="s-card" data-val="urgent"><span class="ce">⚡</span>Le plus tôt possible</button>
+                <button class="s-card" data-val="1_mois"><span class="ce">📅</span>Dans 1 mois</button>
+                <button class="s-card" data-val="1_3_mois"><span class="ce">🗓️</span>Entre 1 et 3 mois</button>
+                <button class="s-card" data-val="3_6_mois"><span class="ce">📆</span>Entre 3 et 6 mois</button>
+                <button class="s-card" data-val="6_mois_plus"><span class="ce">📅</span>Plus de 6 mois</button>
+                <button class="s-card" data-val="inconnu"><span class="ce">❓</span>Je ne sais pas</button>
               </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-cemail">Votre email</label>
-                <input class="s-input" type="email" id="s-cemail" placeholder="ex : jean@email.fr" autocomplete="email" />
+              <div class="s-nav"><button class="s-prev" data-to="1">← Retour</button><button class="s-next" id="n2" disabled>CONTINUER →</button></div>
+            </div>
+
+            <!-- Pane 3: LISTE (quick contact) -->
+            <div class="step-pane" id="pane-3">
+              <div class="step-q">Recevez la liste des EHPAD</div>
+              <div class="step-sub">Gratuit · Sans engagement · Données protégées.</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-cnom">Votre nom</label>
+                  <input class="s-input" type="text" id="s-cnom" placeholder="ex : Dupont" autocomplete="family-name" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-ctel">Votre téléphone</label>
+                  <input class="s-input" type="tel" id="s-ctel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-cemail">Votre email</label>
+                  <input class="s-input" type="email" id="s-cemail" placeholder="ex : jean@email.fr" autocomplete="email" />
+                </div>
               </div>
+              <div class="s-nav"><button class="s-prev" data-to="2">← Retour</button><button class="s-next" id="n3">JE VEUX VOIR LA LISTE →</button></div>
             </div>
-            <div class="s-nav"><button class="s-prev" data-to="2">← Retour</button><button class="s-next" id="n3">JE VEUX VOIR LA LISTE →</button></div>
-          </div>
 
-          <!-- Pane 4: ÉTABLISSEMENT -->
-          <div class="step-pane" id="pane-4">
-            <div class="step-q">Dans quelle ville recherchez-vous ?</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-ville">Ville ou code postal</label>
-                <input class="s-input" type="text" id="s-ville" placeholder="ex : Lyon, 69000…" autocomplete="off" />
+            <!-- Pane 4: ÉTABLISSEMENT -->
+            <div class="step-pane" id="pane-4">
+              <div class="step-q">Dans quelle ville recherchez-vous ?</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-ville">Ville ou code postal</label>
+                  <input class="s-input" type="text" id="s-ville" placeholder="ex : Lyon, 69000…" autocomplete="off" />
+                </div>
               </div>
-            </div>
-            <div class="s-slider-w">
-              <div class="s-slider-lbl">Dans un rayon de <span class="s-slider-val" id="rayon-val">20</span> km</div>
-              <input class="s-slider" type="range" id="s-rayon" min="10" max="50" value="20" step="10" />
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="3">← Retour</button><button class="s-next" id="n4" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 5: PROCHE - Nombre -->
-          <div class="step-pane" id="pane-5">
-            <div class="step-q">Vous recherchez une résidence pour combien de personnes ?</div>
-            <div class="s-grid">
-              <button class="s-card" data-val="1"><span class="ce">👤</span>1 personne</button>
-              <button class="s-card" data-val="2"><span class="ce">👥</span>2 personnes</button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="4">← Retour</button><button class="s-next" id="n5" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 6: PROCHE - Genre -->
-          <div class="step-pane" id="pane-6">
-            <div class="step-q">C'est un homme ou une femme ?</div>
-            <div class="s-grid">
-              <button class="s-card" data-val="homme"><span class="ce">👨</span>Un homme</button>
-              <button class="s-card" data-val="femme"><span class="ce">👩</span>Une femme</button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="5">← Retour</button><button class="s-next" id="n6" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 7: PROCHE - Identité -->
-          <div class="step-pane" id="pane-7">
-            <div class="step-q">Quel est son prénom ?</div>
-            <div class="step-sub">Cela nous permet de personnaliser votre recherche.</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-pprenom">Prénom</label>
-                <input class="s-input" type="text" id="s-pprenom" placeholder="ex : Marcel" autocomplete="given-name" />
+              <div class="s-slider-w">
+                <div class="s-slider-lbl">Dans un rayon de <span class="s-slider-val" id="rayon-val">20</span> km</div>
+                <input class="s-slider" type="range" id="s-rayon" min="10" max="50" value="20" step="10" />
               </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-pnom">Nom</label>
-                <input class="s-input" type="text" id="s-pnom" placeholder="ex : Dupont" autocomplete="family-name" />
+              <div class="s-nav"><button class="s-prev" data-to="3">← Retour</button><button class="s-next" id="n4" disabled>CONTINUER →</button></div>
+            </div>
+
+            <!-- Pane 5: PROCHE - Nombre -->
+            <div class="step-pane" id="pane-5">
+              <div class="step-q">Vous recherchez une résidence pour combien de personnes ?</div>
+              <div class="s-grid">
+                <button class="s-card" data-val="1"><span class="ce">👤</span>1 personne</button>
+                <button class="s-card" data-val="2"><span class="ce">👥</span>2 personnes</button>
               </div>
+              <div class="s-nav"><button class="s-prev" data-to="4">← Retour</button><button class="s-next" id="n5" disabled>CONTINUER →</button></div>
             </div>
-            <div class="s-nav"><button class="s-prev" data-to="6">← Retour</button><button class="s-next" id="n7" disabled>VALIDER →</button></div>
-          </div>
 
-          <!-- Pane 8: PROCHE - Situation actuelle -->
-          <div class="step-pane" id="pane-8">
-            <div class="step-q" id="q-sit">Où se trouve votre proche actuellement ?</div>
-            <div class="s-radio">
-              <button class="s-radio-item" data-val="domicile"><span class="s-radio-dot"></span><span>Domicile</span></button>
-              <button class="s-radio-item" data-val="famille"><span class="s-radio-dot"></span><span>Famille</span></button>
-              <button class="s-radio-item" data-val="hopital"><span class="s-radio-dot"></span><span>Hôpital / Clinique</span></button>
-              <button class="s-radio-item" data-val="autre_residence"><span class="s-radio-dot"></span><span>Autre Résidence</span></button>
-              <button class="s-radio-item" data-val="autre"><span class="s-radio-dot"></span><span>Autre choix</span></button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="7">← Retour</button><button class="s-next" id="n8" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 9: PROCHE - Date de naissance -->
-          <div class="step-pane" id="pane-9">
-            <div class="step-q" id="q-age">Quelle est la date de naissance de votre proche ?</div>
-            <div class="step-sub">Nécessaire pour le dossier d'admission et le calcul de l'APA.</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-dob">Date de naissance</label>
-                <input class="s-input" type="date" id="s-dob" max="" />
+            <!-- Pane 6: PROCHE - Genre -->
+            <div class="step-pane" id="pane-6">
+              <div class="step-q">C'est un homme ou une femme ?</div>
+              <div class="s-grid">
+                <button class="s-card" data-val="homme"><span class="ce">👨</span>Un homme</button>
+                <button class="s-card" data-val="femme"><span class="ce">👩</span>Une femme</button>
               </div>
-              <div id="age-display" style="font-size:.8rem;color:var(--accent2);font-weight:700;margin-top:4px;min-height:1.2em;"></div>
+              <div class="s-nav"><button class="s-prev" data-to="5">← Retour</button><button class="s-next" id="n6" disabled>CONTINUER →</button></div>
             </div>
-            <div class="s-nav"><button class="s-prev" data-to="8">← Retour</button><button class="s-next" id="n9" disabled>VALIDER →</button></div>
-          </div>
 
-          <!-- Pane 10: PROCHE - Autonomie GIR -->
-          <div class="step-pane" id="pane-10">
-            <div class="step-q" id="q-gir">Quel est le niveau d'autonomie ?</div>
-            <div class="s-radio">
-              <button class="s-radio-item" data-val="autonome">
-                <span class="s-radio-dot"></span>
-                <div><div>Autonome (GIR 5-6)</div><div class="s-radio-desc">Personne valide capable d'agir seul.</div></div>
-              </button>
-              <button class="s-radio-item" data-val="semi_dependant">
-                <span class="s-radio-dot"></span>
-                <div><div>Semi dépendant (GIR 3-4)</div><div class="s-radio-desc">Besoin d'aide pour marcher, manger, s'habiller ou faire sa toilette.</div></div>
-              </button>
-              <button class="s-radio-item" data-val="tres_dependant">
-                <span class="s-radio-dot"></span>
-                <div><div>Très dépendant (GIR 1-2)</div><div class="s-radio-desc">N'arrive pas à marcher, manger, s'habiller ou faire sa toilette.</div></div>
-              </button>
-            </div>
-            <div class="s-nav"><button class="s-prev" data-to="9">← Retour</button><button class="s-next" id="n10" disabled>CONTINUER →</button></div>
-          </div>
-
-          <!-- Pane 11: PROCHE - Ville actuelle -->
-          <div class="step-pane" id="pane-11">
-            <div class="step-q" id="q-vproche">Dans quelle ville réside votre proche actuellement ?</div>
-            <div class="step-sub">Les aides financières (APA) se font auprès du conseil général du lieu de résidence.</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-vproche">Ville ou code postal</label>
-                <input class="s-input" type="text" id="s-vproche" placeholder="Ville ou code postal" autocomplete="off" />
+            <!-- Pane 7: PROCHE - Identité -->
+            <div class="step-pane" id="pane-7">
+              <div class="step-q">Quel est son prénom ?</div>
+              <div class="step-sub">Cela nous permet de personnaliser votre recherche.</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-pprenom">Prénom</label>
+                  <input class="s-input" type="text" id="s-pprenom" placeholder="ex : Marcel" autocomplete="given-name" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-pnom">Nom</label>
+                  <input class="s-input" type="text" id="s-pnom" placeholder="ex : Dupont" autocomplete="family-name" />
+                </div>
               </div>
+              <div class="s-nav"><button class="s-prev" data-to="6">← Retour</button><button class="s-next" id="n7" disabled>VALIDER →</button></div>
             </div>
-            <div class="s-nav"><button class="s-prev" data-to="10">← Retour</button><button class="s-next" id="n11" disabled>CONTINUER →</button></div>
-          </div>
 
-          <!-- Pane 12: FAMILLE - Contact complet -->
-          <div class="step-pane" id="pane-12">
-            <div class="step-q">Complétez vos coordonnées</div>
-            <div class="step-sub">Pour accéder à votre liste personnalisée d'EHPAD.</div>
-            <div class="s-fields">
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-fprenom">Votre prénom</label>
-                <input class="s-input" type="text" id="s-fprenom" placeholder="ex : Marie" autocomplete="given-name" />
+            <!-- Pane 8: PROCHE - Situation actuelle -->
+            <div class="step-pane" id="pane-8">
+              <div class="step-q" id="q-sit">Où se trouve votre proche actuellement ?</div>
+              <div class="s-radio">
+                <button class="s-radio-item" data-val="domicile"><span class="s-radio-dot"></span><span>Domicile</span></button>
+                <button class="s-radio-item" data-val="famille"><span class="s-radio-dot"></span><span>Famille</span></button>
+                <button class="s-radio-item" data-val="hopital"><span class="s-radio-dot"></span><span>Hôpital / Clinique</span></button>
+                <button class="s-radio-item" data-val="autre_residence"><span class="s-radio-dot"></span><span>Autre Résidence</span></button>
+                <button class="s-radio-item" data-val="autre"><span class="s-radio-dot"></span><span>Autre choix</span></button>
               </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-fnom">Votre nom</label>
-                <input class="s-input" type="text" id="s-fnom" placeholder="ex : Dupont" autocomplete="family-name" />
-              </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-ftel">Téléphone mobile</label>
-                <input class="s-input" type="tel" id="s-ftel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
-              </div>
-              <div class="s-field-g">
-                <label class="s-field-lbl" for="s-femail">Email</label>
-                <input class="s-input" type="email" id="s-femail" placeholder="ex : marie@email.fr" autocomplete="email" />
-              </div>
+              <div class="s-nav"><button class="s-prev" data-to="7">← Retour</button><button class="s-next" id="n8" disabled>CONTINUER →</button></div>
             </div>
-            <div class="s-nav"><button class="s-prev" data-to="11">← Retour</button><button class="s-next" id="n12">ACCÉDER À MA LISTE →</button></div>
-          </div>
 
-          <!-- Pane 13: RÉSULTATS -->
-          <div class="step-pane" id="pane-13">
-            <div class="s-success-box">
-              <div class="rs-t" id="results-title">🔍 Recherche en cours…</div>
-              <div class="rs-s" id="results-sub">Emma cherche les EHPAD disponibles. Les résultats apparaissent dans le chat à gauche.</div>
+            <!-- Pane 9: PROCHE - Date de naissance -->
+            <div class="step-pane" id="pane-9">
+              <div class="step-q" id="q-age">Quelle est la date de naissance de votre proche ?</div>
+              <div class="step-sub">Nécessaire pour le dossier d'admission et le calcul de l'APA.</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-dob">Date de naissance</label>
+                  <input class="s-input" type="date" id="s-dob" max="" />
+                </div>
+                <div id="age-display"></div>
+              </div>
+              <div class="s-nav"><button class="s-prev" data-to="8">← Retour</button><button class="s-next" id="n9" disabled>VALIDER →</button></div>
             </div>
-            <div class="s-docs">
-              <button class="s-doc" id="dl-visite">
-                <span class="di">📋</span>
-                <div class="dt"><div class="dn">Aide mémoire visite</div><div class="dd">Ne rien oublier lors de la visite d'un EHPAD</div></div>
-              </button>
-              <button class="s-doc" id="dl-dossier">
-                <span class="di">📄</span>
-                <div class="dt"><div class="dn">Dossier d'admission</div><div class="dd">Formulaire d'inscription EHPAD à compléter</div></div>
-              </button>
-              <button class="s-doc" id="dl-entree">
-                <span class="di">📦</span>
-                <div class="dt"><div class="dn">Aide mémoire entrée</div><div class="dd">Préparer l'hébergement en douceur</div></div>
-              </button>
+
+            <!-- Pane 10: PROCHE - Autonomie GIR -->
+            <div class="step-pane" id="pane-10">
+              <div class="step-q" id="q-gir">Quel est le niveau d'autonomie ?</div>
+              <div class="s-radio">
+                <button class="s-radio-item" data-val="autonome">
+                  <span class="s-radio-dot"></span>
+                  <div><div>Autonome (GIR 5-6)</div><div class="s-radio-desc">Personne valide capable d'agir seul.</div></div>
+                </button>
+                <button class="s-radio-item" data-val="semi_dependant">
+                  <span class="s-radio-dot"></span>
+                  <div><div>Semi dépendant (GIR 3-4)</div><div class="s-radio-desc">Besoin d'aide pour marcher, manger, s'habiller ou faire sa toilette.</div></div>
+                </button>
+                <button class="s-radio-item" data-val="tres_dependant">
+                  <span class="s-radio-dot"></span>
+                  <div><div>Très dépendant (GIR 1-2)</div><div class="s-radio-desc">N'arrive pas à marcher, manger, s'habiller ou faire sa toilette.</div></div>
+                </button>
+              </div>
+              <div class="s-nav"><button class="s-prev" data-to="9">← Retour</button><button class="s-next" id="n10" disabled>CONTINUER →</button></div>
             </div>
-            <button class="s-newsearch" id="new-search-btn">🔄 Nouvelle recherche</button>
+
+            <!-- Pane 11: PROCHE - Ville actuelle -->
+            <div class="step-pane" id="pane-11">
+              <div class="step-q" id="q-vproche">Dans quelle ville réside votre proche actuellement ?</div>
+              <div class="step-sub">Les aides financières (APA) se font auprès du conseil départemental du lieu de résidence.</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-vproche">Ville ou code postal</label>
+                  <input class="s-input" type="text" id="s-vproche" placeholder="Ville ou code postal" autocomplete="off" />
+                </div>
+              </div>
+              <div class="s-nav"><button class="s-prev" data-to="10">← Retour</button><button class="s-next" id="n11" disabled>CONTINUER →</button></div>
+            </div>
+
+            <!-- Pane 12: FAMILLE - Contact complet -->
+            <div class="step-pane" id="pane-12">
+              <div class="step-q">Complétez vos coordonnées</div>
+              <div class="step-sub">Pour accéder à votre liste personnalisée d'EHPAD.</div>
+              <div class="s-fields">
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-fprenom">Votre prénom</label>
+                  <input class="s-input" type="text" id="s-fprenom" placeholder="ex : Marie" autocomplete="given-name" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-fnom">Votre nom</label>
+                  <input class="s-input" type="text" id="s-fnom" placeholder="ex : Dupont" autocomplete="family-name" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-ftel">Téléphone mobile</label>
+                  <input class="s-input" type="tel" id="s-ftel" placeholder="ex : 06 12 34 56 78" autocomplete="tel" />
+                </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-femail">Email</label>
+                  <input class="s-input" type="email" id="s-femail" placeholder="ex : marie@email.fr" autocomplete="email" />
+                </div>
+              </div>
+              <div class="s-nav"><button class="s-prev" data-to="11">← Retour</button><button class="s-next" id="n12">ACCÉDER À MA LISTE →</button></div>
+            </div>
+
+            <!-- Pane 13: RÉSULTATS -->
+            <div class="step-pane" id="pane-13">
+              <div class="s-success-box">
+                <div class="rs-t" id="results-title">🔍 Recherche en cours…</div>
+                <div class="rs-s" id="results-sub">Emma cherche les EHPAD disponibles. Les résultats apparaissent dans le chat à gauche.</div>
+              </div>
+              <div class="s-docs">
+                <button class="s-doc" id="dl-visite">
+                  <span class="di">📋</span>
+                  <div class="dt"><div class="dn">Aide mémoire visite</div><div class="dd">Ne rien oublier lors de la visite d'un EHPAD</div></div>
+                </button>
+                <button class="s-doc" id="dl-dossier">
+                  <span class="di">📄</span>
+                  <div class="dt"><div class="dn">Dossier d'admission</div><div class="dd">Formulaire d'inscription EHPAD à compléter</div></div>
+                </button>
+                <button class="s-doc" id="dl-entree">
+                  <span class="di">📦</span>
+                  <div class="dt"><div class="dn">Aide mémoire entrée</div><div class="dd">Préparer l'hébergement en douceur</div></div>
+                </button>
+              </div>
+              <button class="s-newsearch" id="new-search-btn">🔄 Nouvelle recherche</button>
+            </div>
+
+            <div class="s-trust">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Données confidentielles · RGPD · Service gratuit
+            </div>
+
           </div>
+        </div><!-- /.form-side -->
 
-          <!-- Trust -->
-          <div class="s-trust">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Données confidentielles · RGPD · Service gratuit
-          </div>
+      </div><!-- /.ss-split -->
+    </section>
+  </div><!-- /#view-conversation -->
 
-        </div>
-      </div><!-- /.form-side -->
-
-    </div><!-- /.main-layout -->
-
-  </section>
-
-  <!-- ── FOOTER ── -->
-  <footer id="footer">
-    <div class="footer-logo">Smart<span>Seniors</span></div>
-    <p class="footer-sub">Conseillère Emma disponible 24h/24 · Recherche EHPAD gratuite et sans engagement</p>
-  </footer>
-
-  <!-- sr-only utility -->
-  <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}</style>
+</div><!-- /.ss-root -->
 
 <script>
-  /* ── Navigation helpers ── */
-  function scrollToMain() {
-    document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
+  /* ── Navigation : vues Accueil ⇄ Conversation ── */
+  function showView(name) {
+    document.querySelectorAll('.ss-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name)?.classList.add('active');
+    document.querySelectorAll('.ss-nav-seg button').forEach(b => {
+      const on = b.dataset.view === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
+  function showConversation() {
+    showView('conversation');
+    setTimeout(() => { try { input.focus(); } catch(e){} }, 80);
+  }
   function openFunnel() {
+    showConversation();
     const panel = document.querySelector('.form-side');
-    if (panel && !panel.classList.contains('funnel-open')) {
-      panel.classList.add('funnel-open');
+    panel?.classList.add('funnel-open');
+    if (window.matchMedia('(max-width:900px)').matches) {
+      setTimeout(() => panel?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
     }
-    document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
   }
 
-  /* ── Floating dots ── */
+  /* ── Floating dots (ambiance discrète du chat) ── */
   (function() {
-    const colors = ['#FF6B6B','#4ECDC4','#FFD93D','#A855F7','#3B82F6','#F97316','#EAA070','#6ee7b7'];
+    const colors = ['#FF6B6B','#4ECDC4','#FFD93D','#A855F7','#3B82F6','#F97316','#5BA8F5','#6ee7b7'];
     const bg = document.getElementById('dots-bg');
+    if (!bg) return;
     for (let i = 0; i < 7; i++) {
       const d = document.createElement('div');
       d.className = 'fdot';
@@ -1253,18 +587,32 @@
   });
 
   // Launch funnel CTA inside welcome
-  document.getElementById('launch-funnel-btn')?.addEventListener('click', () => {
-    openFunnel();
-  });
+  document.getElementById('launch-funnel-btn')?.addEventListener('click', () => { openFunnel(); });
 
+  // Suggestions in-chat (vide par défaut — les chips d'entrée sont dans le hero)
   suggsEl.querySelectorAll(".sugg-chip").forEach(btn => {
     btn.addEventListener("click", () => {
-      const text = btn.textContent.trim();
-      // Hospitalization or urgent: open funnel so Emma can guide them
+      const text = btn.dataset.chip || btn.textContent.trim();
       if (text.toLowerCase().includes('hospitalisé') || text.toLowerCase().includes('urgent')) openFunnel();
       sendMessage(text);
     });
   });
+
+  // Navigation : segments + CTAs + chips du hero
+  document.querySelectorAll('.ss-nav-seg button').forEach(b =>
+    b.addEventListener('click', () => showView(b.dataset.view)));
+  document.querySelectorAll('[data-go="conversation"]').forEach(b =>
+    b.addEventListener('click', () => showConversation()));
+  document.querySelectorAll('[data-scroll="how"]').forEach(b =>
+    b.addEventListener('click', () => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })));
+  document.querySelectorAll('.emma-chip[data-chip]').forEach(b =>
+    b.addEventListener('click', () => {
+      const text = b.dataset.chip;
+      showConversation();
+      const t = (text || '').toLowerCase();
+      if (t.includes('hospitalisé') || t.includes('urgent')) openFunnel();
+      setTimeout(() => sendMessage(text), 140);
+    }));
 
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
@@ -1286,15 +634,15 @@
 
   function createRow(role) {
     const row = document.createElement("div");
-    row.className = `row ${role}`;
+    row.className = `crow ${role}`;
     if (role === "bot") {
       const av = document.createElement("div");
-      av.className = "avatar";
+      av.className = "cav";
       av.innerHTML = avatarHTML();
       row.appendChild(av);
     }
     const bubble = document.createElement("div");
-    bubble.className = "bubble";
+    bubble.className = "cbub";
     row.appendChild(bubble);
     chatBox.appendChild(row);
     return bubble;
@@ -1302,13 +650,13 @@
 
   function showThinking() {
     const row = document.createElement("div");
-    row.className = "row bot"; row.id = "thinking-row";
+    row.className = "crow bot"; row.id = "thinking-row";
     const av = document.createElement("div");
-    av.className = "avatar"; av.innerHTML = avatarHTML();
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.innerHTML = `<div class="thinking-dots"><span></span><span></span><span></span></div>`;
-    row.appendChild(av); row.appendChild(bubble);
+    av.className = "cav"; av.innerHTML = avatarHTML();
+    const think = document.createElement("div");
+    think.className = "cthink";
+    think.innerHTML = `<span></span><span></span><span></span>`;
+    row.appendChild(av); row.appendChild(think);
     chatBox.appendChild(row); scrollDown();
   }
   function removeThinking() { document.getElementById("thinking-row")?.remove(); }
@@ -1346,7 +694,7 @@
       removeThinking();
       botBubble = createRow("bot");
       cursorEl = document.createElement("span");
-      cursorEl.className = "cursor";
+      cursorEl.className = "ccursor";
       botBubble.appendChild(cursorEl);
       scrollDown();
 
@@ -1371,7 +719,7 @@
               fullText += delta;
               botBubble.innerHTML = renderMarkdown(fullText);
               cursorEl = document.createElement("span");
-              cursorEl.className = "cursor";
+              cursorEl.className = "ccursor";
               botBubble.appendChild(cursorEl);
               scrollDown();
             }
@@ -1479,7 +827,7 @@
     ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
 
     const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1640,7 +988,6 @@
   // Date de naissance (pane 9) — calcul âge auto
   const dobEl = document.getElementById('s-dob');
   const ageDisplay = document.getElementById('age-display');
-  // Limite max = aujourd'hui
   dobEl.max = new Date().toISOString().split('T')[0];
   dobEl.addEventListener('input', () => {
     F.date_naissance_proche = dobEl.value;
@@ -1709,7 +1056,7 @@
 
   async function submitFunnel() {
     goPane(13);
-    document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('#view-conversation .chat-side')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     hideWelcome();
 
     // Score urgence
