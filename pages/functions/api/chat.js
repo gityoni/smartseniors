@@ -312,6 +312,16 @@ export async function onRequestPost(context) {
     });
   }
 
+  // Garde explicite : sans clé, on renvoie une erreur lisible (utile pour diagnostiquer
+  // un environnement Preview/Prod où ANTHROPIC_API_KEY n'est pas (encore) configurée).
+  if (!env.ANTHROPIC_API_KEY) {
+    console.error("ANTHROPIC_API_KEY manquante dans l'environnement Cloudflare.");
+    return new Response(JSON.stringify({ error: "Service IA non configuré (ANTHROPIC_API_KEY manquante)." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   // Prompt dynamique : base (mise en cache) + contexte prospect volatil
   const systemBlocks = [
     { type: "text", text: BASE_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },

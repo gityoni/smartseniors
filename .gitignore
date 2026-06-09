@@ -18,3 +18,5 @@ fiche.md
 .DS_Store
 node_modules/
 .env
+# Secrets locaux Cloudflare Pages (wrangler pages dev) — jamais committés
+.dev.vars
