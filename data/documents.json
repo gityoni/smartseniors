@@ -15,7 +15,7 @@
       "champs_lead": ["contact_prenom", "contact_nom", "contact_telephone", "contact_email", "lien_proche", "prenom_proche", "nom_proche", "genre_proche", "date_naissance_proche", "age_proche", "ville_proche_actuelle"],
       "champs_a_demander": ["adresse_complete_proche", "numero_securite_sociale", "medecin_traitant", "caisse_retraite"],
       "guardrail": null,
-      "fichier_source": null,
+      "fichier_source": "data/documents/sources/dossier-admission-ehpad.pdf",
       "actif": true
     },
     {
@@ -45,7 +45,7 @@
       "champs_lead": ["prenom_proche", "niveau_autonomie", "situation_actuelle"],
       "champs_a_demander": [],
       "guardrail": "Estimation indicative seulement. Le classement GIR officiel (qui ouvre l'APA) est établi par l'équipe médico-sociale du Conseil départemental.",
-      "fichier_source": null,
+      "fichier_source": "data/documents/sources/grille-aggir.pdf",
       "actif": true
     },
     {
