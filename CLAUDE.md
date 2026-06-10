@@ -35,7 +35,8 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
 | `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
 | `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
-| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma (OpenAI `gpt-4o-mini-tts`, voix au choix (`coral` défaut) + instructions « jeune Française, douce, débit conversationnel », cache edge par hash du texte, repli `tts-1-hd`) |
+| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma : **ElevenLabs prioritaire** (`eleven_multilingual_v2`, voix FR native via `ELEVENLABS_VOICE_ID`), secours OpenAI `gpt-4o-mini-tts` (`coral`), cache edge par hash moteur+voix+texte |
+| `pages/functions/api/tts-voices.js` + `pages/voix-test.html` | Outil interne de choix de voix : liste/écoute les voix FR ElevenLabs (compte + Voice Library), adopte et teste la réplique d'Emma — à verrouiller après choix |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires (**consentement** : `non` → n° conseiller à la place du tél famille) |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
 | `pages/confidentialite.html` | Page RGPD / mentions |
@@ -140,7 +141,10 @@ modifier fichiers
 | Variable | Usage |
 |---|---|
 | `ANTHROPIC_API_KEY` | Clé API Anthropic (secret, jamais committée) |
-| `OPENAI_API_KEY` | Clé OpenAI pour la voix studio d'Emma `/api/tts` (secret) |
+| `ELEVENLABS_API_KEY` | Clé ElevenLabs — moteur prioritaire de la voix d'Emma `/api/tts` (accent FR natif) |
+| `ELEVENLABS_VOICE_ID` | Voix ElevenLabs d'Emma (choisie via `/voix-test`) |
+| `ELEVENLABS_MODEL` | (optionnel) `eleven_multilingual_v2` (défaut) · `eleven_v3`, `eleven_turbo_v2_5`… |
+| `OPENAI_API_KEY` | Clé OpenAI — voix de secours `/api/tts` (secret) |
 | `OPENAI_TTS_VOICE` | (optionnel) voix OpenAI : `coral` (défaut), `shimmer`, `nova`, `sage`… |
 | `BACKOFFICE_EMAIL` | Destinataire de la notification interne de lead (défaut `leads@smartseniors.fr`) |
 | `DB` | Binding D1 (configuré dans wrangler.toml) |
