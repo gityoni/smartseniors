@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>SmartSeniors — Test des voix d'Emma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Nunito', sans-serif; background: #F1F7F5; color: #16302B; margin: 0; padding: 32px 16px; }
+  .wrap { max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 900; margin: 0 0 4px; }
+  p.lede { color: #5E7E78; margin: 0 0 22px; font-size: .95rem; }
+  .phrase { background: #fff; border: 1px solid #DCE9E4; border-radius: 12px; padding: 12px 16px; font-size: .9rem; color: #5E7E78; font-style: italic; margin-bottom: 22px; }
+  .voice { display: flex; align-items: center; gap: 14px; background: #fff; border: 1.5px solid #DCE9E4; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; transition: border-color .2s; }
+  .voice.playing { border-color: #5B8DEF; }
+  .voice button { width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(135deg, #5B8DEF, #9D8CF0); color: #fff; font-size: 1.1rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .voice button:disabled { opacity: .5; cursor: wait; }
+  .voice .nm { font-weight: 900; font-size: 1.02rem; }
+  .voice .desc { font-size: .8rem; color: #5E7E78; margin-top: 2px; }
+  .voice .tag { margin-left: auto; font-size: .68rem; font-weight: 800; color: #5B8DEF; background: rgba(91,141,239,.12); border-radius: 99px; padding: 4px 10px; white-space: nowrap; }
+  .note { font-size: .78rem; color: #5E7E78; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎧 Choisir la voix d'Emma</h1>
+  <p class="lede">Même réplique, mêmes instructions (accent France, débit conversationnel) — seule la voix change.</p>
+  <div class="phrase">« Vous avez fait un maximum, bravo. Peu de familles s'occupent de leurs parents aussi longtemps. Il y a un moment où ça dépasse ce qu'on peut faire, même pour ceux qu'on aime. Comment va votre maman, en ce moment ? »</div>
+  <div id="list"></div>
+  <p class="note">La première lecture de chaque voix peut prendre 2-3 s (génération) ; ensuite c'est instantané (cache). Une fois choisie : variable <b>OPENAI_TTS_VOICE</b> dans Cloudflare, ou dites-le à Claude.</p>
+</div>
+<script>
+const PHRASE = "Vous avez fait un maximum, bravo. Peu de familles s'occupent de leurs parents aussi longtemps. Il y a un moment où ça dépasse ce qu'on peut faire, même pour ceux qu'on aime. Comment va votre maman, en ce moment ?";
+const VOICES = [
+  ['coral',   'Jeune, pétillante, chaleureuse', 'défaut actuel'],
+  ['marin',   'Dernière génération, très naturelle', ''],
+  ['shimmer', 'La plus douce / feutrée', ''],
+  ['sage',    'Posée, un peu plus mûre', ''],
+  ['cedar',   'Dernière génération, neutre', ''],
+  ['ballad',  'Calme, narratif', ''],
+  ['nova',    'L’ex-« Suisse », re-testée avec les nouvelles instructions', ''],
+];
+const list = document.getElementById('list');
+let current = null;
+const cache = new Map();
+VOICES.forEach(([v, desc, tag]) => {
+  const row = document.createElement('div');
+  row.className = 'voice';
+  row.innerHTML = `<button aria-label="Écouter ${v}">▶</button><div><div class="nm">${v}</div><div class="desc">${desc}</div></div>${tag ? `<span class="tag">${tag}</span>` : ''}`;
+  const btn = row.querySelector('button');
+  btn.addEventListener('click', async () => {
+    if (current) { current.audio.pause(); current.row.classList.remove('playing'); current.btn.textContent = '▶'; if (current.row === row) { current = null; return; } current = null; }
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      if (!cache.has(v)) {
+        const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: PHRASE, voice: v }) });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        cache.set(v, URL.createObjectURL(await r.blob()));
+      }
+      const audio = new Audio(cache.get(v));
+      current = { audio, row, btn };
+      row.classList.add('playing'); btn.textContent = '⏸';
+      audio.onended = () => { row.classList.remove('playing'); btn.textContent = '▶'; if (current && current.row === row) current = null; };
+      await audio.play();
+    } catch (e) {
+      btn.textContent = '✕'; row.querySelector('.desc').textContent = 'Erreur : ' + e.message;
+    } finally { btn.disabled = false; }
+  });
+  list.appendChild(row);
+});
+</script>
+</body>
+</html>
