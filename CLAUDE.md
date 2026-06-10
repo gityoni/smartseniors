@@ -142,7 +142,7 @@ modifier fichiers
 |---|---|
 | `ANTHROPIC_API_KEY` | Clé API Anthropic (secret, jamais committée) |
 | `ELEVENLABS_API_KEY` | Clé ElevenLabs — moteur prioritaire de la voix d'Emma `/api/tts` (accent FR natif) |
-| `ELEVENLABS_VOICE_ID` | Voix ElevenLabs d'Emma (choisie via `/voix-test`) |
+| `ELEVENLABS_VOICE_ID` | (optionnel) surcharge la voix d'Emma — défaut codé : **Shana** `vUH2A53pJe77Jd2xNGHv` |
 | `ELEVENLABS_MODEL` | (optionnel) `eleven_multilingual_v2` (défaut) · `eleven_v3`, `eleven_turbo_v2_5`… |
 | `OPENAI_API_KEY` | Clé OpenAI — voix de secours `/api/tts` (secret) |
 | `OPENAI_TTS_VOICE` | (optionnel) voix OpenAI : `coral` (défaut), `shimmer`, `nova`, `sage`… |

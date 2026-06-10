@@ -22,6 +22,10 @@ const INSTRUCTIONS =
 // Voix OpenAI autorisées en surcharge par requête (comparaison / préférence)
 const OPENAI_VOICES = new Set(["alloy", "ash", "ballad", "coral", "echo", "fable", "marin", "cedar", "nova", "onyx", "sage", "shimmer", "verse"]);
 
+// Voix officielle d'Emma : « Shana - Neutral & Professional » (Voice Library, adoptée
+// dans le compte via /voix-test le 10/06). Surchargeable par ELEVENLABS_VOICE_ID.
+const DEFAULT_ELEVEN_VOICE = "vUH2A53pJe77Jd2xNGHv";
+
 // Réglages ElevenLabs « jeune, pétillante, chaleureuse » : stabilité basse = plus vivant.
 const ELEVEN_SETTINGS = { stability: 0.45, similarity_boost: 0.8, style: 0.4, use_speaker_boost: true };
 
@@ -61,9 +65,9 @@ async function cachePut(context, keyStr, audio) {
   );
 }
 
-function audioResponse(audio, cacheState) {
+function audioResponse(audio, cacheState, engine) {
   return new Response(audio, {
-    headers: { "Content-Type": "audio/mpeg", "X-TTS-Cache": cacheState, ...CORS },
+    headers: { "Content-Type": "audio/mpeg", "X-TTS-Cache": cacheState, "X-TTS-Engine": engine, ...CORS },
   });
 }
 
@@ -101,20 +105,20 @@ export async function onRequestPost(context) {
   const elVoice =
     typeof body.voice_id === "string" && /^[A-Za-z0-9]{8,48}$/.test(body.voice_id)
       ? body.voice_id
-      : env.ELEVENLABS_VOICE_ID || null;
+      : env.ELEVENLABS_VOICE_ID || DEFAULT_ELEVEN_VOICE;
   const elModel = env.ELEVENLABS_MODEL || "eleven_multilingual_v2";
   const wantsOpenai = OPENAI_VOICES.has(body.voice); // demande explicite d'une voix OpenAI
 
   if (env.ELEVENLABS_API_KEY && elVoice && !wantsOpenai) {
     const keyStr = `el|${elVoice}|${elModel}|${JSON.stringify(ELEVEN_SETTINGS)}|${text}`;
     const cached = await cacheGet(keyStr);
-    if (cached) return audioResponse(cached, "HIT");
+    if (cached) return audioResponse(cached, "HIT", "elevenlabs");
 
     const upstream = await elevenSpeech(env, text, elVoice, elModel);
     if (upstream.ok) {
       const audio = await upstream.arrayBuffer();
       await cachePut(context, keyStr, audio);
-      return audioResponse(audio, "MISS");
+      return audioResponse(audio, "MISS", "elevenlabs");
     }
     console.error("ElevenLabs TTS error:", upstream.status, await upstream.text());
     // → on tente le secours OpenAI ci-dessous
@@ -133,7 +137,7 @@ export async function onRequestPost(context) {
   const voice = OPENAI_VOICES.has(body.voice) ? body.voice : env.OPENAI_TTS_VOICE || "coral";
   const keyStr = `oa|${voice}|${INSTRUCTIONS}|${text}`;
   const cached = await cacheGet(keyStr);
-  if (cached) return audioResponse(cached, "HIT");
+  if (cached) return audioResponse(cached, "HIT", "openai");
 
   let upstream = await openaiSpeech(env, {
     model: "gpt-4o-mini-tts",
@@ -157,7 +161,7 @@ export async function onRequestPost(context) {
 
   const audio = await upstream.arrayBuffer();
   await cachePut(context, keyStr, audio);
-  return audioResponse(audio, "MISS");
+  return audioResponse(audio, "MISS", "openai");
 }
 
 export async function onRequestOptions() {

@@ -40,7 +40,8 @@
 ## 🔴 À faire — prod / données (côté toi, Cloudflare)
 - [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`). *Toujours nécessaire pour l'**envoi des emails partenaires*** (le fallback `_partners.js` ne couvre que l'affichage `/api/ehpads`).
 - [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
-- [ ] **`ELEVENLABS_API_KEY`** à ajouter dans Cloudflare (Production **et** Aperçu) → choisir la voix sur `/voix-test` → poser **`ELEVENLABS_VOICE_ID`** (ou le donner à Claude). Retirer/verrouiller `/voix-test` + `/api/tts-voices` ensuite.
+- [x] **`ELEVENLABS_API_KEY`** posée (Prod + Aperçu) · voix d'Emma choisie : **Shana** (`vUH2A53pJe77Jd2xNGHv`, défaut codé dans `tts.js`).
+- [ ] **Verrouiller/retirer `/voix-test` + `/api/tts-voices`** maintenant que la voix est choisie (outil interne ouvert).
 - [x] **`OPENAI_API_KEY`** à ajouter dans Cloudflare (Production **et** Aperçu, comme la clé Anthropic) pour la voix studio d'Emma `/api/tts`. Optionnel : `OPENAI_TTS_VOICE` (`nova` défaut, sinon `coral`/`shimmer`).
 - [x] **`ANTHROPIC_API_KEY` en environnement Preview** — fait le 10/06 (Paramètres → « Choisir l'environnement : Aperçu » → Variables et secrets) ; mode Live vérifié OK sur la preview de branche.
 - [ ] Vérifier binding `DB` + `BACKOFFICE_EMAIL`.
