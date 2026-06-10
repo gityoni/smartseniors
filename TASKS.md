@@ -11,6 +11,7 @@
 - **`_geo.js`** : `findDept()` partagé `ehpads.js` + `leads.js` (normalisation accents/tirets/st→saint, mots entiers).
 - **Consentement bout en bout** (règle métier) : étape oui/non au pane contact du funnel `index.html` → `contact_consent` dans le lead → email partenaire bascule sur le **n° conseiller `07 57 99 11 40`** si « non » (HTML + texte brut, tél/email famille masqués) → consigne passée à Emma via le contexte funnel.
 - **Budget réellement collecté** : select optionnel au pane contact (`moins_2000` / `2000_3000` / `3000_plus` — labels déjà gérés par l'email) ; `F.budget_mensuel` n'existait pas → partait toujours vide.
+- **Voix d'Emma dans la démo** : toggle 🔊 (Web Speech API, voix fr du navigateur, OFF par défaut — un clic l'active) ; le scénario attend la fin de la lecture, Pause gèle la voix, lecture aussi en mode Live.
 - **Démo mode Live affiné** : le dossier remplit aussi **Adresse** + **Contact souhaité** (extract enrichi : `adresse_proche`, `contact_consent`), **score d'urgence animé en Live** (même heuristique que le funnel), erreur lisible si `ANTHROPIC_API_KEY` absente (au lieu de « une erreur est survenue »).
 
 ### Frontend famille — design « Aurore »
@@ -49,6 +50,7 @@
 - [ ] **Moteur de génération de docs** (HTML→PDF pré-rempli) — pour de vrai (aujourd'hui simulé dans la démo) ; brancher sur les champs du lead ; remplacer les boutons `dl-visite`/`dl-dossier`/`dl-entree` de `index.html`.
 - [ ] **Itinéraire** : data station/coords par résidence + lien RATP/Citymapper (aujourd'hui simulé).
 - [ ] **Vidéo** : vidéothèque par résidence (aujourd'hui une vidéo placeholder).
+- [ ] **Voix premium** (option) : pré-générer les répliques du scénario en MP3 (ElevenLabs / OpenAI TTS) pour une voix studio identique sur toutes les machines — la Web Speech API dépend des voix installées sur le poste.
 - [ ] **Adresses Conseils départementaux** par dept (pour le doc APA).
 - [ ] Schéma `leads` : ajouter `adresse_proche` + `contact_consent` si on persiste ces champs (le consentement est désormais **collecté et appliqué à l'email**, mais pas encore stocké en D1).
 - [ ] **Durcir l'anonymisation** du notebook Colab (lieux/hôpitaux résiduels) → committer les fiches scrubbées si besoin.

@@ -37,6 +37,12 @@
   .ss-root .chat-pause svg { width: 13px; height: 13px; }
   .ss-root .chat-pause.is-paused { background: #0E3B33; box-shadow: 0 3px 12px rgba(14,59,51,.4); }
   .ss-root .chat-pause:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  /* bouton voix : sobre éteint, dégradé + blanc activé ; masqué si le navigateur ne sait pas parler */
+  .ss-root .chat-voice { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: 1.5px solid var(--c-line); background: transparent; color: var(--c-ink-soft); border-radius: 999px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; }
+  .ss-root .chat-voice svg { width: 13px; height: 13px; }
+  .ss-root .chat-voice:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  .ss-root .chat-voice.on { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
+  .ss-root .chat-voice.unsupported { display: none; }
   /* widget AGGIR */
   .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
   .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
@@ -131,6 +137,10 @@
           </div>
           <div><div class="nm">Emma</div><div class="rl">Conseillère EHPAD · En ligne</div></div>
           <div class="demo-actions">
+            <button class="chat-voice" id="voice" type="button" aria-pressed="false" aria-label="Activer la voix d'Emma">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              <span>Voix</span>
+            </button>
             <button class="chat-pause" id="pause" type="button" disabled aria-label="Mettre la démo en pause" aria-pressed="false">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
               <span>Pause</span>
@@ -232,6 +242,51 @@ async function wait(ms) {
 }
 const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
 
+/* ── Voix d'Emma (synthèse vocale du navigateur, aucune API) ── */
+const voiceBtn = document.getElementById('voice');
+const TTS_OK = 'speechSynthesis' in window;
+let voiceOn = false, frVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('fr'));
+  const prefs = ['amelie', 'amélie', 'audrey', 'aurelie', 'aurélie', 'marie', 'julie', 'hortense', 'google français', 'denise'];
+  frVoice = vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+}
+if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+else voiceBtn.classList.add('unsupported');
+const speakable = (t) => t
+  .replace(/\*\*/g, '')
+  .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+  .replace(/→/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
+// Parle (si la voix est activée) et résout quand Emma a fini — le scénario attend la fin.
+// stopSpeech() libère aussi les attentes en cours (certains navigateurs n'émettent rien sur cancel()).
+let speakWaiters = [];
+function speak(text) {
+  if (!voiceOn || !TTS_OK) return Promise.resolve();
+  return new Promise(res => {
+    speakWaiters.push(res);
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    if (frVoice) u.voice = frVoice;
+    u.lang = 'fr-FR';
+    u.rate = Math.min(1.5, Math.max(0.85, pace()));
+    u.pitch = 1.04;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+function stopSpeech() {
+  if (TTS_OK) { try { speechSynthesis.cancel(); } catch {} }
+  const w = speakWaiters; speakWaiters = []; w.forEach(fn => fn());
+}
+voiceBtn.addEventListener('click', () => {
+  voiceOn = !voiceOn;
+  voiceBtn.classList.toggle('on', voiceOn);
+  voiceBtn.setAttribute('aria-pressed', String(voiceOn));
+  voiceBtn.setAttribute('aria-label', voiceOn ? "Couper la voix d'Emma" : "Activer la voix d'Emma");
+  if (!voiceOn) stopSpeech();
+});
+// Anti-coupure Chrome : la synthèse se fige après ~15 s de parole continue sans pause/resume.
+if (TTS_OK) setInterval(() => { if (speechSynthesis.speaking && !speechSynthesis.paused) { speechSynthesis.pause(); speechSynthesis.resume(); } }, 12000);
+
 function renderFieldsInit() {
   fieldsEl.innerHTML = FIELDS.map(f => `
     <div class="lfield" data-key="${f.key}">
@@ -271,11 +326,14 @@ async function botSay(text) {
   // thinking
   const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
   chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
+  const said = speak(text);
   // stream
   const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
   const words = text.split(" "); let acc = "";
   for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
   b.innerHTML = mdBold(acc);
+  await said;
 }
 async function userSay(text) {
   await wait(520);
@@ -421,6 +479,7 @@ function updatePauseUI() {
 function setPaused(p) {
   if (!running) return;
   paused = p;
+  if (TTS_OK) { try { p ? speechSynthesis.pause() : speechSynthesis.resume(); } catch {} }
   if (!paused) releasePause();
   updatePauseUI();
   document.getElementById("mode-note").textContent = paused ? "⏸ Démo en pause" : "Scénario en cours…";
@@ -428,8 +487,8 @@ function setPaused(p) {
 
 // Arrête proprement le scénario en cours et attend qu'il se soit dénoué (utilisé avant la bascule Live).
 async function stopScript() {
-  if (!running && !starting) { cancelRequested = false; return; }
-  cancelRequested = true; paused = false; releasePause();
+  if (!running && !starting) { cancelRequested = false; stopSpeech(); return; }
+  cancelRequested = true; paused = false; releasePause(); stopSpeech();
   await runDone;
   cancelRequested = false;
 }
@@ -438,9 +497,9 @@ async function stopScript() {
 async function startScript() {
   if (starting) return;                       // ignore les double-clics pendant la bascule
   starting = true;
-  if (running) { cancelRequested = true; paused = false; releasePause(); }
+  if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
   await runDone;                              // attend la fin (le dénouement) du run précédent
-  cancelRequested = false; paused = false;
+  cancelRequested = false; paused = false; stopSpeech();
   let resolveDone; runDone = new Promise(r => resolveDone = r);
   running = true;
   setMode('demo'); resetDossier(); chatBox.innerHTML = "";
@@ -497,7 +556,7 @@ async function liveSend(text) {
         try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
     bb.innerHTML = mdBold(full);
   } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = apiErr ? "⚠️ " + apiErr : "Désolé, une erreur est survenue."; }
-  if (full) LIVE.history.push({ role:"assistant", content:full });
+  if (full) { LIVE.history.push({ role:"assistant", content:full }); speak(full); }
   liveBusy = false; sendBtn.disabled = false; down();
   liveExtract();
 }
