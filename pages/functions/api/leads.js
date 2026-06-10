@@ -3,7 +3,15 @@
  * 1. Sauvegarde le lead en D1
  * 2. Récupère les EHPAD partenaires du département
  * 3. Envoie un email de lead à chaque EHPAD via MailChannels
+ *
+ * Consentement (règle métier) : si contact_consent = "non", la famille ne veut pas
+ * être appelée directement → l'email partenaire affiche le numéro du conseiller
+ * SmartSeniors à la place des coordonnées de la famille.
  */
+
+import { findDept } from './_geo.js';
+
+const CONSEILLER_TEL = '07 57 99 11 40';
 
 // ── Labels lisibles ──────────────────────────────────────────────
 const TYPE_LABEL = {
@@ -34,25 +42,6 @@ const SITUATION_LABEL = {
   autre_residence:  'Autre résidence',
   autre:            'Autre',
 };
-
-// ── Extraction département depuis localite ────────────────────────
-function extractDept(localite) {
-  if (!localite) return null;
-  const cp = localite.match(/\b(\d{2})\d{3}\b/);
-  if (cp) return cp[1];
-  const d2 = localite.trim().match(/^(\d{2})/);
-  if (d2) return d2[1];
-  const map = {
-    paris:'75', lyon:'69', marseille:'13', bordeaux:'33',
-    nice:'06', toulouse:'31', lille:'59', strasbourg:'67',
-    nantes:'44', rennes:'35', montpellier:'34', grenoble:'38',
-  };
-  const l = localite.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  for (const [city, dept] of Object.entries(map)) {
-    if (l.includes(city)) return dept;
-  }
-  return null;
-}
 
 // ── Calcul âge depuis date de naissance ──────────────────────────
 function calcAge(dateStr) {
@@ -122,7 +111,16 @@ function buildLeadEmail(lead, ehpadNom) {
       ${lead.budget_mensuel ? `<div class="row"><span class="lbl">Budget mensuel</span><span class="val">${lead.budget_mensuel.replace(/_/g,' ').replace('moins 2000','Moins de 2 000 €').replace('2000 3000','2 000 – 3 000 €').replace('3000 plus','Plus de 3 000 €')}</span></div>` : ''}
     </div>
 
-    <div class="section">
+    ${lead.contact_consent === 'non' ? `<div class="section">
+      <div class="section-title">Contact — via votre conseiller SmartSeniors</div>
+      <div class="row"><span class="lbl">Famille</span><span class="val big">${lead.contact_prenom || ''} ${lead.contact_nom || '—'}</span></div>
+      <div class="row"><span class="lbl">Conseiller SmartSeniors</span><span class="val big" style="color:#D4824A;">📞 ${CONSEILLER_TEL}</span></div>
+      <div class="row"><span class="lbl">Important</span><span class="val">La famille ne souhaite pas être appelée directement. Contactez le conseiller, qui fait le lien.</span></div>
+    </div>
+
+    <a class="cta" href="tel:${CONSEILLER_TEL.replace(/\s/g, '')}">
+      📞 Appeler le conseiller SmartSeniors
+    </a>` : `<div class="section">
       <div class="section-title">Contact famille — À appeler EN PRIORITÉ</div>
       <div class="row"><span class="lbl">Nom</span><span class="val big">${lead.contact_prenom || ''} ${lead.contact_nom || '—'}</span></div>
       <div class="row"><span class="lbl">Téléphone</span><span class="val big" style="color:#D4824A;">📞 ${lead.contact_telephone || '—'}</span></div>
@@ -131,7 +129,7 @@ function buildLeadEmail(lead, ehpadNom) {
 
     <a class="cta" href="mailto:${lead.contact_email || ''}?subject=Suite à votre demande EHPAD SmartSeniors&body=Bonjour ${lead.contact_prenom || ''},">
       ✉️ Répondre à la famille maintenant
-    </a>
+    </a>`}
 
   </div>
   <div class="footer">
@@ -157,7 +155,9 @@ async function sendLeadEmail(toEmail, toNom, lead) {
       from: { email: 'leads@smartseniors.fr', name: 'SmartSeniors — Leads' },
       subject,
       content: [
-        { type: 'text/plain', value: `Nouveau prospect SmartSeniors\n\nPersonne âgée : ${lead.prenom_proche || ''} ${lead.nom_proche || ''}\nDate de naissance : ${lead.date_naissance_proche || '—'}\nNiveau autonomie : ${GIR_LABEL[lead.niveau_autonomie] || '—'}\n\nRecherche : ${typeRes} à ${lead.ville_recherche || '—'}\nDélai : ${DELAI_LABEL[lead.delai] || '—'}\n\nContact famille :\nNom : ${lead.contact_prenom || ''} ${lead.contact_nom || ''}\nTél : ${lead.contact_telephone || '—'}\nEmail : ${lead.contact_email || '—'}` },
+        { type: 'text/plain', value: `Nouveau prospect SmartSeniors\n\nPersonne âgée : ${lead.prenom_proche || ''} ${lead.nom_proche || ''}\nDate de naissance : ${lead.date_naissance_proche || '—'}\nNiveau autonomie : ${GIR_LABEL[lead.niveau_autonomie] || '—'}\n\nRecherche : ${typeRes} à ${lead.ville_recherche || '—'}\nDélai : ${DELAI_LABEL[lead.delai] || '—'}\n\n${lead.contact_consent === 'non'
+          ? `Contact via le conseiller SmartSeniors (la famille ne souhaite pas être appelée directement) :\nFamille : ${lead.contact_prenom || ''} ${lead.contact_nom || ''}\nConseiller : ${CONSEILLER_TEL}`
+          : `Contact famille :\nNom : ${lead.contact_prenom || ''} ${lead.contact_nom || ''}\nTél : ${lead.contact_telephone || '—'}\nEmail : ${lead.contact_email || '—'}`}` },
         { type: 'text/html', value: html },
       ],
     }),
@@ -198,7 +198,7 @@ export async function onRequestPost(context) {
     lien_proche:            s(body.lien_proche, 50),
     delai:                  s(body.delai, 50),
     ville_recherche:        s(body.ville_recherche || body.ville || body.localite, 200),
-    departement:            s(body.departement || extractDept(body.ville_recherche || body.ville || body.localite), 10),
+    departement:            s(body.departement || findDept(body.ville_recherche || body.ville || body.localite), 10),
     rayon_km:               parseInt(body.rayon_km) || 20,
     budget_mensuel:         s(body.budget_mensuel, 50),
     nb_personnes:           parseInt(body.nb_personnes) || 1,
@@ -211,6 +211,7 @@ export async function onRequestPost(context) {
     niveau_autonomie:       s(body.niveau_autonomie, 50),
     ville_proche_actuelle:  s(body.ville_proche_actuelle, 200),
     score_urgence:          parseInt(body.score_urgence) || 0,
+    contact_consent:        s(body.contact_consent, 10).toLowerCase() === 'non' ? 'non' : 'oui',
     statut:                 s(body.statut || 'nouveau', 20),
     source:                 s(body.source || 'funnel', 50),
     nb_etapes_completees:   parseInt(body.nb_etapes_completees) || 0,

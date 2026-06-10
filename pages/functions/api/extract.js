@@ -22,6 +22,7 @@ const LEAD_TOOL = {
       prenom_proche:         { type: "string",  description: "Prénom du senior" },
       nom_proche:            { type: "string",  description: "Nom de famille du senior" },
       date_naissance_proche: { type: "string",  description: "Date de naissance AAAA-MM-JJ, uniquement si donnée" },
+      adresse_proche:        { type: "string",  description: "Adresse actuelle du senior (rue, code postal, ville) si donnée" },
       age_proche:            { type: "integer", description: "Âge du senior si donné" },
       genre_proche:          { type: "string",  enum: ["homme", "femme"] },
       lien_proche:           { type: "string",  enum: ["parent", "conjoint", "grand_parent", "moi_meme", "ass_sociale", "autre"], description: "Lien du contact avec le senior : parent (cherche pour son père/mère), conjoint, grand_parent (cherche pour un grand-parent), moi_meme, ass_sociale, autre" },
@@ -37,6 +38,7 @@ const LEAD_TOOL = {
       contact_nom:           { type: "string",  description: "Nom de la personne qui contacte" },
       contact_telephone:     { type: "string" },
       contact_email:         { type: "string" },
+      contact_consent:       { type: "string",  enum: ["oui", "non"], description: "oui si la famille accepte que les résidences la recontactent directement ; non si elle préfère passer par un conseiller. Uniquement si la question a été posée et la famille a répondu." },
     },
   },
 };
@@ -50,6 +52,7 @@ Règles strictes :
 - delai = urgent si "dès que possible", "sortie d'hôpital imminente", ou moins de 15 jours.
 - situation_actuelle = hopital si la personne est hospitalisée OU en SSR/clinique/soins de suite ; autre_residence si déjà en EHPAD/résidence ; famille si hébergée chez un proche.
 - niveau_autonomie : déduis-le de la description (troubles cognitifs, aide toilette/repas, mobilité).
+- contact_consent : uniquement si Emma a demandé si les résidences peuvent recontacter directement ET que la famille a répondu (oui/non).
 Appelle TOUJOURS l'outil maj_lead.`;
 
 function jsonResponse(obj, status, cors) {

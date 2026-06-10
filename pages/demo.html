@@ -470,9 +470,13 @@ async function liveSend(text) {
   LIVE.history.push({ role:"user", content:text }); down();
   const tk = rowEl("bot"); const tt = document.createElement("div"); tt.className = "cthink"; tt.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(tt); chatBox.appendChild(tk); down();
   let full = "", bb = null;
+  let apiErr = "";
   try {
     const resp = await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ message:text, history:LIVE.history.slice(0,-1), funnel:LIVE.lead }) });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    if (!resp.ok) {
+      try { apiErr = (await resp.json())?.error || ""; } catch {}
+      throw new Error("HTTP " + resp.status);
+    }
     tk.remove(); const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r);
     const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
     while (true) { const { done, value } = await reader.read(); if (done) break;
@@ -480,7 +484,7 @@ async function liveSend(text) {
       for (const line of lines) { if (!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if (d === "[DONE]") continue;
         try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
     bb.innerHTML = mdBold(full);
-  } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = "Désolé, une erreur est survenue."; }
+  } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = apiErr ? "⚠️ " + apiErr : "Désolé, une erreur est survenue."; }
   if (full) LIVE.history.push({ role:"assistant", content:full });
   liveBusy = false; sendBtn.disabled = false; down();
   liveExtract();
@@ -497,8 +501,30 @@ async function liveExtract() {
     set('situation', SITL[l.situation_actuelle]); set('autonomie', GIRL[l.niveau_autonomie]); set('type', TYPEL[l.type_residence]);
     const zone = l.ville_recherche || l.code_postal; if (zone) set('zone', zone + (l.rayon_km ? ` · ${l.rayon_km} km` : ""));
     set('budget', l.budget_mensuel); set('delai', DELL[l.delai]);
+    set('adresse', l.adresse_proche);
     const c = [l.contact_prenom, l.contact_nom].filter(Boolean).join(" "); const co = [c, l.contact_telephone, l.contact_email].filter(Boolean).join(" · "); if (co) set('contact', co);
+    if (l.contact_consent === 'non') set('consent', `Non — via conseiller ${CONSEILLER_TEL}`);
+    else if (l.contact_consent === 'oui') set('consent', 'Oui — recontact direct par les résidences');
+    liveScoreUpdate(l);
   } catch {}
+}
+// Score d'urgence live — même heuristique que le funnel index.html (affiché dès que le délai est connu)
+function liveScoreUpdate(l) {
+  if (mode !== 'live' || !l.delai) return;
+  let sc = 0;
+  if (l.delai === 'urgent' || l.delai === '1_mois') sc += 4; else if (l.delai === '1_3_mois') sc += 2;
+  if (l.type_residence === 'ehpad_medicalise' || l.type_residence === 'alzheimer') sc += 3;
+  if (l.niveau_autonomie === 'tres_dependant' || l.niveau_autonomie === 'semi_dependant') sc += 1;
+  if (l.contact_telephone) sc += 2;
+  if (l.contact_email) sc += 1;
+  if (l.situation_actuelle === 'hopital') sc += 1;
+  sc = Math.min(sc, 10);
+  const statut = sc >= 7 ? 'chaud' : sc >= 4 ? 'tiede' : 'froid';
+  document.getElementById('lead-score').classList.add('on');
+  document.getElementById('ls-meter').style.width = (sc * 10) + '%';
+  const b = document.getElementById('ls-badge');
+  b.className = 'ls-badge ' + statut;
+  b.textContent = (statut === 'chaud' ? '🔥 Chaud' : statut === 'tiede' ? '⚡ Tiède' : '❄ Froid') + ` · ${sc}/10`;
 }
 
 /* ── Modes & wiring ── */
