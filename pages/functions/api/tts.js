@@ -11,9 +11,14 @@
  */
 
 const INSTRUCTIONS =
-  "Parle en français naturel. Tu es Emma, une jeune conseillère d'environ 25 ans : " +
-  "voix douce, chaleureuse et rassurante, énergie positive mais posée, ton bienveillant et souriant. " +
-  "Articulation claire, rythme calme, aucune sonorité métallique ou robotique.";
+  "Tu es Emma, conseillère téléphonique française d'environ 25 ans, chaleureuse et rassurante. " +
+  "Accent : français standard de France métropolitaine (parisien neutre) — surtout pas d'accent suisse, belge ou québécois. " +
+  "Débit : conversationnel et vivant, ni lent ni pressé ; micro-pauses naturelles aux virgules, respiration discrète entre les phrases. " +
+  "Intonation : variée et humaine — descend en fin d'affirmation, légère montée chaleureuse sur les questions ; sourire audible. " +
+  "Style : douce, posée, empathique, comme une vraie conversation téléphonique avec une famille — jamais monotone, jamais récitée, aucune sonorité robotique ou de voix de synthèse.";
+
+// Voix OpenAI autorisées en surcharge par requête (comparaison / préférence)
+const VOICES = new Set(["alloy", "ash", "ballad", "coral", "echo", "fable", "marin", "cedar", "nova", "onyx", "sage", "shimmer", "verse"]);
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -58,7 +63,7 @@ export async function onRequestPost(context) {
     return jsonError("Voix studio non configurée (OPENAI_API_KEY manquante).", 503);
   }
 
-  const voice = env.OPENAI_TTS_VOICE || "nova";
+  const voice = VOICES.has(body.voice) ? body.voice : (env.OPENAI_TTS_VOICE || "coral");
 
   // Cache edge : un même texte (même voix) n'est généré qu'une seule fois.
   const digest = await crypto.subtle.digest(

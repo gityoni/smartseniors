@@ -35,7 +35,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
 | `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
 | `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
-| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma (OpenAI `gpt-4o-mini-tts`, voix `nova` + instructions « jeune, douce », cache edge par hash du texte, repli `tts-1-hd`) |
+| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma (OpenAI `gpt-4o-mini-tts`, voix au choix (`coral` défaut) + instructions « jeune Française, douce, débit conversationnel », cache edge par hash du texte, repli `tts-1-hd`) |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires (**consentement** : `non` → n° conseiller à la place du tél famille) |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
 | `pages/confidentialite.html` | Page RGPD / mentions |
@@ -141,7 +141,7 @@ modifier fichiers
 |---|---|
 | `ANTHROPIC_API_KEY` | Clé API Anthropic (secret, jamais committée) |
 | `OPENAI_API_KEY` | Clé OpenAI pour la voix studio d'Emma `/api/tts` (secret) |
-| `OPENAI_TTS_VOICE` | (optionnel) voix OpenAI : `nova` (défaut), `coral`, `shimmer`, `sage`… |
+| `OPENAI_TTS_VOICE` | (optionnel) voix OpenAI : `coral` (défaut), `shimmer`, `nova`, `sage`… |
 | `BACKOFFICE_EMAIL` | Destinataire de la notification interne de lead (défaut `leads@smartseniors.fr`) |
 | `DB` | Binding D1 (configuré dans wrangler.toml) |
 

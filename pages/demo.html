@@ -258,7 +258,8 @@ const speakable = (t) => t
   .replace(/\*\*/g, '')
   .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
   .replace(/→/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
-const vRate = () => Math.min(1.5, Math.max(0.85, pace()));
+// Vitesse de lecture : jamais sous 1× (ralentir une voix la rend artificielle) ; suit le curseur au-dessus.
+const vRate = () => Math.min(1.5, Math.max(1, pace()));
 // Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
 const ttsMem = new Map();
 function getTTS(text) {
