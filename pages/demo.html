@@ -12,12 +12,16 @@
 <link rel="stylesheet" href="/ss-chat.css" />
 <style>
   html, body { margin: 0; padding: 0; background: #F1F7F5; }
-  /* le fil de messages remplit la colonne → la barre de saisie reste collée en bas de la carte */
-  .ss-root #demo-split .chat-scroll { max-height: none; }
+  /* Mise en page « face à face » : la carte tient dans l'écran, rien ne bouge pendant la démo —
+     le chat ET le dossier défilent chacun en interne, la barre de saisie reste collée en bas. */
+  .ss-root .ss-convo { padding-top: 12px; padding-bottom: 16px; }
+  .ss-root .ss-convo-head { margin-bottom: 10px; }
+  .ss-root #demo-split { height: calc(100vh - 215px); min-height: 480px; }
+  @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; } }
+  .ss-root #demo-split .chat-scroll { max-height: none; min-height: 0; }
+  .ss-root #demo-split .lead-fields { min-height: 0; }
   .ss-root .chat-input textarea { resize: none; max-height: 90px; line-height: 1.45; }
   .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled, .ss-root .chat-replay:disabled { opacity: .5; cursor: not-allowed; }
-  .ss-root #demo-split { min-height: min(760px, calc(100vh - 175px)); }
-  @media (max-width: 900px) { .ss-root #demo-split { min-height: 0; } }
   .ss-root .lead-fields { overflow-y: auto; }
   .ss-root .cbub strong { color: var(--c-accent); }
   /* barre de contrôle démo */
@@ -27,11 +31,12 @@
   /* boutons play/pause + rejouer (groupés à droite de la barre Emma) */
   .ss-root .chat-top .demo-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .ss-root .chat-top .demo-actions .chat-replay { margin-left: 0; }
-  .ss-root .chat-pause { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: 1.5px solid var(--c-line); background: transparent; color: var(--c-ink-soft); border-radius: 999px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; }
-  .ss-root .chat-pause:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
+  /* bouton play/pause : fond plein + texte blanc dans les DEUX états (lecture / pause) */
+  .ss-root .chat-pause { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: none; background: var(--grad); color: #fff; border-radius: 999px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
+  .ss-root .chat-pause:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
   .ss-root .chat-pause svg { width: 13px; height: 13px; }
-  .ss-root .chat-pause.is-paused { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
-  .ss-root .chat-pause:disabled { opacity: .45; cursor: not-allowed; }
+  .ss-root .chat-pause.is-paused { background: #0E3B33; box-shadow: 0 3px 12px rgba(14,59,51,.4); }
+  .ss-root .chat-pause:disabled { opacity: .5; cursor: not-allowed; transform: none; }
   /* widget AGGIR */
   .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
   .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
@@ -240,6 +245,7 @@ function setField(key, val) {
   const v = el.querySelector(".lf-value");
   v.textContent = val; el.classList.add("filled");
   el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
   updateProgress(); down();
 }
 function updateProgress() {
