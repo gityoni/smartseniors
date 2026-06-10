@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>SmartSeniors — Test des voix d'Emma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Nunito', sans-serif; background: #F1F7F5; color: #16302B; margin: 0; padding: 32px 16px 60px; }
+  .wrap { max-width: 660px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 900; margin: 0 0 4px; }
+  h2 { font-size: 1.02rem; font-weight: 900; margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2 .badge { font-size: .64rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #5B8DEF, #9D8CF0); border-radius: 99px; padding: 3px 9px; }
+  p.lede { color: #5E7E78; margin: 0 0 18px; font-size: .95rem; }
+  .phrase { background: #fff; border: 1px solid #DCE9E4; border-radius: 12px; padding: 12px 16px; font-size: .88rem; color: #5E7E78; font-style: italic; margin-bottom: 6px; }
+  .voice { display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid #DCE9E4; border-radius: 14px; padding: 12px 14px; margin-bottom: 9px; flex-wrap: wrap; }
+  .voice.playing { border-color: #5B8DEF; }
+  .voice .play { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(135deg, #5B8DEF, #9D8CF0); color: #fff; font-size: 1rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .voice .play.alt { background: #12463C; }
+  .voice button:disabled { opacity: .5; cursor: wait; }
+  .voice .meta { flex: 1; min-width: 160px; }
+  .voice .nm { font-weight: 900; font-size: .98rem; }
+  .voice .desc { font-size: .76rem; color: #5E7E78; margin-top: 2px; }
+  .voice .vid { font-size: .68rem; color: #9D8CF0; font-weight: 700; word-break: break-all; }
+  .voice .try { border: 1.5px solid #5B8DEF; color: #5B8DEF; background: transparent; border-radius: 99px; padding: 8px 13px; font-family: inherit; font-weight: 800; font-size: .76rem; cursor: pointer; }
+  .voice .try:hover { background: rgba(91,141,239,.08); }
+  .note, .warn { font-size: .8rem; color: #5E7E78; margin-top: 14px; line-height: 1.5; }
+  .warn { color: #B45309; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); border-radius: 10px; padding: 10px 14px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎧 Choisir la voix d'Emma</h1>
+  <p class="lede">▶ = extrait natif de la voix · « Réplique Emma » = génère la phrase ci-dessous avec cette voix (2-4 s la 1ʳᵉ fois, puis instantané).</p>
+  <div class="phrase" id="phrase">« Vous avez fait un maximum, bravo. Peu de familles s'occupent de leurs parents aussi longtemps. Il y a un moment où ça dépasse ce qu'on peut faire, même pour ceux qu'on aime. Comment va votre maman, en ce moment ? »</div>
+
+  <h2>ElevenLabs <span class="badge">recommandé · accent FR natif</span></h2>
+  <div class="warn hidden" id="el-warn"></div>
+  <div id="el-account"></div>
+  <div id="el-library"></div>
+
+  <h2>OpenAI (comparaison)</h2>
+  <div id="oa-list"></div>
+
+  <p class="note">Une fois la gagnante trouvée : notez son <b>voice_id</b> (affiché sous le nom) → variable <b>ELEVENLABS_VOICE_ID</b> dans Cloudflare (Production + Aperçu), ou dites-le à Claude. Les voix de la bibliothèque sont ajoutées au compte ElevenLabs au moment du test (« Réplique Emma »).</p>
+</div>
+<script>
+const PHRASE = "Vous avez fait un maximum, bravo. Peu de familles s'occupent de leurs parents aussi longtemps. Il y a un moment où ça dépasse ce qu'on peut faire, même pour ceux qu'on aime. Comment va votre maman, en ce moment ?";
+let current = null;
+const blobCache = new Map();
+
+function stopCurrent() {
+  if (current) { current.audio.pause(); current.row.classList.remove('playing'); current.btn.textContent = current.btn.dataset.ico || '▶'; current = null; }
+}
+async function playUrl(url, row, btn) {
+  if (current && current.btn === btn) { stopCurrent(); return; }
+  stopCurrent();
+  const audio = new Audio(url);
+  current = { audio, row, btn };
+  row.classList.add('playing'); btn.dataset.ico = btn.textContent; btn.textContent = '⏸';
+  audio.onended = () => { row.classList.remove('playing'); btn.textContent = btn.dataset.ico; if (current && current.btn === btn) current = null; };
+  try { await audio.play(); } catch (e) { row.classList.remove('playing'); btn.textContent = btn.dataset.ico; }
+}
+async function ttsBlobUrl(payload) {
+  const key = JSON.stringify(payload);
+  if (!blobCache.has(key)) {
+    const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: PHRASE, ...payload }) });
+    if (!r.ok) { let m = 'HTTP ' + r.status; try { m = (await r.json()).error || m; } catch {} throw new Error(m); }
+    blobCache.set(key, URL.createObjectURL(await r.blob()));
+  }
+  return blobCache.get(key);
+}
+
+function elRow(v, fromLibrary) {
+  const labels = Object.values(v.labels || {}).filter(Boolean).join(' · ');
+  const row = document.createElement('div');
+  row.className = 'voice';
+  row.innerHTML = `
+    ${v.preview_url ? '<button class="play" data-act="preview" aria-label="Extrait">▶</button>' : ''}
+    <div class="meta"><div class="nm">${v.name}</div><div class="desc">${labels || (fromLibrary ? 'Voice Library' : 'Compte')}</div><div class="vid">${fromLibrary ? '' : v.voice_id}</div></div>
+    <button class="try" data-act="emma">Réplique Emma</button>`;
+  row.addEventListener('click', async (e) => {
+    const act = e.target.dataset && e.target.dataset.act; if (!act) return;
+    const btn = e.target;
+    if (act === 'preview') { playUrl(v.preview_url, row, btn); return; }
+    btn.disabled = true; const t = btn.textContent; btn.textContent = '…';
+    try {
+      let voiceId = v.voice_id;
+      if (fromLibrary && !v._adopted) {
+        const r = await fetch('/api/tts-voices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ public_owner_id: v.public_owner_id, voice_id: v.voice_id, name: 'Emma — ' + v.name }) });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'ajout impossible');
+        voiceId = d.voice_id; v._adopted = true; v.voice_id = voiceId;
+        row.querySelector('.vid').textContent = voiceId;
+      }
+      const url = await ttsBlobUrl({ voice_id: voiceId });
+      const playBtn = row.querySelector('[data-act="preview"]') || btn;
+      playUrl(url, row, playBtn);
+    } catch (err) {
+      row.querySelector('.desc').textContent = 'Erreur : ' + err.message;
+    } finally { btn.disabled = false; btn.textContent = t; }
+  });
+  return row;
+}
+
+(async () => {
+  const warn = document.getElementById('el-warn');
+  try {
+    const r = await fetch('/api/tts-voices');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+    const acc = document.getElementById('el-account'), lib = document.getElementById('el-library');
+    (d.account || []).forEach(v => acc.appendChild(elRow(v, false)));
+    (d.library || []).forEach(v => lib.appendChild(elRow(v, true)));
+    if (!(d.account || []).length && !(d.library || []).length) { warn.textContent = 'Aucune voix trouvée côté ElevenLabs.'; warn.classList.remove('hidden'); }
+  } catch (e) {
+    warn.textContent = '⚠️ ElevenLabs indisponible : ' + e.message + ' — ajoutez ELEVENLABS_API_KEY dans Cloudflare (Production + Aperçu) puis redéployez.';
+    warn.classList.remove('hidden');
+  }
+})();
+
+const OA = [
+  ['coral', 'Jeune, pétillante, chaleureuse'], ['marin', 'Dernière génération, très naturelle'],
+  ['shimmer', 'La plus douce / feutrée'], ['sage', 'Posée, un peu plus mûre'],
+  ['cedar', 'Dernière génération, neutre'], ['ballad', 'Calme, narratif'], ['nova', 'À re-juger avec les nouvelles instructions'],
+];
+const oaList = document.getElementById('oa-list');
+OA.forEach(([v, desc]) => {
+  const row = document.createElement('div');
+  row.className = 'voice';
+  row.innerHTML = `<button class="play alt" aria-label="Écouter ${v}">▶</button><div class="meta"><div class="nm">${v}</div><div class="desc">${desc}</div></div>`;
+  const btn = row.querySelector('button');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; const t = btn.textContent; btn.textContent = '…';
+    try { playUrl(await ttsBlobUrl({ voice: v }), row, btn); }
+    catch (e) { row.querySelector('.desc').textContent = 'Erreur : ' + e.message; }
+    finally { btn.disabled = false; if (btn.textContent === '…') btn.textContent = t; }
+  });
+  oaList.appendChild(row);
+});
+</script>
+</body>
+</html>

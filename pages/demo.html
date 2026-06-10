@@ -93,6 +93,13 @@
         <button class="active" data-mode="demo" role="tab" aria-selected="true">▶ Démo</button>
         <button data-mode="live" role="tab" aria-selected="false">✍ Live</button>
       </div>
+      <label class="demo-note">Voix
+        <select id="voice-sel" aria-label="Voix d'Emma">
+          <option value="off" selected>Coupée</option>
+          <option value="premium">Emma (studio)</option>
+          <option value="browser">Navigateur</option>
+        </select>
+      </label>
       <label class="demo-note">Vitesse
         <select id="pace" aria-label="Vitesse de la démo">
           <option value="0.4" selected>0,4×</option>
@@ -232,6 +239,84 @@ async function wait(ms) {
 }
 const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
 
+/* ── Voix d'Emma — 2 moteurs au choix (sélecteur top-bar) ──
+   « Emma (studio) » : POST /api/tts (OpenAI, mp3 mis en cache edge) — voix jeune, douce, naturelle.
+   « Navigateur »    : Web Speech API (voix fr installée sur le poste), zéro réseau.
+   Le scénario attend la fin de la lecture ; Pause gèle la voix ; Rejouer / bascule Live coupe net. */
+const TTS_URL = "/api/tts";
+const voiceSel = document.getElementById('voice-sel');
+const TTS_OK = 'speechSynthesis' in window;
+let voiceMode = 'off', frVoice = null, currentAudio = null, speechGen = 0, speakWaiters = [];
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('fr'));
+  const prefs = ['amelie', 'amélie', 'audrey', 'aurelie', 'aurélie', 'marie', 'julie', 'hortense', 'google français', 'denise'];
+  frVoice = vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+}
+if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+else voiceSel.querySelector('option[value="browser"]')?.remove();
+const speakable = (t) => t
+  .replace(/\*\*/g, '')
+  .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+  .replace(/→/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
+// Vitesse de lecture : jamais sous 1× (ralentir une voix la rend artificielle) ; suit le curseur au-dessus.
+const vRate = () => Math.min(1.5, Math.max(1, pace()));
+// Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
+const ttsMem = new Map();
+function getTTS(text) {
+  if (!ttsMem.has(text)) {
+    const p = fetch(TTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: speakable(text) }) })
+      .then(r => { if (!r.ok) throw new Error('TTS ' + r.status); return r.blob(); })
+      .then(b => URL.createObjectURL(b));
+    p.catch(() => ttsMem.delete(text));
+    ttsMem.set(text, p);
+  }
+  return ttsMem.get(text);
+}
+function speakBrowser(text) {
+  if (!TTS_OK) return Promise.resolve();
+  return new Promise(res => {
+    speakWaiters.push(res);
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    if (frVoice) u.voice = frVoice;
+    u.lang = 'fr-FR'; u.rate = vRate(); u.pitch = 1.04;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+async function speakPremium(text) {
+  const gen = speechGen;
+  const url = await getTTS(text);              // échec → speak() bascule sur la voix navigateur
+  if (gen !== speechGen) return;               // annulé pendant le téléchargement
+  await new Promise(res => {
+    speakWaiters.push(res);
+    const a = new Audio(url);
+    a.playbackRate = vRate();
+    currentAudio = a;
+    const done = () => { if (currentAudio === a) currentAudio = null; res(); };
+    a.onended = done; a.onerror = done;
+    a.play().catch(done);
+  });
+}
+async function speak(text) {
+  if (voiceMode === 'premium') {
+    try { return await speakPremium(text); }
+    catch (e) {
+      voiceMode = TTS_OK ? 'browser' : 'off'; voiceSel.value = voiceMode;
+      document.getElementById('mode-note').textContent = "Voix studio indisponible (OPENAI_API_KEY ?) → voix navigateur";
+    }
+  }
+  if (voiceMode === 'browser') return speakBrowser(text);
+}
+function stopSpeech() {
+  speechGen++;
+  if (TTS_OK) { try { speechSynthesis.cancel(); } catch {} }
+  if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+  const w = speakWaiters; speakWaiters = []; w.forEach(fn => fn());
+}
+voiceSel.addEventListener('change', () => { stopSpeech(); voiceMode = voiceSel.value; });
+// Anti-coupure Chrome (voix navigateur) : la synthèse se fige après ~15 s sans pause/resume.
+if (TTS_OK) setInterval(() => { if (voiceMode === 'browser' && speechSynthesis.speaking && !speechSynthesis.paused) { speechSynthesis.pause(); speechSynthesis.resume(); } }, 12000);
+
 function renderFieldsInit() {
   fieldsEl.innerHTML = FIELDS.map(f => `
     <div class="lfield" data-key="${f.key}">
@@ -271,11 +356,14 @@ async function botSay(text) {
   // thinking
   const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
   chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
+  const said = speak(text);
   // stream
   const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
   const words = text.split(" "); let acc = "";
   for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
   b.innerHTML = mdBold(acc);
+  await said;
 }
 async function userSay(text) {
   await wait(520);
@@ -421,6 +509,8 @@ function updatePauseUI() {
 function setPaused(p) {
   if (!running) return;
   paused = p;
+  if (TTS_OK) { try { p ? speechSynthesis.pause() : speechSynthesis.resume(); } catch {} }
+  if (currentAudio) { try { p ? currentAudio.pause() : currentAudio.play(); } catch {} }
   if (!paused) releasePause();
   updatePauseUI();
   document.getElementById("mode-note").textContent = paused ? "⏸ Démo en pause" : "Scénario en cours…";
@@ -428,8 +518,8 @@ function setPaused(p) {
 
 // Arrête proprement le scénario en cours et attend qu'il se soit dénoué (utilisé avant la bascule Live).
 async function stopScript() {
-  if (!running && !starting) { cancelRequested = false; return; }
-  cancelRequested = true; paused = false; releasePause();
+  if (!running && !starting) { cancelRequested = false; stopSpeech(); return; }
+  cancelRequested = true; paused = false; releasePause(); stopSpeech();
   await runDone;
   cancelRequested = false;
 }
@@ -438,9 +528,9 @@ async function stopScript() {
 async function startScript() {
   if (starting) return;                       // ignore les double-clics pendant la bascule
   starting = true;
-  if (running) { cancelRequested = true; paused = false; releasePause(); }
+  if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
   await runDone;                              // attend la fin (le dénouement) du run précédent
-  cancelRequested = false; paused = false;
+  cancelRequested = false; paused = false; stopSpeech();
   let resolveDone; runDone = new Promise(r => resolveDone = r);
   running = true;
   setMode('demo'); resetDossier(); chatBox.innerHTML = "";
@@ -449,7 +539,13 @@ async function startScript() {
   starting = false;
   try {
     await wait(400);
-    for (const step of SCRIPT) {
+    for (let si = 0; si < SCRIPT.length; si++) {
+      const step = SCRIPT[si];
+      // voix studio : précharge la réplique d'Emma suivante pendant que celle-ci se joue
+      if (step.t === 'bot' && voiceMode === 'premium') {
+        const next = SCRIPT.slice(si + 1).find(s => s.t === 'bot');
+        if (next) getTTS(next.text).catch(() => {});
+      }
       if (step.t === 'bot') await botSay(step.text);
       else if (step.t === 'user') await userSay(step.text);
       else if (step.t === 'aggir') await runAggir(step.items);
@@ -497,7 +593,7 @@ async function liveSend(text) {
         try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
     bb.innerHTML = mdBold(full);
   } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = apiErr ? "⚠️ " + apiErr : "Désolé, une erreur est survenue."; }
-  if (full) LIVE.history.push({ role:"assistant", content:full });
+  if (full) { LIVE.history.push({ role:"assistant", content:full }); speak(full); }
   liveBusy = false; sendBtn.disabled = false; down();
   liveExtract();
 }

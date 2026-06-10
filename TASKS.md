@@ -11,6 +11,7 @@
 - **`_geo.js`** : `findDept()` partagé `ehpads.js` + `leads.js` (normalisation accents/tirets/st→saint, mots entiers).
 - **Consentement bout en bout** (règle métier) : étape oui/non au pane contact du funnel `index.html` → `contact_consent` dans le lead → email partenaire bascule sur le **n° conseiller `07 57 99 11 40`** si « non » (HTML + texte brut, tél/email famille masqués) → consigne passée à Emma via le contexte funnel.
 - **Budget réellement collecté** : select optionnel au pane contact (`moins_2000` / `2000_3000` / `3000_plus` — labels déjà gérés par l'email) ; `F.budget_mensuel` n'existait pas → partait toujours vide.
+- **Voix d'Emma dans la démo** : sélecteur « Coupée / Emma (studio) / Navigateur ». Studio = `/api/tts` OpenAI `gpt-4o-mini-tts` voix `nova` (jeune, douce, jamais métallique), **cache edge** (le scénario ne coûte qu'une génération), préchargement de la réplique suivante, repli auto navigateur si clé absente. Le scénario attend la fin de lecture ; Pause gèle la voix ; lecture aussi en mode Live.
 - **Démo mode Live affiné** : le dossier remplit aussi **Adresse** + **Contact souhaité** (extract enrichi : `adresse_proche`, `contact_consent`), **score d'urgence animé en Live** (même heuristique que le funnel), erreur lisible si `ANTHROPIC_API_KEY` absente (au lieu de « une erreur est survenue »).
 
 ### Frontend famille — design « Aurore »
@@ -39,6 +40,9 @@
 ## 🔴 À faire — prod / données (côté toi, Cloudflare)
 - [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`). *Toujours nécessaire pour l'**envoi des emails partenaires*** (le fallback `_partners.js` ne couvre que l'affichage `/api/ehpads`).
 - [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
+- [x] **`ELEVENLABS_API_KEY`** posée (Prod + Aperçu) · voix d'Emma choisie : **Shana** (`vUH2A53pJe77Jd2xNGHv`, défaut codé dans `tts.js`).
+- [ ] **Verrouiller/retirer `/voix-test` + `/api/tts-voices`** maintenant que la voix est choisie (outil interne ouvert).
+- [x] **`OPENAI_API_KEY`** à ajouter dans Cloudflare (Production **et** Aperçu, comme la clé Anthropic) pour la voix studio d'Emma `/api/tts`. Optionnel : `OPENAI_TTS_VOICE` (`nova` défaut, sinon `coral`/`shimmer`).
 - [x] **`ANTHROPIC_API_KEY` en environnement Preview** — fait le 10/06 (Paramètres → « Choisir l'environnement : Aperçu » → Variables et secrets) ; mode Live vérifié OK sur la preview de branche.
 - [ ] Vérifier binding `DB` + `BACKOFFICE_EMAIL`.
 - [ ] Délivrabilité **MailChannels** (SPF/DKIM `smartseniors.fr`) · domaine custom.

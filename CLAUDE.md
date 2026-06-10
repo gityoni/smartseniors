@@ -35,6 +35,8 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
 | `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
 | `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
+| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma : **ElevenLabs prioritaire** (`eleven_multilingual_v2`, voix FR native via `ELEVENLABS_VOICE_ID`), secours OpenAI `gpt-4o-mini-tts` (`coral`), cache edge par hash moteur+voix+texte |
+| `pages/functions/api/tts-voices.js` + `pages/voix-test.html` | Outil interne de choix de voix : liste/écoute les voix FR ElevenLabs (compte + Voice Library), adopte et teste la réplique d'Emma — à verrouiller après choix |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires (**consentement** : `non` → n° conseiller à la place du tél famille) |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
 | `pages/confidentialite.html` | Page RGPD / mentions |
@@ -69,6 +71,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `POST /api/chat` | POST | Chat streaming SSE avec Emma (Anthropic) — body `{ message, history, funnel }` |
 | `GET /api/ehpads?localite=` | GET | Liste EHPAD par localité (département extrait) |
 | `POST /api/leads` | POST | Sauvegarde lead en D1 + scoring + email MailChannels aux EHPAD partenaires |
+| `POST /api/tts` | POST | Voix d'Emma (OpenAI TTS → mp3, cache edge) — body `{ text }` |
 | `POST /api/admin/import-ehpads` | POST | Import administrateur des EHPAD partenaires |
 
 ### Scoring d'urgence
@@ -116,6 +119,7 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 
 **2 modes (toggle dans la top-bar) :**
 - **Démo scriptée (déterministe)** — *mode par défaut, autoplay* : scénario figé rejoué (réponses Emma **pré-écrites**, streaming mot-à-mot, **curseur vitesse 0,5×–2×**, bouton Rejouer). **Zéro API, zéro surprise** pour le pitch. Durée ~2-3 min à 1×.
+- **Voix d'Emma** : sélecteur top-bar « Coupée / **Emma (studio)** / Navigateur » (OFF par défaut — le choix vaut geste utilisateur pour l'audio). Studio = `/api/tts` (OpenAI, voix jeune et douce, mp3 caché à l'edge, préchargement de la réplique suivante, repli auto voix navigateur si clé absente) ; Navigateur = Web Speech API locale. Le scénario attend la fin de lecture ; Pause gèle la voix ; en Live la réponse est lue après le streaming.
 - **Live** : Laurent tape, **vrai pipeline** `/api/chat` + `/api/extract` → le dossier se remplit pour de vrai, **y compris adresse + consentement + score d'urgence animé** (nécessite `ANTHROPIC_API_KEY` ; clé absente → message d'erreur explicite dans le chat).
 
 **Scénario démo (fictif)** : Sylvie ↔ Emma pour sa mère **Jeanne, 82 ans** (Garches, fugue nocturne/Alzheimer non confirmé, refus, retraite modeste 1 600 € + épargne ~85 k€). Déroulé — **un sujet à la fois** : émotion → fugue nommée + **question violence/agitation** → unités adaptées (décision = **médecin coordinateur**) + réponse « mouroir » → **AGGIR interactif expliqué (A/B/C → GIR 2 indicatif)** → localisation amenée avec tact (« vous passez la voir régulièrement ? ») → objection « vous êtes qui ? » (présentation SmartSeniors : EHPAD adapté · aides financières · pédagogie · écoute, sans prétendre n'être lié à aucune résidence) → budget/aides → consentement → **création du lead** (nom, prénom, date de naissance, adresse, tél + e-mail du contact) → **final features** : carte GIR · PDF d'admission pré-rempli · **promo L'Empereur 110 €/j** · vidéo (youtu.be/DvSet0Rkjkk) · itinéraire vers L'Empereur (Garches) → score chaud + « lead envoyé à N résidences ».
@@ -137,6 +141,11 @@ modifier fichiers
 | Variable | Usage |
 |---|---|
 | `ANTHROPIC_API_KEY` | Clé API Anthropic (secret, jamais committée) |
+| `ELEVENLABS_API_KEY` | Clé ElevenLabs — moteur prioritaire de la voix d'Emma `/api/tts` (accent FR natif) |
+| `ELEVENLABS_VOICE_ID` | (optionnel) surcharge la voix d'Emma — défaut codé : **Shana** `vUH2A53pJe77Jd2xNGHv` |
+| `ELEVENLABS_MODEL` | (optionnel) `eleven_multilingual_v2` (défaut) · `eleven_v3`, `eleven_turbo_v2_5`… |
+| `OPENAI_API_KEY` | Clé OpenAI — voix de secours `/api/tts` (secret) |
+| `OPENAI_TTS_VOICE` | (optionnel) voix OpenAI : `coral` (défaut), `shimmer`, `nova`, `sage`… |
 | `BACKOFFICE_EMAIL` | Destinataire de la notification interne de lead (défaut `leads@smartseniors.fr`) |
 | `DB` | Binding D1 (configuré dans wrangler.toml) |
 
