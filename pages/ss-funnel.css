@@ -165,6 +165,9 @@
 }
 .ss-root .s-input::placeholder { color: rgba(241,247,245,.24); }
 .ss-root .s-input:focus { border-color: var(--c-accent2); background: rgba(241,247,245,.11); }
+/* select (budget) : texte clair sur panneau sombre, options lisibles dans le menu système */
+.ss-root select.s-input { cursor: pointer; }
+.ss-root select.s-input option { color: #16302B; background: #fff; }
 
 /* slider */
 .ss-root .s-slider-w { margin-bottom: 12px; }

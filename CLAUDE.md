@@ -32,8 +32,10 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/demo.html` | **Démo partenaire** : player déterministe (scénario Garches/Jeanne · AGGIR interactif A/B/C · cartes GIR/PDF/promo/vidéo/itinéraire) + mode **Live** (vrai `/api/chat` + `/api/extract`) |
 | `pages/ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` | Design system Aurore : tokens/top-bar · landing · chat+dossier · funnel re-skin + cartes EHPAD |
 | `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma `opus-4-8` + prompt v3 nourri du playbook + contexte funnel + prompt caching) |
-| `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback mock) |
-| `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires |
+| `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
+| `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
+| `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
+| `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires (**consentement** : `non` → n° conseiller à la place du tél famille) |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
 | `pages/confidentialite.html` | Page RGPD / mentions |
 | `pages/manifest.json`, `pages/sw.js`, `pages/icon-*.png` | PWA (installable, offline shell) |
@@ -53,7 +55,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 ### Flux utilisateur
 1. L'utilisateur arrive sur `pages/index.html` — Emma seule au premier plan (welcome plein écran).
 2. Il discute librement avec Emma (chat streaming) et/ou lance le funnel de qualification.
-3. **Funnel (13 étapes)** : type de résidence, lien avec le senior, délai, ville + rayon, prénom/nom du proche, date de naissance, genre, niveau d'autonomie (GIR), situation actuelle, ville actuelle du proche, budget, puis contact famille (nom, téléphone, email).
+3. **Funnel (13 étapes)** : type de résidence, lien avec le senior, délai, ville + rayon, prénom/nom du proche, date de naissance, genre, niveau d'autonomie (GIR), situation actuelle, ville actuelle du proche, puis contact famille (nom, téléphone, email + **budget optionnel** + **consentement recontact direct** oui/non).
 4. Le **contexte funnel** est passé à Emma à chaque message (`getFunnelContext()`) → elle personnalise sans redemander.
 5. **Création du lead en 2 temps** :
    - **Lead partiel** dès l'étape 3 (`source: funnel_partial`, `nb_etapes_completees: 3`) — capture early.
@@ -76,15 +78,16 @@ Calculé côté frontend à la complétion du funnel, stocké sur le lead :
 - **Statut** : score ≥ 7 → `chaud`, ≥ 4 → `tiède`, sinon `froid`. Le score (0–10) est affiché en étoiles dans l'email partenaire.
 
 ### Détection département
-`extractDept()` dans `leads.js` / `extractDepartement()` dans `ehpads.js` :
+`findDept()` dans `_geo.js`, partagé par `ehpads.js` et `leads.js` :
 1. Code postal 5 chiffres → prend les 2 premiers
 2. Débute par 2 chiffres → département direct
-3. Map ville → département (Paris→75, Lyon→69, Marseille→13, etc.)
+3. Ville normalisée (accents, tirets, st→saint) → département via `VILLE_TO_DEPT` (villes des 350 partenaires + grandes villes) — ex. « Garches » → 92.
 
 ### Données EHPAD
 - Source de vérité : `data/ehpads.json` (seedée en D1 via `scripts/seed.mjs`).
-- `ehpads.js` requête D1 en priorité, **fallback mock** intégré si D1 indisponible.
+- `ehpads.js` requête D1 en priorité, **fallback réel bundlé** (`_partners.js` = les 350 résidences) si D1 vide ou indisponible. Après modif de `data/ehpads.json` : `node scripts/build-partners-fallback.mjs` pour régénérer.
 - `DEFAULT_EHPADS` retourné si département inconnu.
+- ⚠️ Les **emails partenaires** de `leads.js` ne partent que depuis D1 (pas depuis le fallback) → le seed D1 reste indispensable à l'envoi des leads.
 
 ## Base de données D1
 
@@ -113,7 +116,7 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 
 **2 modes (toggle dans la top-bar) :**
 - **Démo scriptée (déterministe)** — *mode par défaut, autoplay* : scénario figé rejoué (réponses Emma **pré-écrites**, streaming mot-à-mot, **curseur vitesse 0,5×–2×**, bouton Rejouer). **Zéro API, zéro surprise** pour le pitch. Durée ~2-3 min à 1×.
-- **Live** : Laurent tape, **vrai pipeline** `/api/chat` + `/api/extract` → le dossier se remplit pour de vrai (nécessite `ANTHROPIC_API_KEY`).
+- **Live** : Laurent tape, **vrai pipeline** `/api/chat` + `/api/extract` → le dossier se remplit pour de vrai, **y compris adresse + consentement + score d'urgence animé** (nécessite `ANTHROPIC_API_KEY` ; clé absente → message d'erreur explicite dans le chat).
 
 **Scénario démo (fictif)** : Sylvie ↔ Emma pour sa mère **Jeanne, 82 ans** (Garches, déambulation/Alzheimer non confirmé, refus, budget serré). Déroulé : émotion → objections (refus, maltraitance→grille de visite, « vous êtes qui ? ») → **AGGIR interactif (6 items A/B/C → GIR 2 indicatif)** → consentement → **création du lead** (nom, prénom, date de naissance, adresse, tél + e-mail du contact) → **final features** : carte GIR · PDF d'admission pré-rempli · **promo L'Empereur 110 €/j** · vidéo (youtu.be/DvSet0Rkjkk) · itinéraire vers L'Empereur (Garches) → score chaud + « lead envoyé à N résidences ».
 

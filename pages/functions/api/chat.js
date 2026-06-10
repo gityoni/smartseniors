@@ -241,6 +241,11 @@ function buildContextSection(funnel) {
     parts.push(`- **⚠️ Score urgence** : ${funnel.score_urgence}/10 — dossier prioritaire`);
   }
 
+  // Consentement recontact (règle métier : non → transmission via le conseiller)
+  if (funnel.contact_consent === 'non') {
+    parts.push(`- **Recontact direct par les résidences** : NON — la famille préfère passer par le conseiller SmartSeniors. Ne propose pas qu'une résidence l'appelle directement.`);
+  }
+
   // EHPAD proposés
   if (Array.isArray(funnel.ehpads_proposes) && funnel.ehpads_proposes.length > 0) {
     const list = funnel.ehpads_proposes.slice(0, 4)

@@ -467,6 +467,22 @@
                   <label class="s-field-lbl" for="s-femail">Email</label>
                   <input class="s-input" type="email" id="s-femail" placeholder="ex : marie@email.fr" autocomplete="email" />
                 </div>
+                <div class="s-field-g">
+                  <label class="s-field-lbl" for="s-budget">Budget mensuel envisagé (optionnel)</label>
+                  <select class="s-input" id="s-budget">
+                    <option value="">Je ne sais pas encore</option>
+                    <option value="moins_2000">Moins de 2 000 €</option>
+                    <option value="2000_3000">Entre 2 000 et 3 000 €</option>
+                    <option value="3000_plus">Plus de 3 000 €</option>
+                  </select>
+                </div>
+                <div class="s-field-g">
+                  <span class="s-field-lbl" id="consent-lbl">Les résidences peuvent-elles vous appeler directement ?</span>
+                  <div class="s-grid" id="consent-grid" role="group" aria-labelledby="consent-lbl" style="margin-bottom:0">
+                    <button type="button" class="s-card sel" data-val="oui"><span class="ce">📞</span>Oui, directement</button>
+                    <button type="button" class="s-card" data-val="non"><span class="ce">🛡️</span>Non, via un conseiller</button>
+                  </div>
+                </div>
               </div>
               <div class="s-nav"><button class="s-prev" data-to="11">← Retour</button><button class="s-next" id="n12">ACCÉDER À MA LISTE →</button></div>
             </div>
@@ -856,6 +872,7 @@
     date_naissance_proche:'', age_proche:null,
     niveau_autonomie:null, ville_proche_actuelle:'',
     contact_prenom:'', contact_tel2:'', contact_email2:'',
+    budget_mensuel:'', contact_consent:'oui',
     ehpads_proposes: [],
   };
 
@@ -919,6 +936,7 @@
         else if (pi===2) F.delai = v;
         else if (pi===5) F.nb_personnes = parseInt(v);
         else if (pi===6) { F.genre_proche = v; updateNames(); }
+        else if (pi===12) F.contact_consent = v;
       });
     });
   });
@@ -1024,6 +1042,10 @@
     if (ffnEl.value.trim()) F.contact_nom = ffnEl.value.trim();
   }));
 
+  // Budget (pane 12, optionnel)
+  const budgetEl = document.getElementById('s-budget');
+  budgetEl.addEventListener('change', () => { F.budget_mensuel = budgetEl.value; });
+
   function updateNames() {
     const titre = F.genre_proche === 'femme' ? 'Madame' : 'Monsieur';
     const full = F.prenom_proche && F.nom_proche
@@ -1099,6 +1121,7 @@
           date_naissance_proche: F.date_naissance_proche, age_proche: F.age_proche,
           niveau_autonomie: F.niveau_autonomie, ville_proche_actuelle: F.ville_proche_actuelle,
           score_urgence: score, statut: score >= 7 ? 'chaud' : score >= 4 ? 'tiede' : 'froid',
+          contact_consent: F.contact_consent,
           source: 'funnel', nb_etapes_completees: 13, localite: ville,
         }),
       });
@@ -1141,8 +1164,10 @@
   // Nouvelle recherche
   document.getElementById('new-search-btn').addEventListener('click', () => {
     Object.keys(F).forEach(k => { F[k] = k==='rayon_km'?20 : k==='nb_personnes'?1 : typeof F[k]==='string'?'' : null; });
+    F.contact_consent = 'oui'; F.ehpads_proposes = [];
     document.querySelectorAll('.s-card.sel,.s-radio-item.sel').forEach(el => el.classList.remove('sel'));
     document.querySelectorAll('.s-input').forEach(el => el.value = '');
+    document.querySelectorAll('#consent-grid .s-card').forEach(c => c.classList.toggle('sel', c.dataset.val === 'oui'));
     document.querySelectorAll('.s-next').forEach(btn => { if(!['n3','n12'].includes(btn.id)) btn.disabled=true; });
     document.getElementById('rayon-val').textContent = '20';
     goPane(0);
