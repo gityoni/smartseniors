@@ -39,7 +39,7 @@
 ## 🔴 À faire — prod / données (côté toi, Cloudflare)
 - [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`). *Toujours nécessaire pour l'**envoi des emails partenaires*** (le fallback `_partners.js` ne couvre que l'affichage `/api/ehpads`).
 - [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
-- [ ] **`ANTHROPIC_API_KEY` en environnement Preview** (Cloudflare → Settings → Env vars → Preview) pour tester le **mode Live** de la démo en preview.
+- [x] **`ANTHROPIC_API_KEY` en environnement Preview** — fait le 10/06 (Paramètres → « Choisir l'environnement : Aperçu » → Variables et secrets) ; mode Live vérifié OK sur la preview de branche.
 - [ ] Vérifier binding `DB` + `BACKOFFICE_EMAIL`.
 - [ ] Délivrabilité **MailChannels** (SPF/DKIM `smartseniors.fr`) · domaine custom.
 - [ ] Tester le flux complet : funnel → `/api/leads` → emails partenaires → `/api/ehpads` → cartes + CSV.
