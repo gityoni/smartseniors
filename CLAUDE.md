@@ -71,7 +71,9 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `POST /api/chat` | POST | Chat streaming SSE avec Emma (Anthropic) — body `{ message, history, funnel }` |
 | `GET /api/ehpads?localite=` | GET | Liste EHPAD par localité (département extrait) |
 | `POST /api/leads` | POST | Sauvegarde lead en D1 + scoring + email MailChannels aux EHPAD partenaires |
-| `POST /api/tts` | POST | Voix d'Emma (OpenAI TTS → mp3, cache edge) — body `{ text }` |
+| `POST /api/extract` | POST | Extraction lead conversationnelle (haiku tool-use) — body `{ history }` → `{ lead }` |
+| `POST /api/tts` | POST | Voix d'Emma (**ElevenLabs Shana** prioritaire, secours OpenAI ; mp3, cache edge) — body `{ text, voice_id?, voice? }` |
+| `GET/POST /api/tts-voices` | — | Outil interne de choix de voix ElevenLabs (**à verrouiller/retirer**) |
 | `POST /api/admin/import-ehpads` | POST | Import administrateur des EHPAD partenaires |
 
 ### Scoring d'urgence
@@ -118,7 +120,7 @@ places_disponibles, tarif_jour, created_at
 Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie ET délivre** — le lead se crée en direct côté back-office + Emma produit tout (GIR, PDF, promo, vidéo, itinéraire).
 
 **2 modes (toggle dans la top-bar) :**
-- **Démo scriptée (déterministe)** — *mode par défaut, autoplay* : scénario figé rejoué (réponses Emma **pré-écrites**, streaming mot-à-mot, **curseur vitesse 0,5×–2×**, bouton Rejouer). **Zéro API, zéro surprise** pour le pitch. Durée ~2-3 min à 1×.
+- **Démo scriptée (déterministe)** — *mode par défaut, autoplay* : scénario figé (**texte intégral validé le 10/06**), streaming mot-à-mot, **vitesse 0,4×–2×** (défaut 0,4× ; **avec voix → mettre 1×**), **play/pause + Rejouer toujours visibles**, layout **face-à-face plein écran** (hauteur viewport fixe, chat et dossier défilent chacun en interne, le dossier auto-scrolle vers le champ rempli). **Zéro API pour le texte.**
 - **Voix d'Emma** : sélecteur top-bar « Coupée / **Emma (studio)** / Navigateur » (OFF par défaut — le choix vaut geste utilisateur pour l'audio). Studio = `/api/tts` (OpenAI, voix jeune et douce, mp3 caché à l'edge, préchargement de la réplique suivante, repli auto voix navigateur si clé absente) ; Navigateur = Web Speech API locale. Le scénario attend la fin de lecture ; Pause gèle la voix ; en Live la réponse est lue après le streaming.
 - **Live** : Laurent tape, **vrai pipeline** `/api/chat` + `/api/extract` → le dossier se remplit pour de vrai, **y compris adresse + consentement + score d'urgence animé** (nécessite `ANTHROPIC_API_KEY` ; clé absente → message d'erreur explicite dans le chat).
 
@@ -127,6 +129,13 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 **Consentement (règle métier)** : Emma demande toujours « souhaitez-vous que les résidences vous recontactent directement ? » — oui → tél famille ; **non → le lead part avec le n° du conseiller `07 57 99 11 40`** (la famille n'est pas appelée).
 
 > Apprentissage : `knowledge/emma-playbook.md` (v3, vrais appels) nourrit le prompt ; régénéré via le notebook Colab Drive-persistant. Fiches brutes **non committées** (anonymisation Colab à durcir — lieux/hôpitaux résiduels).
+
+## Stratégie & pitch — notes (06/2026)
+- **Pitch partenaire** : Google Meet, **démo scriptée UNIQUEMENT** (le mode Live existe mais n'est pas montré — pas encore au point). Partager **un onglet Chrome avec « Partager l'audio »**, voix **Emma (studio)**, vitesse **1×**, run à blanc avant (cache audio = par datacenter régional), bouton Pause pour commenter. Présenter depuis la **prod après merge** (URL propre).
+- **Partenaire cible** : organisme de placement (type Cap Retraite) — ils ont les contrats résidences qui paient **1 000-4 000 € par admission** sur lead. Règle métier : à réception, la résidence fait une **validation dédup** (« prospect déjà en base ? ») ; si oui, le lead est mort.
+- **Business models** : **A** = vente de leads, CPL par score (chaud 120-150 € · tiède 80-100 €), payé au **lead validé**, clause dédup 72 h + plafond de rejet auditable · **B** = Emma intégrée à LEUR système (SaaS 1-2 k€/mois + **20-25 % par admission**, accès API au cycle de vie du lead). **Stratégie : signer A avec clause d'option vers B** (A = cash immédiat + données réelles ; B = passif, scale sur leur volume). Atout technique à pitcher : **pré-check dédup par hash** (empreinte nom+tél envoyée avant le lead en clair) — à développer sur `leads.js`.
+- **Simulation acquisition** (benchmark transfo secteur **7 %** — Cap Retraite & co) : 100 leads/mois = **~1 430 visites/mois (48/jour)**. Canal n°1 : **SEO local programmatique** — ~390 pages « EHPAD à [ville/dept] » générées depuis `data/ehpads.json` (même pattern que `_partners.js`). Pont **Google Ads** M1-M4 (CPL 21-57 €) → objectif atteint **M4-M5**, cumul 6 mois ≈ 12 k€, CPL blended ≈ 18 €. ⚠️ Le site n'a quasi **aucune surface indexable** aujourd'hui : les pages SEO sont LE chantier.
+- **Inconnue adoption 45-65 ans → testable, pas projetable** : M1 Ads ~2 k€ ≈ centaines de sessions réelles. Seuils de validation : engagement chat > 8 % · étape 3 > 35 % des engagés · complétion > 50 %. En dessous → framing hybride « Emma + conseiller humain » (le mécanisme consentement/conseiller `07 57 99 11 40` existe déjà). Conversation ≈ 0,20 € → risque paramétrique, pas existentiel.
 
 ## Workflow de déploiement
 ```

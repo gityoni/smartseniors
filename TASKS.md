@@ -5,6 +5,13 @@
 
 ## ✅ Fait
 
+### Démo pitch-ready + voix Shana (10-11/06)
+- **Layout face-à-face plein écran** : carte à hauteur viewport, chat + dossier défilent **en interne** (plus aucun scroll de page), dossier auto-scroll vers le champ qui se remplit, **play/pause + Rejouer toujours visibles** (texte blanc dans les 2 états).
+- **Scénario reworded intégralement** (texte fourni et validé par Yonatan) : fugue + question agitation → unités sécurisées (décision médecin coordinateur) → AGGIR expliqué A/B/C → localisation amenée avec tact → présentation SmartSeniors → budget/APA → épargne 85 k€ → consentement → dossier → final features. Seule retouche : « maisons de retraite » → « établissements » (vocabulaire marque). 11 champs dossier ✅.
+- **Voix d'Emma = Shana (ElevenLabs)** : `eleven_multilingual_v2`, voice_id `vUH2A53pJe77Jd2xNGHv` **codé en défaut** dans `tts.js` (surcharge possible via `ELEVENLABS_VOICE_ID`). Sélecteur top-bar Coupée / **Emma (studio)** / Navigateur ; secours OpenAI auto ; réglages « jeune, pétillante » (stability .45, style .4). Clés **ELEVENLABS + OPENAI posées (Prod + Aperçu)**. Cache edge préchauffé 21/21 — ⚠️ cache **par datacenter** : refaire un run à blanc depuis la machine du pitch.
+- **`/voix-test` + `/api/tts-voices`** : navigateur de voix FR (previews natifs + adoption Voice Library + test réplique) — a servi au choix de Shana, **à verrouiller**.
+- **Conseils pitch Meet** documentés (CLAUDE.md § Stratégie) : onglet Chrome + audio, 1×, pauses commentées, vidéo de secours.
+
 ### Vérification prod + affinage funnel live & démo (10/06)
 - **Vérifié en ligne** : `/` 200 · `/demo` 200 · `/api/chat` ✅ (opus-4-8, streaming, caching actif ~6,8k tok) · `/api/extract` ✅ (haiku, extraction correcte) · `/api/leads` ✅ (validation OK). ⚠️ D1 toujours **non seedée** (constaté : fallback renvoyé).
 - **Fallback EHPAD réel** : `_partners.js` généré depuis `data/ehpads.json` (`scripts/build-partners-fallback.mjs`) → `/api/ehpads` renvoie les **vraies 350 résidences** même sans D1 (fini le mock fictif). Map ville→dept dérivée des données (+ grandes villes) : « Garches » → 92 fonctionne.
@@ -34,14 +41,17 @@
 ### Données & API
 - `data/ehpads.json` : **350 résidences de Laurent** (CP→dept + tarif auto) ; L'Empereur enrichi (direction + promo). `data/ehpads.schema.json` (+ `direction`, `promo`).
 - `data/documents.json` + schema : **9 documents** catalogués (admission, médical, AGGIR, APA, adresses CD, aide-mémoires, métro/itinéraire, vidéo) + `data/documents/sources/` (AGGIR + admission vierges).
-- `ehpads.js` (D1 → fallback mock) · `leads.js` (D1 + scoring + email MailChannels) · `admin/import-ehpads.js`.
+- `ehpads.js` (D1 → fallback réel `_partners.js`) · `leads.js` (D1 + scoring + email MailChannels) · `admin/import-ehpads.js`.
 - `schema.sql` (tables `leads`, `ehpads`) · D1 `smartseniors-db` créée · déploiement Cloudflare live.
 
 ## 🔴 À faire — prod / données (côté toi, Cloudflare)
 - [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`). *Toujours nécessaire pour l'**envoi des emails partenaires*** (le fallback `_partners.js` ne couvre que l'affichage `/api/ehpads`).
 - [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
 - [x] **`ELEVENLABS_API_KEY`** posée (Prod + Aperçu) · voix d'Emma choisie : **Shana** (`vUH2A53pJe77Jd2xNGHv`, défaut codé dans `tts.js`).
+- [ ] **Merger la branche vers `main`** avant le pitch → présenter depuis `smartseniors.pages.dev/demo` + run à blanc voix sur la machine du pitch.
+- [ ] **Enregistrer une vidéo de secours** du run complet avec le son (plan B si réseau).
 - [ ] **Verrouiller/retirer `/voix-test` + `/api/tts-voices`** maintenant que la voix est choisie (outil interne ouvert).
+- [ ] Restreindre la clé ElevenLabs à **Text to Speech seul** (l'écriture Voices ne sert plus après le choix).
 - [x] **`OPENAI_API_KEY`** à ajouter dans Cloudflare (Production **et** Aperçu, comme la clé Anthropic) pour la voix studio d'Emma `/api/tts`. Optionnel : `OPENAI_TTS_VOICE` (`nova` défaut, sinon `coral`/`shimmer`).
 - [x] **`ANTHROPIC_API_KEY` en environnement Preview** — fait le 10/06 (Paramètres → « Choisir l'environnement : Aperçu » → Variables et secrets) ; mode Live vérifié OK sur la preview de branche.
 - [ ] Vérifier binding `DB` + `BACKOFFICE_EMAIL`.
@@ -49,7 +59,10 @@
 - [ ] Tester le flux complet : funnel → `/api/leads` → emails partenaires → `/api/ehpads` → cartes + CSV.
 
 ## 🚧 À faire — démo & features
-- [ ] **Démo** : Phase 3 répétition/sécurisation du run ; affiner timing/wording ; décider no-naming vs nommage résidence en mode famille.
+- [ ] **SEO local programmatique** (canal n°1 du plan 100 leads/mois) : générateur de ~390 pages « EHPAD à [ville/département] » depuis `data/ehpads.json` + sitemap + schema.org — le site n'a quasi pas de surface indexable aujourd'hui.
+- [ ] **Pré-check dédup par hash** sur l'API leads (empreinte nom+tél → connu/inconnu avant envoi du lead en clair) — argument clé de la négociation partenaire.
+- [ ] **Mode Live** : continuer l'affinage (volontairement non montré au pitch).
+- [ ] **Démo** : répétition générale (Meet test avec un 2ᵉ appareil pour valider l'audio d'onglet) ; décider no-naming vs nommage résidence en mode famille.
 - [ ] **Moteur de génération de docs** (HTML→PDF pré-rempli) — pour de vrai (aujourd'hui simulé dans la démo) ; brancher sur les champs du lead ; remplacer les boutons `dl-visite`/`dl-dossier`/`dl-entree` de `index.html`.
 - [ ] **Itinéraire** : data station/coords par résidence + lien RATP/Citymapper (aujourd'hui simulé).
 - [ ] **Vidéo** : vidéothèque par résidence (aujourd'hui une vidéo placeholder).
@@ -60,4 +73,6 @@
 
 ## 📌 Repères
 - Consentement (règle métier) : oui → tél famille · **non → lead transmis avec le conseiller `07 57 99 11 40`**.
-- Démo : URL preview du dernier commit + `/demo.html` ; le mode Démo tourne sans clé API.
+- Démo : `/demo` (preview de branche ou prod après merge). Le **texte** tourne sans clé ; la **voix studio** nécessite `ELEVENLABS_API_KEY` (secours `OPENAI_API_KEY`).
+- Pitch : **démo scriptée SEULE** (Live pas montré) · voix **Shana** · vitesse **1×** avec voix · partager **un onglet Chrome + audio** sur Meet.
+- Deal partenaire : résidences paient **1 000-4 000 €/admission** · **dédup obligatoire** à réception · modèles **A** (CPL au lead validé) / **B** (SaaS + 20-25 %/admission) · séquence **A → option B** · détail : CLAUDE.md § Stratégie.
