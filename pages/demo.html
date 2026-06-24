@@ -67,6 +67,25 @@
   .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
   .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
   .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
+  /* validation EDI — bloc back-office (panneau droit, fond vert foncé) */
+  .ss-root .lead-edi { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(241,247,245,.1); position: relative; z-index: 1; opacity: 0; transform: translateY(8px); transition: opacity .4s, transform .4s; pointer-events: none; }
+  .ss-root .lead-edi.on { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .ss-root .lead-edi .le-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .ss-root .lead-edi .le-label { font-size: .82rem; font-weight: 900; color: #F1F7F5; }
+  .ss-root .lead-edi .le-count { font-size: .72rem; font-weight: 800; color: var(--c-online); }
+  .ss-root .lead-edi .edi-list { display: flex; flex-direction: column; gap: 6px; }
+  .ss-root .lead-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 9px; background: rgba(255,255,255,.04); border: 1px solid rgba(241,247,245,.1); transition: background .3s, border-color .3s, opacity .3s; }
+  .ss-root .lead-edi .edi-name { flex: 1; font-weight: 700; font-size: .78rem; color: rgba(241,247,245,.92); }
+  .ss-root .lead-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .72rem; flex-shrink: 0; }
+  .ss-root .lead-edi .edi-row[data-st="pending"] .edi-st { color: rgba(241,247,245,.5); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] { border-color: rgba(110,231,183,.4); background: rgba(110,231,183,.1); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] .edi-st { color: var(--c-online); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] { opacity: .5; }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: rgba(241,247,245,.55); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-st { color: #FCA5A5; }
+  .ss-root .lead-edi .edi-motif { font-size: .64rem; font-weight: 700; color: rgba(241,247,245,.45); margin-left: 5px; }
+  .ss-root .lead-edi .edi-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(241,247,245,.2); border-top-color: var(--c-online); animation: edi-spin .7s linear infinite; }
+  @keyframes edi-spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -170,6 +189,10 @@
           <div class="ls-top"><span class="ls-label">Score d'urgence</span><span class="ls-badge froid" id="ls-badge">—</span></div>
           <div class="ls-meter"><i id="ls-meter"></i></div>
           <div class="ls-scale"><span>Froid</span><span>Tiède</span><span>Chaud</span></div>
+        </div>
+        <div class="lead-edi" id="lead-edi" aria-live="polite">
+          <div class="le-top"><span class="le-label">📡 Validation réseau partenaire (EDI)</span><span class="le-count" id="le-count"></span></div>
+          <div class="edi-list" id="edi-list"></div>
         </div>
         <div class="lead-sent" id="lead-sent">
           <div class="lead-sent-banner">
@@ -343,6 +366,8 @@ function resetDossier() {
   const sc = document.getElementById("lead-score"); sc.classList.remove("on");
   document.getElementById("ls-meter").style.width = "0%";
   document.getElementById("ls-badge").className = "ls-badge froid"; document.getElementById("ls-badge").textContent = "—";
+  document.getElementById("lead-edi").classList.remove("on");
+  document.getElementById("edi-list").innerHTML = ""; document.getElementById("le-count").textContent = "";
 }
 
 /* ── Rendu chat ── */
@@ -419,6 +444,31 @@ async function showCard(step) {
       <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;→&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
   }
 }
+// Validation EDI — back-office uniquement (panneau droit) : la famille ne voit jamais les rejets/dédup.
+async function showEdi(step) {
+  const block = document.getElementById("lead-edi");
+  const list = document.getElementById("edi-list");
+  const count = document.getElementById("le-count");
+  list.innerHTML = step.items.map((it, i) => `
+    <div class="edi-row" data-i="${i}" data-st="pending">
+      <span class="edi-name">${it[0]}</span>
+      <span class="edi-st"><span class="edi-spin"></span>interrogation…</span>
+    </div>`).join("");
+  count.textContent = "";
+  block.classList.add("on");
+  block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  let ok = 0;
+  for (let i = 0; i < step.items.length; i++) {
+    await wait(760);
+    const it = step.items[i];
+    const row = list.querySelector(`.edi-row[data-i="${i}"]`);
+    const st = row.querySelector(".edi-st");
+    if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
+    else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
+    count.textContent = `${ok}/${step.items.length} validée${ok > 1 ? "s" : ""}`;
+  }
+  await wait(320);
+}
 async function showScore(step) {
   await wait(300);
   const sc = document.getElementById("lead-score"); sc.classList.add("on");
@@ -430,10 +480,10 @@ async function showScore(step) {
 }
 async function showSent(step) {
   await wait(350);
-  document.getElementById("sent-t").textContent = `Lead envoyé à ${step.n} résidences partenaires`;
-  document.getElementById("sent-s").textContent = `Transmission temps réel · département ${step.dept}`;
+  document.getElementById("sent-t").textContent = `Orientation validée par ${step.n} résidences partenaires`;
+  document.getElementById("sent-s").textContent = `Transmission EDI temps réel · département ${step.dept}`;
   document.getElementById("email-card").innerHTML = `
-    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences</div></div></div>
+    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences validées</div></div></div>
     <div class="email-subj">🔥 Nouveau lead chaud · Garches (92) · besoin urgent</div>
     <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. Contact <b>Sylvie (07 57 99 11 40 si non-consentement)</b>. Recontactez la famille au plus vite.</div>`;
   document.getElementById("lead-sent").classList.add("show"); down();
@@ -443,7 +493,7 @@ async function showSent(step) {
 const SCRIPT = [
   { t:'bot',  text:"Bonjour, je suis Emma 💛 Je sais que cette étape est souvent difficile, alors n'hésitez pas à prendre tout le temps nécessaire. Racontez-moi simplement, avec vos propres mots, ce qui vous amène aujourd'hui." },
   { t:'user', text:"C'est pour ma mère… je n'en peux plus, je culpabilise, mais je n'y arrive plus. 82 ans, et ça se dégrade vite.", fills:[['lien','Fille']] },
-  { t:'bot',  text:"Félicitations pour tout ce que vous avez accompli jusqu'ici ; fort peu de familles parviennent à soutenir leurs parents aussi durablement, **vous avez vraiment fait votre maximum**. Il arrive inévitablement un stade où la situation excède nos propres forces, malgré toute l'affection qu'on leur porte. Dites-moi, comment décririez-vous l'état actuel de votre maman ?" },
+  { t:'bot',  text:"Je comprends profondément votre épuisement, il n'est pas humainement possible de porter seul une telle charge indéfiniment. Ne soyez pas trop dur avec vous-même : vous avez fait bien plus que votre maximum. Pour mieux vous aider, pourriez-vous m'en dire davantage sur l'état actuel de votre maman ?" },
   { t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
   { t:'bot',  text:"De nombreuses familles me font part de ces déambulations nocturnes — je comprends tout à fait votre inquiétude. Bien que le diagnostic relève exclusivement du médecin, pourriez-vous me dire si un terme médical précis a déjà été posé sur cette situation ?" },
   { t:'user', text:"Le médecin a parlé d'Alzheimer, rien d'officiel. Et elle refuse, « pas dans un mouroir ».", fills:[['type','Alzheimer / unité protégée']] },
@@ -462,8 +512,8 @@ const SCRIPT = [
     ], fills:[['autonomie','Dépendante · GIR 2 (estimé)']] },
   { t:'card', kind:'gir', value:'GIR 2', pct:82, note:"Estimation indicative — le classement officiel sera fixé par l'équipe médico-sociale du département." },
   { t:'bot',  text:"On voit que votre maman a besoin d'une **présence très soutenue au quotidien**, notamment pour les gestes de la vie de tous les jours comme la toilette. Cela correspondrait à un accompagnement proche d'un **GIR 2**. C'est un repère précieux pour nous. Et vous, dans ce tourbillon, comment vous sentez-vous ? Avez-vous la chance d'avoir des proches ou des voisins sur qui compter pour vous épauler un peu ?" },
-  { t:'user', text:"J'y passe tous les jours, on habite toutes les deux à Garches. Mais attendez — vous êtes qui ? Une commerciale ? On m'a déjà appelée trois fois.", fills:[['zone','Garches (92)']] },
-  { t:'bot',  text:"C'est une question tout à fait légitime, et avec tout ce que vous traversez, votre prudence est bien naturelle. Je suis **Emma, l'accompagnatrice IA de SmartSeniors**. Mon rôle est d'être à vos côtés, **gracieusement**, pour vous aider à traverser cette étape avec plus de sérénité. Je suis là pour vous aider à **dénicher le lieu de vie le plus doux et adapté** pour votre maman, vous éclairer sur les **aides financières** et vous expliquer simplement le fonctionnement des établissements. Nous avançons à votre propre rythme, sans aucune pression, car **c'est vous qui gardez le fil de chaque décision**." },
+  { t:'user', text:"Je lui rends visite quotidiennement, nous résidons toutes deux à Garches. Mais pouvez-vous vous présenter ? Je crains qu'il ne s'agisse d'un démarchage commercial, ayant déjà été contactée à plusieurs reprises.", fills:[['zone','Garches (92)']] },
+  { t:'bot',  text:"Votre méfiance est tout à fait compréhensible compte tenu de votre situation. Je m'appelle Emma, l'IA de SmartSeniors, et je suis là pour vous accompagner gratuitement. Mon rôle est d'être à vos côtés, gracieusement, pour vous aider à traverser cette étape avec plus de sérénité. Je suis là pour vous aider à trouver une solution d'hébergement adaptée, en vous renseignant sur les aides financières et en vous expliquant le fonctionnement des établissements. Nous avançons à votre propre rythme, sans aucune pression, car c'est vous qui gardez le fil de chaque décision." },
   { t:'user', text:"D'accord… merci. Excusez-moi, je suis à cran en ce moment." },
   { t:'bot',  text:"Ne vous excusez surtout pas, votre vigilance est tout à fait légitime et témoigne de l'attention que vous portez à votre maman. Pour continuer à vous accompagner, concentrons-nous sur sa situation : puisque vous vivez toutes deux à Garches, cherchons les établissements les plus proches. Dans quel périmètre souhaiteriez-vous que nous effectuions nos recherches ?" },
   { t:'user', text:"Le plus près possible — 5 km maximum.", fills:[['zone','Garches (92) · 5 km']] },
@@ -485,14 +535,24 @@ const SCRIPT = [
   { t:'user', text:"8 rue de Buzenval, 92380 Garches.", fills:[['adresse','8 rue de Buzenval · 92380 Garches']] },
   { t:'bot',  text:"Pour que je puisse vous transmettre le récapitulatif et les informations importantes, pourriez-vous me donner **votre** numéro de téléphone et une adresse e-mail ?" },
   { t:'user', text:"06 24 18 52 40, sylvie.belkacem@gmail.com.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 · sylvie.belkacem@gmail.com']] },
-  { t:'bot',  text:"Le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { t:'bot',  text:"Avant de finaliser, je dois m'assurer que c'est bien vous : je viens de vous envoyer un **code de vérification par SMS** au 06 24 18 52 40. Merci de bien vouloir me donner le code de vérification que vous avez reçu de la part de SmartSeniors." },
+  { t:'user', text:"C'est le 738 204.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 ✓ vérifié · sylvie.belkacem@gmail.com']] },
+  { t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { t:'edi', dept:'92', items:[
+      ["EHPAD L'Empereur — Garches","ok"],
+      ["Résidence partenaire — Garches","ok"],
+      ["Résidence partenaire — Vaucresson","ko","déjà dans leur base"],
+      ["Résidence partenaire — Saint-Cloud","ok"],
+      ["Résidence partenaire — Marnes-la-Coquette","ko","plus de place"],
+      ["Résidence partenaire — Rueil-Malmaison","ok"],
+    ] },
   { t:'card', kind:'pdf', titre:"Dossier d'admission — Jeanne Belkacem", sous:"Pré-rempli (identité, adresse, contact) · reste : votre signature + le volet médical (médecin)." },
   { t:'bot',  text:"J'ai d'ailleurs une excellente nouvelle budgétaire : la résidence **L'Empereur** à Garches propose actuellement des conditions très avantageuses." },
   { t:'card', kind:'promo', residence:"EHPAD L'Empereur — Garches", prix:"110 €/jour", detail:"Offre en cours (15 jours) · au lieu de ~145 €/jour" },
   { t:'card', kind:'video', titre:"Visite vidéo — EHPAD L'Empereur (Garches)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
   { t:'card', kind:'itineraire', from:"8 rue de Buzenval, Garches", to:"L'Empereur (Garches)", detail:"≈ 7 min à pied · ou gare Garches–Marnes-la-Coquette (Transilien L) à 5 min" },
   { t:'bot',  text:"Vous n'avez plus à courir partout, **les résidences reviendront vers vous directement**. Et surtout, n'oubliez jamais, Sylvie : **votre présence est irremplaçable** auprès de votre maman. 💛" },
-  { t:'sent', n:5, dept:'92' },
+  { t:'sent', n:4, dept:'92' },
 ];
 
 /* ── Contrôles play / pause ── */
@@ -548,6 +608,7 @@ async function startScript() {
       if (step.t === 'bot') await botSay(step.text);
       else if (step.t === 'user') await userSay(step.text);
       else if (step.t === 'aggir') await runAggir(step.items);
+      else if (step.t === 'edi') await showEdi(step);
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
