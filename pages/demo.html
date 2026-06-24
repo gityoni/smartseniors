@@ -16,13 +16,17 @@
      le chat ET le dossier défilent chacun en interne, la barre de saisie reste collée en bas. */
   .ss-root .ss-convo { padding-top: 12px; padding-bottom: 16px; }
   .ss-root .ss-convo-head { margin-bottom: 10px; }
-  .ss-root #demo-split { height: calc(100vh - 215px); min-height: 480px; }
-  @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; } }
+  .ss-root #demo-split { height: calc(100vh - 215px); min-height: 480px; grid-template-columns: 1fr 1.04fr; }
+  @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; grid-template-columns: 1fr; } }
   .ss-root #demo-split .chat-scroll { max-height: none; min-height: 0; }
-  .ss-root #demo-split .lead-fields { min-height: 0; }
+  /* dossier : tout le panneau défile d'un bloc (auto-scroll vers l'élément actif), plus de mini-boîte champs */
+  .ss-root #demo-split .lead-side { overflow-y: auto; overflow-x: hidden; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar { width: 6px; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar-thumb { background: rgba(241,247,245,.18); border-radius: 4px; }
+  .ss-root #demo-split .lead-fields { min-height: 0; flex: 0 0 auto; overflow: visible; gap: 8px; }
+  .ss-root #demo-split .lfield { padding: 10px 13px; }
   .ss-root .chat-input textarea { resize: none; max-height: 90px; line-height: 1.45; }
   .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled, .ss-root .chat-replay:disabled { opacity: .5; cursor: not-allowed; }
-  .ss-root .lead-fields { overflow-y: auto; }
   .ss-root .cbub strong { color: var(--c-accent); }
   /* barre de contrôle démo */
   .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
