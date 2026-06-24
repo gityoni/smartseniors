@@ -67,23 +67,25 @@
   .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
   .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
   .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
-  /* carte validation EDI (réseau partenaire en temps réel) */
-  .ss-root .dcard-edi .dc-ico { background: rgba(91,141,239,.14); }
-  .ss-root .dcard-edi .edi-list { margin-top: 11px; display: flex; flex-direction: column; gap: 7px; }
-  .ss-root .dcard-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 10px; background: var(--c-bg); border: 1px solid var(--c-line); transition: background .3s, border-color .3s, opacity .3s; }
-  .ss-root .dcard-edi .edi-name { flex: 1; font-weight: 700; font-size: .82rem; color: var(--c-ink); }
-  .ss-root .dcard-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .74rem; flex-shrink: 0; }
-  .ss-root .dcard-edi .edi-row[data-st="pending"] .edi-st { color: var(--c-ink-soft); }
-  .ss-root .dcard-edi .edi-row[data-st="ok"] { border-color: rgba(21,183,158,.5); background: rgba(21,183,158,.08); }
-  .ss-root .dcard-edi .edi-row[data-st="ok"] .edi-st { color: #0E8C77; }
-  .ss-root .dcard-edi .edi-row[data-st="ko"] { opacity: .6; }
-  .ss-root .dcard-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: var(--c-ink-soft); }
-  .ss-root .dcard-edi .edi-row[data-st="ko"] .edi-st { color: #B4471F; }
-  .ss-root .dcard-edi .edi-motif { font-size: .66rem; font-weight: 700; color: var(--c-ink-soft); margin-left: 5px; }
-  .ss-root .dcard-edi .edi-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--c-line); border-top-color: var(--c-accent); animation: edi-spin .7s linear infinite; }
+  /* validation EDI — bloc back-office (panneau droit, fond vert foncé) */
+  .ss-root .lead-edi { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(241,247,245,.1); position: relative; z-index: 1; opacity: 0; transform: translateY(8px); transition: opacity .4s, transform .4s; pointer-events: none; }
+  .ss-root .lead-edi.on { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .ss-root .lead-edi .le-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .ss-root .lead-edi .le-label { font-size: .82rem; font-weight: 900; color: #F1F7F5; }
+  .ss-root .lead-edi .le-count { font-size: .72rem; font-weight: 800; color: var(--c-online); }
+  .ss-root .lead-edi .edi-list { display: flex; flex-direction: column; gap: 6px; }
+  .ss-root .lead-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 9px; background: rgba(255,255,255,.04); border: 1px solid rgba(241,247,245,.1); transition: background .3s, border-color .3s, opacity .3s; }
+  .ss-root .lead-edi .edi-name { flex: 1; font-weight: 700; font-size: .78rem; color: rgba(241,247,245,.92); }
+  .ss-root .lead-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .72rem; flex-shrink: 0; }
+  .ss-root .lead-edi .edi-row[data-st="pending"] .edi-st { color: rgba(241,247,245,.5); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] { border-color: rgba(110,231,183,.4); background: rgba(110,231,183,.1); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] .edi-st { color: var(--c-online); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] { opacity: .5; }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: rgba(241,247,245,.55); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-st { color: #FCA5A5; }
+  .ss-root .lead-edi .edi-motif { font-size: .64rem; font-weight: 700; color: rgba(241,247,245,.45); margin-left: 5px; }
+  .ss-root .lead-edi .edi-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(241,247,245,.2); border-top-color: var(--c-online); animation: edi-spin .7s linear infinite; }
   @keyframes edi-spin { to { transform: rotate(360deg); } }
-  .ss-root .dcard-edi .edi-foot { margin-top: 11px; font-size: .78rem; font-weight: 800; color: var(--c-ink); line-height: 1.4; }
-  .ss-root .dcard-edi .edi-foot b { color: #0E8C77; }
 </style>
 </head>
 <body>
@@ -187,6 +189,10 @@
           <div class="ls-top"><span class="ls-label">Score d'urgence</span><span class="ls-badge froid" id="ls-badge">—</span></div>
           <div class="ls-meter"><i id="ls-meter"></i></div>
           <div class="ls-scale"><span>Froid</span><span>Tiède</span><span>Chaud</span></div>
+        </div>
+        <div class="lead-edi" id="lead-edi" aria-live="polite">
+          <div class="le-top"><span class="le-label">📡 Validation réseau partenaire (EDI)</span><span class="le-count" id="le-count"></span></div>
+          <div class="edi-list" id="edi-list"></div>
         </div>
         <div class="lead-sent" id="lead-sent">
           <div class="lead-sent-banner">
@@ -360,6 +366,8 @@ function resetDossier() {
   const sc = document.getElementById("lead-score"); sc.classList.remove("on");
   document.getElementById("ls-meter").style.width = "0%";
   document.getElementById("ls-badge").className = "ls-badge froid"; document.getElementById("ls-badge").textContent = "—";
+  document.getElementById("lead-edi").classList.remove("on");
+  document.getElementById("edi-list").innerHTML = ""; document.getElementById("le-count").textContent = "";
 }
 
 /* ── Rendu chat ── */
@@ -434,29 +442,32 @@ async function showCard(step) {
   } else if (step.kind === "itineraire") {
     cardWrap("itineraire", `<div class="dc-h"><div class="dc-ico">🚇</div><div><div class="dc-t">Itinéraire jusqu'à ${step.to}</div><div class="dc-s">${step.detail}</div></div></div>
       <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;→&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
-  } else if (step.kind === "edi") {
-    const rowsHtml = step.items.map((it, i) => `
-      <div class="edi-row" data-i="${i}" data-st="pending">
-        <span class="edi-name">${it[0]}</span>
-        <span class="edi-st"><span class="edi-spin"></span>interrogation…</span>
-      </div>`).join("");
-    const c = cardWrap("edi", `<div class="dc-h"><div class="dc-ico">📡</div><div><div class="dc-t">Transmission de l'orientation — réseau partenaire</div><div class="dc-s">Chaque résidence connectée valide en temps réel · département ${step.dept}</div></div></div>
-      <div class="edi-list">${rowsHtml}</div>
-      <div class="edi-foot"></div>`);
-    let ok = 0;
-    for (let i = 0; i < step.items.length; i++) {
-      await wait(760);
-      const it = step.items[i];
-      const row = c.querySelector(`.edi-row[data-i="${i}"]`);
-      const st = row.querySelector(".edi-st");
-      if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
-      else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
-      down();
-    }
-    await wait(320);
-    c.querySelector(".edi-foot").innerHTML = `<b>${ok} résidence${ok > 1 ? "s" : ""}</b> ${ok > 1 ? "ont" : "a"} validé l'orientation — elles vont vous recontacter.`;
-    down();
   }
+}
+// Validation EDI — back-office uniquement (panneau droit) : la famille ne voit jamais les rejets/dédup.
+async function showEdi(step) {
+  const block = document.getElementById("lead-edi");
+  const list = document.getElementById("edi-list");
+  const count = document.getElementById("le-count");
+  list.innerHTML = step.items.map((it, i) => `
+    <div class="edi-row" data-i="${i}" data-st="pending">
+      <span class="edi-name">${it[0]}</span>
+      <span class="edi-st"><span class="edi-spin"></span>interrogation…</span>
+    </div>`).join("");
+  count.textContent = "";
+  block.classList.add("on");
+  block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  let ok = 0;
+  for (let i = 0; i < step.items.length; i++) {
+    await wait(760);
+    const it = step.items[i];
+    const row = list.querySelector(`.edi-row[data-i="${i}"]`);
+    const st = row.querySelector(".edi-st");
+    if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
+    else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
+    count.textContent = `${ok}/${step.items.length} validée${ok > 1 ? "s" : ""}`;
+  }
+  await wait(320);
 }
 async function showScore(step) {
   await wait(300);
@@ -527,8 +538,7 @@ const SCRIPT = [
   { t:'bot',  text:"Avant de finaliser, je dois m'assurer que c'est bien vous : je viens de vous envoyer un **code de vérification par SMS** au 06 24 18 52 40. Merci de bien vouloir me donner le code de vérification que vous avez reçu de la part de SmartSeniors." },
   { t:'user', text:"C'est le 738 204.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 ✓ vérifié · sylvie.belkacem@gmail.com']] },
   { t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
-  { t:'bot',  text:"Je transmets dès maintenant votre orientation **aux résidences connectées à notre réseau**, et chacune confirme **en temps réel** sa disponibilité. Vous ne verrez que celles qui ont **validé** — ni établissement complet, ni double sollicitation." },
-  { t:'card', kind:'edi', dept:'92', items:[
+  { t:'edi', dept:'92', items:[
       ["EHPAD L'Empereur — Garches","ok"],
       ["Résidence partenaire — Garches","ok"],
       ["Résidence partenaire — Vaucresson","ko","déjà dans leur base"],
@@ -598,6 +608,7 @@ async function startScript() {
       if (step.t === 'bot') await botSay(step.text);
       else if (step.t === 'user') await userSay(step.text);
       else if (step.t === 'aggir') await runAggir(step.items);
+      else if (step.t === 'edi') await showEdi(step);
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
