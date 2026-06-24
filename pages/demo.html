@@ -67,6 +67,23 @@
   .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
   .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
   .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
+  /* carte validation EDI (réseau partenaire en temps réel) */
+  .ss-root .dcard-edi .dc-ico { background: rgba(91,141,239,.14); }
+  .ss-root .dcard-edi .edi-list { margin-top: 11px; display: flex; flex-direction: column; gap: 7px; }
+  .ss-root .dcard-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 10px; background: var(--c-bg); border: 1px solid var(--c-line); transition: background .3s, border-color .3s, opacity .3s; }
+  .ss-root .dcard-edi .edi-name { flex: 1; font-weight: 700; font-size: .82rem; color: var(--c-ink); }
+  .ss-root .dcard-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .74rem; flex-shrink: 0; }
+  .ss-root .dcard-edi .edi-row[data-st="pending"] .edi-st { color: var(--c-ink-soft); }
+  .ss-root .dcard-edi .edi-row[data-st="ok"] { border-color: rgba(21,183,158,.5); background: rgba(21,183,158,.08); }
+  .ss-root .dcard-edi .edi-row[data-st="ok"] .edi-st { color: #0E8C77; }
+  .ss-root .dcard-edi .edi-row[data-st="ko"] { opacity: .6; }
+  .ss-root .dcard-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: var(--c-ink-soft); }
+  .ss-root .dcard-edi .edi-row[data-st="ko"] .edi-st { color: #B4471F; }
+  .ss-root .dcard-edi .edi-motif { font-size: .66rem; font-weight: 700; color: var(--c-ink-soft); margin-left: 5px; }
+  .ss-root .dcard-edi .edi-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--c-line); border-top-color: var(--c-accent); animation: edi-spin .7s linear infinite; }
+  @keyframes edi-spin { to { transform: rotate(360deg); } }
+  .ss-root .dcard-edi .edi-foot { margin-top: 11px; font-size: .78rem; font-weight: 800; color: var(--c-ink); line-height: 1.4; }
+  .ss-root .dcard-edi .edi-foot b { color: #0E8C77; }
 </style>
 </head>
 <body>
@@ -417,6 +434,28 @@ async function showCard(step) {
   } else if (step.kind === "itineraire") {
     cardWrap("itineraire", `<div class="dc-h"><div class="dc-ico">🚇</div><div><div class="dc-t">Itinéraire jusqu'à ${step.to}</div><div class="dc-s">${step.detail}</div></div></div>
       <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;→&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
+  } else if (step.kind === "edi") {
+    const rowsHtml = step.items.map((it, i) => `
+      <div class="edi-row" data-i="${i}" data-st="pending">
+        <span class="edi-name">${it[0]}</span>
+        <span class="edi-st"><span class="edi-spin"></span>interrogation…</span>
+      </div>`).join("");
+    const c = cardWrap("edi", `<div class="dc-h"><div class="dc-ico">📡</div><div><div class="dc-t">Transmission de l'orientation — réseau partenaire</div><div class="dc-s">Chaque résidence connectée valide en temps réel · département ${step.dept}</div></div></div>
+      <div class="edi-list">${rowsHtml}</div>
+      <div class="edi-foot"></div>`);
+    let ok = 0;
+    for (let i = 0; i < step.items.length; i++) {
+      await wait(760);
+      const it = step.items[i];
+      const row = c.querySelector(`.edi-row[data-i="${i}"]`);
+      const st = row.querySelector(".edi-st");
+      if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
+      else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
+      down();
+    }
+    await wait(320);
+    c.querySelector(".edi-foot").innerHTML = `<b>${ok} résidence${ok > 1 ? "s" : ""}</b> ${ok > 1 ? "ont" : "a"} validé l'orientation — elles vont vous recontacter.`;
+    down();
   }
 }
 async function showScore(step) {
@@ -430,10 +469,10 @@ async function showScore(step) {
 }
 async function showSent(step) {
   await wait(350);
-  document.getElementById("sent-t").textContent = `Lead envoyé à ${step.n} résidences partenaires`;
-  document.getElementById("sent-s").textContent = `Transmission temps réel · département ${step.dept}`;
+  document.getElementById("sent-t").textContent = `Orientation validée par ${step.n} résidences partenaires`;
+  document.getElementById("sent-s").textContent = `Transmission EDI temps réel · département ${step.dept}`;
   document.getElementById("email-card").innerHTML = `
-    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences</div></div></div>
+    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences validées</div></div></div>
     <div class="email-subj">🔥 Nouveau lead chaud · Garches (92) · besoin urgent</div>
     <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. Contact <b>Sylvie (07 57 99 11 40 si non-consentement)</b>. Recontactez la famille au plus vite.</div>`;
   document.getElementById("lead-sent").classList.add("show"); down();
@@ -485,14 +524,25 @@ const SCRIPT = [
   { t:'user', text:"8 rue de Buzenval, 92380 Garches.", fills:[['adresse','8 rue de Buzenval · 92380 Garches']] },
   { t:'bot',  text:"Pour que je puisse vous transmettre le récapitulatif et les informations importantes, pourriez-vous me donner **votre** numéro de téléphone et une adresse e-mail ?" },
   { t:'user', text:"06 24 18 52 40, sylvie.belkacem@gmail.com.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 · sylvie.belkacem@gmail.com']] },
-  { t:'bot',  text:"Le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { t:'bot',  text:"Avant de finaliser, je dois m'assurer que c'est bien vous : je viens de vous envoyer un **code de vérification par SMS** au 06 24 18 52 40. Merci de bien vouloir me donner le code de vérification que vous avez reçu de la part de SmartSeniors." },
+  { t:'user', text:"C'est le 738 204.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 ✓ vérifié · sylvie.belkacem@gmail.com']] },
+  { t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { t:'bot',  text:"Je transmets dès maintenant votre orientation **aux résidences connectées à notre réseau**, et chacune confirme **en temps réel** sa disponibilité. Vous ne verrez que celles qui ont **validé** — ni établissement complet, ni double sollicitation." },
+  { t:'card', kind:'edi', dept:'92', items:[
+      ["EHPAD L'Empereur — Garches","ok"],
+      ["Résidence partenaire — Garches","ok"],
+      ["Résidence partenaire — Vaucresson","ko","déjà dans leur base"],
+      ["Résidence partenaire — Saint-Cloud","ok"],
+      ["Résidence partenaire — Marnes-la-Coquette","ko","plus de place"],
+      ["Résidence partenaire — Rueil-Malmaison","ok"],
+    ] },
   { t:'card', kind:'pdf', titre:"Dossier d'admission — Jeanne Belkacem", sous:"Pré-rempli (identité, adresse, contact) · reste : votre signature + le volet médical (médecin)." },
   { t:'bot',  text:"J'ai d'ailleurs une excellente nouvelle budgétaire : la résidence **L'Empereur** à Garches propose actuellement des conditions très avantageuses." },
   { t:'card', kind:'promo', residence:"EHPAD L'Empereur — Garches", prix:"110 €/jour", detail:"Offre en cours (15 jours) · au lieu de ~145 €/jour" },
   { t:'card', kind:'video', titre:"Visite vidéo — EHPAD L'Empereur (Garches)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
   { t:'card', kind:'itineraire', from:"8 rue de Buzenval, Garches", to:"L'Empereur (Garches)", detail:"≈ 7 min à pied · ou gare Garches–Marnes-la-Coquette (Transilien L) à 5 min" },
   { t:'bot',  text:"Vous n'avez plus à courir partout, **les résidences reviendront vers vous directement**. Et surtout, n'oubliez jamais, Sylvie : **votre présence est irremplaçable** auprès de votre maman. 💛" },
-  { t:'sent', n:5, dept:'92' },
+  { t:'sent', n:4, dept:'92' },
 ];
 
 /* ── Contrôles play / pause ── */
