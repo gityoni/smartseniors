@@ -135,3 +135,28 @@ linear-gradient(135deg, #D4824A 0%, #EAA070 100%)
 - Langage simple, phrases courtes dans le prompt système Emma
 - Toujours orienter vers un professionnel pour les questions médicales
 - Accessibilité : `aria-live`, `aria-label`, `role`, focus management
+
+## Karpathy Coding Guidelines
+
+**Tradeoff:** Ces règles privilégient la prudence sur la vitesse. Utilise ton jugement pour les tâches triviales.
+
+### 1. Réfléchir avant de coder
+- Énonce tes hypothèses explicitement. Si incertain, demande.
+- Si plusieurs interprétations existent, présente-les — ne choisis pas en silence.
+- Si une approche plus simple existe, dis-le.
+- Si quelque chose est flou, stop. Nomme ce qui est confus. Demande.
+
+### 2. Simplicité d'abord
+- Minimum de code qui résout le problème. Rien de spéculatif.
+- Pas de features au-delà de ce qui est demandé.
+- Pas d'abstractions pour du code à usage unique.
+- Pas de gestion d'erreurs pour des scénarios impossibles.
+
+### 3. Changements chirurgicaux
+- Ne touche que ce que tu dois toucher.
+- Ne "améliore" pas le code adjacent, les commentaires ou le formatage.
+- Chaque ligne modifiée doit tracer directement à la demande de l'utilisateur.
+
+### 4. Exécution orientée objectif
+- Transforme les tâches en critères vérifiables avant de coder.
+- Pour les tâches multi-étapes, énonce un plan bref avec vérifications.
