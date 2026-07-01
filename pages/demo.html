@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>SmartSeniors — Démo partenaire · Emma en action</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/ss-theme.css" />
+<link rel="stylesheet" href="/ss-chat.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: #F1F7F5; }
+  /* Mise en page « face à face » : la carte tient dans l'écran, rien ne bouge pendant la démo —
+     le chat ET le dossier défilent chacun en interne, la barre de saisie reste collée en bas. */
+  .ss-root .ss-convo { padding-top: 12px; padding-bottom: 16px; }
+  .ss-root .ss-convo-head { margin-bottom: 10px; }
+  .ss-root #demo-split { height: calc(100vh - 215px); min-height: 480px; grid-template-columns: 1fr 1.04fr; }
+  @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; grid-template-columns: 1fr; } }
+  .ss-root #demo-split .chat-scroll { max-height: none; min-height: 0; }
+  /* dossier : tout le panneau défile d'un bloc (auto-scroll vers l'élément actif), plus de mini-boîte champs */
+  .ss-root #demo-split .lead-side { overflow-y: auto; overflow-x: hidden; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar { width: 6px; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar-thumb { background: rgba(241,247,245,.18); border-radius: 4px; }
+  .ss-root #demo-split .lead-fields { min-height: 0; flex: 0 0 auto; overflow: visible; gap: 8px; }
+  .ss-root #demo-split .lfield { padding: 10px 13px; }
+  .ss-root .chat-input textarea { resize: none; max-height: 90px; line-height: 1.45; }
+  .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled, .ss-root .chat-replay:disabled { opacity: .5; cursor: not-allowed; }
+  .ss-root .cbub strong { color: var(--c-accent); }
+  /* barre de contrôle démo */
+  .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
+  .ss-root .demo-ctrl select { font-family: var(--font); border: 1.5px solid var(--c-line); border-radius: 8px; padding: 5px 8px; font-size: .8rem; background: var(--c-surface); color: var(--c-ink); }
+  .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
+  /* boutons play/pause + rejouer (groupés à droite de la barre Emma) */
+  .ss-root .chat-top .demo-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .ss-root .chat-top .demo-actions .chat-replay { margin-left: 0; }
+  /* bouton play/pause : fond plein + texte blanc dans les DEUX états (lecture / pause) */
+  .ss-root .chat-pause { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: none; background: var(--grad); color: #fff; border-radius: 999px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
+  .ss-root .chat-pause:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+  .ss-root .chat-pause svg { width: 13px; height: 13px; }
+  .ss-root .chat-pause.is-paused { background: #0E3B33; box-shadow: 0 3px 12px rgba(14,59,51,.4); }
+  .ss-root .chat-pause:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  /* widget AGGIR */
+  .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
+  .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
+  .ss-root .aggir-sub { font-size: .72rem; color: var(--c-ink-soft); margin-bottom: 8px; }
+  .ss-root .aggir-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--c-line); }
+  .ss-root .aggir-row .q { flex: 1; font-size: .85rem; color: var(--c-ink); font-weight: 600; }
+  .ss-root .aggir-opts { display: flex; gap: 5px; flex-shrink: 0; }
+  .ss-root .aggir-opt { width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--c-line); background: var(--c-bg); font-weight: 800; font-size: .82rem; color: var(--c-ink-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s; }
+  .ss-root .aggir-opt.sel { color: #fff; border-color: transparent; transform: scale(1.08); }
+  .ss-root .aggir-opt.sel[data-v="A"] { background: #15B79E; }
+  .ss-root .aggir-opt.sel[data-v="B"] { background: #F59E0B; }
+  .ss-root .aggir-opt.sel[data-v="C"] { background: #EF4444; }
+  .ss-root .aggir-leg { font-size: .64rem; color: var(--c-ink-soft); margin-top: 8px; line-height: 1.4; }
+  /* cartes features */
+  .ss-root .dcard { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-soft); max-width: 86%; animation: ss-slideup .3s ease both; }
+  .ss-root .dcard .dc-h { display: flex; align-items: center; gap: 11px; }
+  .ss-root .dcard .dc-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; background: var(--c-bg-alt); }
+  .ss-root .dcard .dc-t { font-weight: 800; color: var(--c-ink); font-size: .92rem; line-height: 1.2; }
+  .ss-root .dcard .dc-s { font-size: .8rem; color: var(--c-ink-soft); margin-top: 5px; line-height: 1.5; }
+  .ss-root .dcard .dc-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 11px; background: var(--grad); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; font-size: .82rem; cursor: pointer; font-family: var(--font); text-decoration: none; }
+  .ss-root .dcard-gir .dc-gauge { height: 10px; border-radius: 99px; background: var(--c-bg-alt); overflow: hidden; margin: 11px 0 4px; }
+  .ss-root .dcard-gir .dc-gauge i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#3B82F6,#FFD93D,#EF4444); border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .ss-root .dcard-gir .dc-scale { display: flex; justify-content: space-between; font-size: .62rem; color: var(--c-ink-soft); font-weight: 700; }
+  .ss-root .dcard-video iframe { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 11px; margin-top: 9px; }
+  .ss-root .dcard-promo { border: 1.5px solid var(--c-accent); }
+  .ss-root .dcard-promo .dc-ico { background: rgba(91,141,239,.14); }
+  .ss-root .dcard-promo .dc-prix { font-size: 1.45rem; font-weight: 900; color: var(--c-accent); margin-top: 8px; }
+  .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
+  .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
+  .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
+  /* validation EDI — bloc back-office (panneau droit, fond vert foncé) */
+  .ss-root .lead-edi { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(241,247,245,.1); position: relative; z-index: 1; opacity: 0; transform: translateY(8px); transition: opacity .4s, transform .4s; pointer-events: none; }
+  .ss-root .lead-edi.on { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .ss-root .lead-edi .le-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .ss-root .lead-edi .le-label { font-size: .82rem; font-weight: 900; color: #F1F7F5; }
+  .ss-root .lead-edi .le-count { font-size: .72rem; font-weight: 800; color: var(--c-online); }
+  .ss-root .lead-edi .edi-list { display: flex; flex-direction: column; gap: 6px; }
+  .ss-root .lead-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 9px; background: rgba(255,255,255,.04); border: 1px solid rgba(241,247,245,.1); transition: background .3s, border-color .3s, opacity .3s; }
+  .ss-root .lead-edi .edi-name { flex: 1; font-weight: 700; font-size: .78rem; color: rgba(241,247,245,.92); }
+  .ss-root .lead-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .72rem; flex-shrink: 0; }
+  .ss-root .lead-edi .edi-row[data-st="pending"] .edi-st { color: rgba(241,247,245,.5); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] { border-color: rgba(110,231,183,.4); background: rgba(110,231,183,.1); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] .edi-st { color: var(--c-online); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] { opacity: .5; }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: rgba(241,247,245,.55); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-st { color: #FCA5A5; }
+  .ss-root .lead-edi .edi-motif { font-size: .64rem; font-weight: 700; color: rgba(241,247,245,.45); margin-left: 5px; }
+  .ss-root .lead-edi .edi-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(241,247,245,.2); border-top-color: var(--c-online); animation: edi-spin .7s linear infinite; }
+  @keyframes edi-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="ss-root" data-direction="aurore" data-font="nunito" style="--c-accent:#5B8DEF; --c-accent2:#9D8CF0;">
+
+  <!-- TOP BAR -->
+  <header class="ss-topbar">
+    <div>
+      <div class="wordmark" aria-label="SmartSeniors">
+        <span>Smart</span><span class="wm-accent">Sen</span><span class="wm-chi"><span>ı</span><svg class="wm-chip" viewBox="0 0 14 14" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="1.5" fill="var(--c-accent)"/>
+          <rect x="6" y="0" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="6" y="11" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="0" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="11" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="5.5" y="5.5" width="3" height="3" rx=".5" fill="var(--c-accent2)"/>
+        </svg></span><span class="wm-accent">ors</span>
+      </div>
+      <div class="wm-sub">Démo partenaire · données fictives</div>
+    </div>
+    <nav class="ss-nav demo-ctrl" aria-label="Contrôles démo">
+      <div class="ss-nav-seg" id="mode-seg" role="tablist" aria-label="Mode">
+        <button class="active" data-mode="demo" role="tab" aria-selected="true">▶ Démo</button>
+        <button data-mode="live" role="tab" aria-selected="false">✍ Live</button>
+      </div>
+      <label class="demo-note">Voix
+        <select id="voice-sel" aria-label="Voix d'Emma">
+          <option value="off" selected>Coupée</option>
+          <option value="premium">Emma (studio)</option>
+          <option value="browser">Navigateur</option>
+        </select>
+      </label>
+      <label class="demo-note">Vitesse
+        <select id="pace" aria-label="Vitesse de la démo">
+          <option value="0.4" selected>0,4×</option>
+          <option value="0.5">0,5×</option>
+          <option value="1">1×</option>
+          <option value="1.5">1,5×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
+      <span class="demo-note" id="mode-note">Scénario rejoué automatiquement</span>
+    </nav>
+  </header>
+
+  <section class="ss-convo">
+    <div class="ss-convo-head">
+      <span class="ss-kicker" style="justify-content:center">Démo partenaire</span>
+      <h2 class="ss-sec-title">Emma en action · le dossier se crée en direct</h2>
+      <p class="ss-sec-lede">Une famille parle à Emma. Pendant qu'elle écoute, rassure et qualifie, le dossier se remplit à droite — jusqu'à la transmission aux résidences.</p>
+    </div>
+
+    <div class="ss-split" id="demo-split">
+
+      <!-- CHAT -->
+      <div class="chat-side">
+        <div class="chat-top">
+          <div class="emma-av">
+            <svg viewBox="0 0 52 52" fill="none" aria-hidden="true">
+              <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
+              <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
+              <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
+              <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            </svg>
+            <span class="on"></span>
+          </div>
+          <div><div class="nm">Emma</div><div class="rl">Conseillère EHPAD · En ligne</div></div>
+          <div class="demo-actions">
+            <button class="chat-pause" id="pause" type="button" disabled aria-label="Mettre la démo en pause" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+              <span>Pause</span>
+            </button>
+            <button class="chat-replay" id="replay" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              Rejouer
+            </button>
+          </div>
+        </div>
+        <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma"></div>
+        <form id="form" class="chat-input" novalidate>
+          <textarea id="input" rows="1" placeholder="Mode Live : écrivez à Emma…" aria-label="Votre message" maxlength="2000" disabled></textarea>
+          <button type="submit" id="send" class="chat-send" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- DOSSIER EN DIRECT -->
+      <div class="lead-side">
+        <div class="lead-head">
+          <div class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></div>
+          <div><div class="lh-t">Dossier en direct</div><div class="lh-s">Back-office résidences partenaires</div></div>
+          <span class="lead-live"><span class="ss-dot"></span> Live</span>
+        </div>
+        <div class="lead-prog"><i id="pbar"></i></div>
+        <div class="lead-fields" id="lead-fields"></div>
+        <div class="lead-score" id="lead-score">
+          <div class="ls-top"><span class="ls-label">Score d'urgence</span><span class="ls-badge froid" id="ls-badge">—</span></div>
+          <div class="ls-meter"><i id="ls-meter"></i></div>
+          <div class="ls-scale"><span>Froid</span><span>Tiède</span><span>Chaud</span></div>
+        </div>
+        <div class="lead-edi" id="lead-edi" aria-live="polite">
+          <div class="le-top"><span class="le-label">📡 Validation réseau partenaire (EDI)</span><span class="le-count" id="le-count"></span></div>
+          <div class="edi-list" id="edi-list"></div>
+        </div>
+        <div class="lead-sent" id="lead-sent">
+          <div class="lead-sent-banner">
+            <div class="sb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><div class="sb-t" id="sent-t">Lead envoyé</div><div class="sb-s" id="sent-s"></div></div>
+          </div>
+          <div class="email-card" id="email-card"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<script>
+const API_URL = "/api/chat", EXTRACT_URL = "/api/extract";
+const CONSEILLER_TEL = "07 57 99 11 40"; // backend : si consentement = non, le lead part avec ce numéro
+
+/* ── Dossier (lead-side) ── */
+const FIELDS = [
+  { key:'lien',     label:'Lien familial',      hint:'en attente…' },
+  { key:'proche',   label:'La personne âgée',   hint:'nom · prénom · naissance' },
+  { key:'adresse',  label:'Adresse',            hint:'rue · CP · ville' },
+  { key:'situation',label:'Situation actuelle', hint:'en attente…' },
+  { key:'autonomie',label:'Autonomie (GIR)',    hint:'en attente…' },
+  { key:'type',     label:'Type de résidence',  hint:'en attente…' },
+  { key:'zone',     label:'Zone de recherche',  hint:'ville + rayon' },
+  { key:'budget',   label:'Budget / aides',     hint:'en attente…' },
+  { key:'delai',    label:'Délai',              hint:'en attente…' },
+  { key:'contact',  label:'Contact famille',    hint:'tél + e-mail' },
+  { key:'consent',  label:'Contact souhaité',   hint:'en attente…' },
+];
+
+const chatBox = document.getElementById("chat-box");
+const fieldsEl = document.getElementById("lead-fields");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const form = document.getElementById("form");
+const replayBtn = document.getElementById("replay");
+const pauseBtn = document.getElementById("pause");
+
+/* ── État du player (démo déterministe) ──
+   running  : un scénario est en cours (en lecture OU en pause)
+   paused   : l'utilisateur a mis en pause (gèle le streaming)
+   liveBusy : verrou d'un envoi en mode Live (indépendant de la démo) */
+let running = false, paused = false, liveBusy = false, mode = 'demo';
+let cancelRequested = false, runDone = Promise.resolve(), starting = false;
+let pauseWaiters = [];
+const CANCEL = Symbol("cancel");
+const pace = () => parseFloat(document.getElementById('pace').value) || 1;
+const down = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+
+function releasePause() { const w = pauseWaiters; pauseWaiters = []; w.forEach(fn => fn()); }
+// Sas pause/annulation : bloque tant que `paused`, lève CANCEL si le run est annulé (Rejouer / bascule Live).
+async function gate() {
+  if (cancelRequested) throw CANCEL;
+  while (paused) {
+    await new Promise(res => pauseWaiters.push(res));
+    if (cancelRequested) throw CANCEL;
+  }
+}
+// Attente pace-aware et sensible à la pause (testée avant ET après le délai → gel net mi-phrase).
+async function wait(ms) {
+  await gate();
+  await new Promise(r => setTimeout(r, ms / pace()));
+  await gate();
+}
+const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+
+/* ── Voix d'Emma — 2 moteurs au choix (sélecteur top-bar) ──
+   « Emma (studio) » : POST /api/tts (OpenAI, mp3 mis en cache edge) — voix jeune, douce, naturelle.
+   « Navigateur »    : Web Speech API (voix fr installée sur le poste), zéro réseau.
+   Le scénario attend la fin de la lecture ; Pause gèle la voix ; Rejouer / bascule Live coupe net. */
+const TTS_URL = "/api/tts";
+const voiceSel = document.getElementById('voice-sel');
+const TTS_OK = 'speechSynthesis' in window;
+let voiceMode = 'off', frVoice = null, currentAudio = null, speechGen = 0, speakWaiters = [];
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('fr'));
+  const prefs = ['amelie', 'amélie', 'audrey', 'aurelie', 'aurélie', 'marie', 'julie', 'hortense', 'google français', 'denise'];
+  frVoice = vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+}
+if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+else voiceSel.querySelector('option[value="browser"]')?.remove();
+const speakable = (t) => t
+  .replace(/\*\*/g, '')
+  .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+  .replace(/→/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
+// Vitesse de lecture : jamais sous 1× (ralentir une voix la rend artificielle) ; suit le curseur au-dessus.
+const vRate = () => Math.min(1.5, Math.max(1, pace()));
+// Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
+const ttsMem = new Map();
+function getTTS(text) {
+  if (!ttsMem.has(text)) {
+    const p = fetch(TTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: speakable(text) }) })
+      .then(r => { if (!r.ok) throw new Error('TTS ' + r.status); return r.blob(); })
+      .then(b => URL.createObjectURL(b));
+    p.catch(() => ttsMem.delete(text));
+    ttsMem.set(text, p);
+  }
+  return ttsMem.get(text);
+}
+function speakBrowser(text) {
+  if (!TTS_OK) return Promise.resolve();
+  return new Promise(res => {
+    speakWaiters.push(res);
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    if (frVoice) u.voice = frVoice;
+    u.lang = 'fr-FR'; u.rate = vRate(); u.pitch = 1.04;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+async function speakPremium(text) {
+  const gen = speechGen;
+  const url = await getTTS(text);              // échec → speak() bascule sur la voix navigateur
+  if (gen !== speechGen) return;               // annulé pendant le téléchargement
+  await new Promise(res => {
+    speakWaiters.push(res);
+    const a = new Audio(url);
+    a.playbackRate = vRate();
+    currentAudio = a;
+    const done = () => { if (currentAudio === a) currentAudio = null; res(); };
+    a.onended = done; a.onerror = done;
+    a.play().catch(done);
+  });
+}
+async function speak(text) {
+  if (voiceMode === 'premium') {
+    try { return await speakPremium(text); }
+    catch (e) {
+      voiceMode = TTS_OK ? 'browser' : 'off'; voiceSel.value = voiceMode;
+      document.getElementById('mode-note').textContent = "Voix studio indisponible (OPENAI_API_KEY ?) → voix navigateur";
+    }
+  }
+  if (voiceMode === 'browser') return speakBrowser(text);
+}
+function stopSpeech() {
+  speechGen++;
+  if (TTS_OK) { try { speechSynthesis.cancel(); } catch {} }
+  if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+  const w = speakWaiters; speakWaiters = []; w.forEach(fn => fn());
+}
+voiceSel.addEventListener('change', () => { stopSpeech(); voiceMode = voiceSel.value; });
+// Anti-coupure Chrome (voix navigateur) : la synthèse se fige après ~15 s sans pause/resume.
+if (TTS_OK) setInterval(() => { if (voiceMode === 'browser' && speechSynthesis.speaking && !speechSynthesis.paused) { speechSynthesis.pause(); speechSynthesis.resume(); } }, 12000);
+
+function renderFieldsInit() {
+  fieldsEl.innerHTML = FIELDS.map(f => `
+    <div class="lfield" data-key="${f.key}">
+      <div class="lf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="lf-body"><div class="lf-label">${f.label}</div><div class="lf-value">${f.hint}</div></div>
+    </div>`).join("");
+  updateProgress();
+}
+function setField(key, val) {
+  const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
+  const v = el.querySelector(".lf-value");
+  v.textContent = val; el.classList.add("filled");
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  updateProgress(); down();
+}
+function updateProgress() {
+  const n = fieldsEl.querySelectorAll(".lfield.filled").length;
+  document.getElementById("pbar").style.width = Math.round(n / FIELDS.length * 100) + "%";
+}
+function resetDossier() {
+  renderFieldsInit();
+  document.getElementById("lead-sent").classList.remove("show");
+  const sc = document.getElementById("lead-score"); sc.classList.remove("on");
+  document.getElementById("ls-meter").style.width = "0%";
+  document.getElementById("ls-badge").className = "ls-badge froid"; document.getElementById("ls-badge").textContent = "—";
+  document.getElementById("lead-edi").classList.remove("on");
+  document.getElementById("edi-list").innerHTML = ""; document.getElementById("le-count").textContent = "";
+}
+
+/* ── Rendu chat ── */
+function avatarSVG() { return `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`; }
+function rowEl(who) {
+  const r = document.createElement("div"); r.className = "crow " + who;
+  if (who === "bot") { const a = document.createElement("div"); a.className = "cav"; a.innerHTML = avatarSVG(); r.appendChild(a); }
+  return r;
+}
+async function botSay(text) {
+  // thinking
+  const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
+  chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
+  const said = speak(text);
+  // stream
+  const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
+  const words = text.split(" "); let acc = "";
+  for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
+  b.innerHTML = mdBold(acc);
+  await said;
+}
+async function userSay(text) {
+  await wait(520);
+  const r = rowEl("user"); const b = document.createElement("div"); b.className = "cbub"; b.textContent = text; r.appendChild(b); chatBox.appendChild(r); down();
+}
+
+/* ── Widget AGGIR interactif ── */
+async function runAggir(items) {
+  const r = rowEl("bot");
+  const w = document.createElement("div"); w.className = "aggir";
+  w.innerHTML = `<div class="aggir-t">🧩 Estimation rapide de l'autonomie (grille AGGIR)</div>
+    <div class="aggir-sub">6 repères clés · validez A, B ou C</div>` +
+    items.map((it, i) => `
+      <div class="aggir-row" data-i="${i}">
+        <span class="q"><b>${it[0]}</b> — ${it[1]}</span>
+        <span class="aggir-opts">
+          <span class="aggir-opt" data-v="A">A</span><span class="aggir-opt" data-v="B">B</span><span class="aggir-opt" data-v="C">C</span>
+        </span>
+      </div>`).join("") +
+    `<div class="aggir-leg">A : fait seul, correctement · B : partiellement / pas correctement · C : ne fait pas</div>`;
+  r.appendChild(w); chatBox.appendChild(r); down();
+  for (let i = 0; i < items.length; i++) {
+    await wait(700);
+    const opt = w.querySelector(`.aggir-row[data-i="${i}"] .aggir-opt[data-v="${items[i][2]}"]`);
+    if (opt) opt.classList.add("sel");
+    down();
+  }
+  await wait(400);
+}
+
+/* ── Cartes features ── */
+function cardWrap(kind, html) {
+  const r = rowEl("bot"); const c = document.createElement("div"); c.className = "dcard dcard-" + kind; c.innerHTML = html;
+  r.appendChild(c); chatBox.appendChild(r); down(); return c;
+}
+async function showCard(step) {
+  await wait(300);
+  if (step.kind === "gir") {
+    const c = cardWrap("gir", `<div class="dc-h"><div class="dc-ico">🟢</div><div><div class="dc-t">Estimation du GIR — ${step.value}</div><div class="dc-s">${step.note}</div></div></div>
+      <div class="dc-gauge"><i></i></div><div class="dc-scale"><span>GIR 6</span><span>GIR 4</span><span>GIR 2</span><span>GIR 1</span></div>`);
+    await wait(150); c.querySelector(".dc-gauge i").style.width = (step.pct || 80) + "%";
+  } else if (step.kind === "pdf") {
+    cardWrap("pdf", `<div class="dc-h"><div class="dc-ico">📄</div><div><div class="dc-t">${step.titre}</div><div class="dc-s">${step.sous}</div></div></div>
+      <a class="dc-btn" href="#" onclick="return false">⬇ Télécharger le PDF</a>`);
+  } else if (step.kind === "promo") {
+    cardWrap("promo", `<div class="dc-h"><div class="dc-ico">🏷️</div><div><div class="dc-t">${step.residence}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-prix">${step.prix} <small>chambre standard</small></div>`);
+  } else if (step.kind === "video") {
+    cardWrap("video", `<div class="dc-h"><div class="dc-ico">▶️</div><div class="dc-t">${step.titre}</div></div>
+      <iframe loading="lazy" src="${step.embed}" title="Visite vidéo" allowfullscreen></iframe>`);
+  } else if (step.kind === "itineraire") {
+    cardWrap("itineraire", `<div class="dc-h"><div class="dc-ico">🚇</div><div><div class="dc-t">Itinéraire jusqu'à ${step.to}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;→&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
+  }
+}
+// Validation EDI — back-office uniquement (panneau droit) : la famille ne voit jamais les rejets/dédup.
+async function showEdi(step) {
+  const block = document.getElementById("lead-edi");
+  const list = document.getElementById("edi-list");
+  const count = document.getElementById("le-count");
+  list.innerHTML = step.items.map((it, i) => `
+    <div class="edi-row" data-i="${i}" data-st="pending">
+      <span class="edi-name">${it[0]}</span>
+      <span class="edi-st"><span class="edi-spin"></span>interrogation…</span>
+    </div>`).join("");
+  count.textContent = "";
+  block.classList.add("on");
+  block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  let ok = 0;
+  for (let i = 0; i < step.items.length; i++) {
+    await wait(760);
+    const it = step.items[i];
+    const row = list.querySelector(`.edi-row[data-i="${i}"]`);
+    const st = row.querySelector(".edi-st");
+    if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
+    else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
+    count.textContent = `${ok}/${step.items.length} validée${ok > 1 ? "s" : ""}`;
+  }
+  await wait(320);
+}
+async function showScore(step) {
+  await wait(300);
+  const sc = document.getElementById("lead-score"); sc.classList.add("on");
+  document.getElementById("ls-meter").style.width = (step.value * 10) + "%";
+  const b = document.getElementById("ls-badge");
+  b.className = "ls-badge " + step.statut;
+  b.textContent = (step.statut === "chaud" ? "🔥 Chaud" : step.statut === "tiede" ? "⚡ Tiède" : "❄ Froid") + ` · ${step.value}/10`;
+  down();
+}
+async function showSent(step) {
+  await wait(350);
+  document.getElementById("sent-t").textContent = `Orientation validée par ${step.n} résidences partenaires`;
+  document.getElementById("sent-s").textContent = `Transmission EDI temps réel · département ${step.dept}`;
+  document.getElementById("email-card").innerHTML = `
+    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences validées</div></div></div>
+    <div class="email-subj">🔥 Nouveau lead chaud · Garches (92) · besoin urgent</div>
+    <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. Contact <b>Sylvie (07 57 99 11 40 si non-consentement)</b>. Recontactez la famille au plus vite.</div>`;
+  document.getElementById("lead-sent").classList.add("show"); down();
+}
+
+/* ════════ SCÉNARIO (déterministe) ════════ */
+const SCRIPT = [
+  { t:'bot',  text:"Bonjour, je suis Emma 💛 Je sais que cette étape est souvent difficile, alors n'hésitez pas à prendre tout le temps nécessaire. Racontez-moi simplement, avec vos propres mots, ce qui vous amène aujourd'hui." },
+  { t:'user', text:"C'est pour ma mère… je n'en peux plus, je culpabilise, mais je n'y arrive plus. 82 ans, et ça se dégrade vite.", fills:[['lien','Fille']] },
+  { t:'bot',  text:"Je comprends profondément votre épuisement, il n'est pas humainement possible de porter seul une telle charge indéfiniment. Ne soyez pas trop dur avec vous-même : vous avez fait bien plus que votre maximum. Pour mieux vous aider, pourriez-vous m'en dire davantage sur l'état actuel de votre maman ?" },
+  { t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
+  { t:'bot',  text:"De nombreuses familles me font part de ces déambulations nocturnes — je comprends tout à fait votre inquiétude. Bien que le diagnostic relève exclusivement du médecin, pourriez-vous me dire si un terme médical précis a déjà été posé sur cette situation ?" },
+  { t:'user', text:"Le médecin a parlé d'Alzheimer, rien d'officiel. Et elle refuse, « pas dans un mouroir ».", fills:[['type','Alzheimer / unité protégée']] },
+  { t:'bot',  text:"Je comprends tout à fait, et nous allons avancer ensemble, pas à pas. Il y a deux points essentiels dans ce que vous me confiez. Tout d'abord, **la sécurité de votre maman est notre priorité absolue** : ces sorties nocturnes, que l'on appelle **phénomènes de fugue**, sont très éprouvantes et il est légitime de vouloir la protéger. Pour m'aider à imaginer l'accompagnement le plus serein pour elle, pourriez-vous me dire si elle exprime parfois de l'agitation ou de la colère, que ce soit par les mots ou les gestes ?" },
+  { t:'user', text:"Non… mais elle peut être agitée par moments." },
+  { t:'bot',  text:"Merci pour cette précision importante. Rassurez-vous, il existe des **espaces de vie dédiés et sécurisés**, conçus justement pour les besoins de votre maman. Ces unités permettent de se déplacer en toute liberté et sécurité, avec des équipes formées pour apaiser l'agitation et prévenir les fugues. C'est toujours le **médecin coordinateur** qui, après avoir pris connaissance de son dossier, pourra vous conseiller la solution la plus adaptée à son bien-être. Quant à vos craintes sur les établissements, sachez que ce sont avant tout des **lieux de vie** chaleureux avec des jardins et des animations." },
+  { t:'bot',  text:"Pour avancer concrètement, j'aimerais mieux comprendre son autonomie au quotidien. Je vous propose une petite estimation simple avec 6 repères : pour chacun, dites-moi si elle agit **seule et correctement (A)**, **avec de l'aide (B)**, ou si elle **ne fait plus du tout (C)**. On peut commencer ?" },
+  { t:'user', text:"Oui, d'accord." },
+  { t:'aggir', items:[
+      ['Cohérence','suit une conversation, se comporte de façon sensée ?','C'],
+      ['Orientation','se repère dans le temps et les lieux ?','C'],
+      ['Toilette','se lave seule (haut et bas) ?','C'],
+      ['Habillage',"s'habille seule ?",'C'],
+      ['Alimentation','mange seule une fois servie ?','B'],
+      ['Déplacements','se lève / marche seule chez elle ?','B'],
+    ], fills:[['autonomie','Dépendante · GIR 2 (estimé)']] },
+  { t:'card', kind:'gir', value:'GIR 2', pct:82, note:"Estimation indicative — le classement officiel sera fixé par l'équipe médico-sociale du département." },
+  { t:'bot',  text:"On voit que votre maman a besoin d'une **présence très soutenue au quotidien**, notamment pour les gestes de la vie de tous les jours comme la toilette. Cela correspondrait à un accompagnement proche d'un **GIR 2**. C'est un repère précieux pour nous. Et vous, dans ce tourbillon, comment vous sentez-vous ? Avez-vous la chance d'avoir des proches ou des voisins sur qui compter pour vous épauler un peu ?" },
+  { t:'user', text:"Je lui rends visite quotidiennement, nous résidons toutes deux à Garches. Mais pouvez-vous vous présenter ? Je crains qu'il ne s'agisse d'un démarchage commercial, ayant déjà été contactée à plusieurs reprises.", fills:[['zone','Garches (92)']] },
+  { t:'bot',  text:"Votre méfiance est tout à fait compréhensible compte tenu de votre situation. Je m'appelle Emma, l'IA de SmartSeniors, et je suis là pour vous accompagner gratuitement. Mon rôle est d'être à vos côtés, gracieusement, pour vous aider à traverser cette étape avec plus de sérénité. Je suis là pour vous aider à trouver une solution d'hébergement adaptée, en vous renseignant sur les aides financières et en vous expliquant le fonctionnement des établissements. Nous avançons à votre propre rythme, sans aucune pression, car c'est vous qui gardez le fil de chaque décision." },
+  { t:'user', text:"D'accord… merci. Excusez-moi, je suis à cran en ce moment." },
+  { t:'bot',  text:"Ne vous excusez surtout pas, votre vigilance est tout à fait légitime et témoigne de l'attention que vous portez à votre maman. Pour continuer à vous accompagner, concentrons-nous sur sa situation : puisque vous vivez toutes deux à Garches, cherchons les établissements les plus proches. Dans quel périmètre souhaiteriez-vous que nous effectuions nos recherches ?" },
+  { t:'user', text:"Le plus près possible — 5 km maximum.", fills:[['zone','Garches (92) · 5 km']] },
+  { t:'bot',  text:"Merci. Maintenant, pour nous permettre de cibler les solutions les plus sereines et pérennes pour votre maman, nous devons aborder un sujet délicat mais essentiel : celui du **budget**. Pourriez-vous m'indiquer, en toute confidentialité, le montant approximatif de ses revenus mensuels ?" },
+  { t:'user', text:"1 600 € de retraite. À 3-4 000 €/mois, c'est mort." },
+  { t:'bot',  text:"Je comprends que ces chiffres puissent inquiéter, mais rassurez-vous : **le tarif affiché n'est qu'une base de départ**. Entre l'**APA** qui allège considérablement les frais liés à la dépendance et le **crédit d'impôt de 25 %**, la charge réelle devient beaucoup plus douce. On peut regarder ensemble comment mobiliser un peu d'épargne pour compléter sereinement le budget, qu'en pensez-vous ?" },
+  { t:'user', text:"Un livret et une assurance-vie, ~85 000 €. Locataire." },
+  { t:'bot',  text:"Cette épargne de 85 000 € est une ressource précieuse qui vous apporte une réelle sécurité : cela permet d'**envisager sereinement le financement** et de voir l'avenir avec plus de tranquillité. Pour vous accompagner au mieux, dites-moi, ressentez-vous le besoin d'agir en urgence ou préférez-vous que nous prenions un peu de temps ensemble ?", fills:[['budget',"Retraite 1 600 € + épargne ~85 000 € · APA + crédit d'impôt"]] },
+  { t:'user', text:"Urgent. Je suis à bout, et avec les sorties la nuit, j'ai trop peur." },
+  { t:'bot',  text:"Je comprends tout à fait, face à une telle situation et à l'inquiétude que vous ressentez, il est tout à fait légitime de vouloir **agir sans plus attendre** pour protéger votre maman et retrouver un peu de sérénité.", fills:[['delai','Urgent']] },
+  { t:'score', value:9, statut:'chaud' },
+  { t:'bot',  text:"Pour vous simplifier les choses et avancer concrètement, **souhaitez-vous que je demande aux résidences de vous recontacter directement** afin d'organiser une première rencontre ?" },
+  { t:'user', text:"Oui, qu'elles m'appellent, c'est plus simple." },
+  { t:'bot',  text:"C'est entendu, **les établissements vont prendre contact avec vous** pour faire le point. Pour bien préparer la suite, je vais ouvrir le dossier de votre maman. Pourriez-vous me donner son nom et son prénom ?", fills:[['consent','Oui — résidences recontactent directement']] },
+  { t:'user', text:"Jeanne Belkacem." },
+  { t:'bot',  text:"Merci. Pour finaliser son **dossier d'admission** et faciliter ses démarches pour l'**APA**, pourriez-vous m'indiquer sa date de naissance ?" },
+  { t:'user', text:"Le 12 mars 1942.", fills:[['proche','Jeanne Belkacem · née le 12/03/1942']] },
+  { t:'bot',  text:"Pourriez-vous m'indiquer son adresse actuelle (rue, code postal et ville) ? Cela permettra de transmettre le dossier **APA** au bon **Conseil départemental**." },
+  { t:'user', text:"8 rue de Buzenval, 92380 Garches.", fills:[['adresse','8 rue de Buzenval · 92380 Garches']] },
+  { t:'bot',  text:"Pour que je puisse vous transmettre le récapitulatif et les informations importantes, pourriez-vous me donner **votre** numéro de téléphone et une adresse e-mail ?" },
+  { t:'user', text:"06 24 18 52 40, sylvie.belkacem@gmail.com.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 · sylvie.belkacem@gmail.com']] },
+  { t:'bot',  text:"Avant de finaliser, je dois m'assurer que c'est bien vous : je viens de vous envoyer un **code de vérification par SMS** au 06 24 18 52 40. Merci de bien vouloir me donner le code de vérification que vous avez reçu de la part de SmartSeniors." },
+  { t:'user', text:"C'est le 738 204.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 ✓ vérifié · sylvie.belkacem@gmail.com']] },
+  { t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { t:'edi', dept:'92', items:[
+      ["EHPAD L'Empereur — Garches","ok"],
+      ["Résidence partenaire — Garches","ok"],
+      ["Résidence partenaire — Vaucresson","ko","déjà dans leur base"],
+      ["Résidence partenaire — Saint-Cloud","ok"],
+      ["Résidence partenaire — Marnes-la-Coquette","ko","plus de place"],
+      ["Résidence partenaire — Rueil-Malmaison","ok"],
+    ] },
+  { t:'card', kind:'pdf', titre:"Dossier d'admission — Jeanne Belkacem", sous:"Pré-rempli (identité, adresse, contact) · reste : votre signature + le volet médical (médecin)." },
+  { t:'bot',  text:"J'ai d'ailleurs une excellente nouvelle budgétaire : la résidence **L'Empereur** à Garches propose actuellement des conditions très avantageuses." },
+  { t:'card', kind:'promo', residence:"EHPAD L'Empereur — Garches", prix:"110 €/jour", detail:"Offre en cours (15 jours) · au lieu de ~145 €/jour" },
+  { t:'card', kind:'video', titre:"Visite vidéo — EHPAD L'Empereur (Garches)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
+  { t:'card', kind:'itineraire', from:"8 rue de Buzenval, Garches", to:"L'Empereur (Garches)", detail:"≈ 7 min à pied · ou gare Garches–Marnes-la-Coquette (Transilien L) à 5 min" },
+  { t:'bot',  text:"Vous n'avez plus à courir partout, **les résidences reviendront vers vous directement**. Et surtout, n'oubliez jamais, Sylvie : **votre présence est irremplaçable** auprès de votre maman. 💛" },
+  { t:'sent', n:4, dept:'92' },
+];
+
+/* ── Contrôles play / pause ── */
+const PAUSE_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
+const PLAY_ICO  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+function updatePauseUI() {
+  pauseBtn.disabled = !running;
+  pauseBtn.classList.toggle('is-paused', running && paused);
+  pauseBtn.innerHTML = (paused ? PLAY_ICO : PAUSE_ICO) + '<span>' + (paused ? 'Reprendre' : 'Pause') + '</span>';
+  pauseBtn.setAttribute('aria-label', paused ? 'Reprendre la démo' : 'Mettre la démo en pause');
+  pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+}
+function setPaused(p) {
+  if (!running) return;
+  paused = p;
+  if (TTS_OK) { try { p ? speechSynthesis.pause() : speechSynthesis.resume(); } catch {} }
+  if (currentAudio) { try { p ? currentAudio.pause() : currentAudio.play(); } catch {} }
+  if (!paused) releasePause();
+  updatePauseUI();
+  document.getElementById("mode-note").textContent = paused ? "⏸ Démo en pause" : "Scénario en cours…";
+}
+
+// Arrête proprement le scénario en cours et attend qu'il se soit dénoué (utilisé avant la bascule Live).
+async function stopScript() {
+  if (!running && !starting) { cancelRequested = false; stopSpeech(); return; }
+  cancelRequested = true; paused = false; releasePause(); stopSpeech();
+  await runDone;
+  cancelRequested = false;
+}
+
+// (Re)lance le scénario déterministe depuis le début — annule d'abord un éventuel run en cours/en pause.
+async function startScript() {
+  if (starting) return;                       // ignore les double-clics pendant la bascule
+  starting = true;
+  if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
+  await runDone;                              // attend la fin (le dénouement) du run précédent
+  cancelRequested = false; paused = false; stopSpeech();
+  let resolveDone; runDone = new Promise(r => resolveDone = r);
+  running = true;
+  setMode('demo'); resetDossier(); chatBox.innerHTML = "";
+  replayBtn.disabled = false; updatePauseUI();
+  document.getElementById("mode-note").textContent = "Scénario en cours…";
+  starting = false;
+  try {
+    await wait(400);
+    for (let si = 0; si < SCRIPT.length; si++) {
+      const step = SCRIPT[si];
+      // voix studio : précharge la réplique d'Emma suivante pendant que celle-ci se joue
+      if (step.t === 'bot' && voiceMode === 'premium') {
+        const next = SCRIPT.slice(si + 1).find(s => s.t === 'bot');
+        if (next) getTTS(next.text).catch(() => {});
+      }
+      if (step.t === 'bot') await botSay(step.text);
+      else if (step.t === 'user') await userSay(step.text);
+      else if (step.t === 'aggir') await runAggir(step.items);
+      else if (step.t === 'edi') await showEdi(step);
+      else if (step.t === 'card') await showCard(step);
+      else if (step.t === 'score') await showScore(step);
+      else if (step.t === 'sent') await showSent(step);
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
+      await wait(step.t === 'bot' ? 320 : 220);
+    }
+    document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
+  } catch (e) {
+    if (e !== CANCEL) throw e;                 // annulation = arrêt silencieux ; vraie erreur = on remonte
+  } finally {
+    running = false; updatePauseUI(); resolveDone();
+  }
+}
+
+/* ════════ MODE LIVE (vrai pipeline) ════════ */
+const LIVE = { history: [], lead: {} };
+const LIENL = { parent:'Enfant (fils/fille)', fils_fille:'Fils / Fille', conjoint:'Conjoint(e)', grand_parent:'Petit-enfant', moi_meme:'Pour lui/elle-même', ass_sociale:'Assistant(e) social(e)', autre:'Proche' };
+const GIRL = { autonome:'Autonome (GIR 5-6)', semi_dependant:'Semi-dépendant (GIR 3-4)', tres_dependant:'Très dépendant (GIR 1-2)' };
+const SITL = { domicile:'À domicile', famille:'Chez la famille', hopital:'🏥 Hospitalisé(e)', clinique:'🏥 Clinique / SSR', autre_residence:'Autre résidence', autre:'Autre' };
+const TYPEL = { ehpad_medicalise:'EHPAD médicalisé', alzheimer:'Unité Alzheimer', autonomie:'Résidence Autonomie', senior:'Résidence Sénior' };
+const DELL = { urgent:'⚡ Urgent', '1_mois':'Sous 1 mois', '1_3_mois':'1 à 3 mois', '3_6_mois':'3 à 6 mois', '6_mois_plus':'+ 6 mois' };
+
+async function liveSend(text) {
+  if (!text || liveBusy) return;
+  liveBusy = true; sendBtn.disabled = true;
+  const ur = rowEl("user"); const ub = document.createElement("div"); ub.className = "cbub"; ub.textContent = text; ur.appendChild(ub); chatBox.appendChild(ur);
+  LIVE.history.push({ role:"user", content:text }); down();
+  const tk = rowEl("bot"); const tt = document.createElement("div"); tt.className = "cthink"; tt.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(tt); chatBox.appendChild(tk); down();
+  let full = "", bb = null;
+  let apiErr = "";
+  try {
+    const resp = await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ message:text, history:LIVE.history.slice(0,-1), funnel:LIVE.lead }) });
+    if (!resp.ok) {
+      try { apiErr = (await resp.json())?.error || ""; } catch {}
+      throw new Error("HTTP " + resp.status);
+    }
+    tk.remove(); const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r);
+    const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+    while (true) { const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream:true }); const lines = buf.split("\n"); buf = lines.pop();
+      for (const line of lines) { if (!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if (d === "[DONE]") continue;
+        try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
+    bb.innerHTML = mdBold(full);
+  } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = apiErr ? "⚠️ " + apiErr : "Désolé, une erreur est survenue."; }
+  if (full) { LIVE.history.push({ role:"assistant", content:full }); speak(full); }
+  liveBusy = false; sendBtn.disabled = false; down();
+  liveExtract();
+}
+async function liveExtract() {
+  try {
+    const r = await fetch(EXTRACT_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ history: LIVE.history }) });
+    if (!r.ok) return; const { lead } = await r.json(); LIVE.lead = { ...LIVE.lead, ...lead }; const l = LIVE.lead;
+    if (mode !== 'live') return;                 // basculé vers la démo entre-temps → ne pas écrire dans le dossier
+    const set = (k, v) => { if (v) setField(k, v); };
+    if (l.lien_proche) set('lien', LIENL[l.lien_proche] || l.lien_proche);
+    const nom = [l.prenom_proche, l.nom_proche].filter(Boolean).join(" "); const dob = l.date_naissance_proche ? ` · né(e) ${l.date_naissance_proche}` : (l.age_proche ? ` · ${l.age_proche} ans` : "");
+    if (nom) set('proche', nom + dob);
+    set('situation', SITL[l.situation_actuelle]); set('autonomie', GIRL[l.niveau_autonomie]); set('type', TYPEL[l.type_residence]);
+    const zone = l.ville_recherche || l.code_postal; if (zone) set('zone', zone + (l.rayon_km ? ` · ${l.rayon_km} km` : ""));
+    set('budget', l.budget_mensuel); set('delai', DELL[l.delai]);
+    set('adresse', l.adresse_proche);
+    const c = [l.contact_prenom, l.contact_nom].filter(Boolean).join(" "); const co = [c, l.contact_telephone, l.contact_email].filter(Boolean).join(" · "); if (co) set('contact', co);
+    if (l.contact_consent === 'non') set('consent', `Non — via conseiller ${CONSEILLER_TEL}`);
+    else if (l.contact_consent === 'oui') set('consent', 'Oui — recontact direct par les résidences');
+    liveScoreUpdate(l);
+  } catch {}
+}
+// Score d'urgence live — même heuristique que le funnel index.html (affiché dès que le délai est connu)
+function liveScoreUpdate(l) {
+  if (mode !== 'live' || !l.delai) return;
+  let sc = 0;
+  if (l.delai === 'urgent' || l.delai === '1_mois') sc += 4; else if (l.delai === '1_3_mois') sc += 2;
+  if (l.type_residence === 'ehpad_medicalise' || l.type_residence === 'alzheimer') sc += 3;
+  if (l.niveau_autonomie === 'tres_dependant' || l.niveau_autonomie === 'semi_dependant') sc += 1;
+  if (l.contact_telephone) sc += 2;
+  if (l.contact_email) sc += 1;
+  if (l.situation_actuelle === 'hopital') sc += 1;
+  sc = Math.min(sc, 10);
+  const statut = sc >= 7 ? 'chaud' : sc >= 4 ? 'tiede' : 'froid';
+  document.getElementById('lead-score').classList.add('on');
+  document.getElementById('ls-meter').style.width = (sc * 10) + '%';
+  const b = document.getElementById('ls-badge');
+  b.className = 'ls-badge ' + statut;
+  b.textContent = (statut === 'chaud' ? '🔥 Chaud' : statut === 'tiede' ? '⚡ Tiède' : '❄ Froid') + ` · ${sc}/10`;
+}
+
+/* ── Modes & wiring ── */
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('#mode-seg button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  input.disabled = (m !== 'live'); sendBtn.disabled = (m !== 'live');
+}
+document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('click', async () => {
+  const m = b.dataset.mode;
+  if (m === 'demo') { startScript(); }
+  else {
+    await stopScript(); setMode('live'); LIVE.history = []; LIVE.lead = {}; resetDossier(); chatBox.innerHTML = ""; updatePauseUI();
+    const r = rowEl("bot"); const bb = document.createElement("div"); bb.className = "cbub"; bb.innerHTML = mdBold("Bonjour, je suis **Emma** 💛 Dites-moi, avec vos mots, ce qui vous amène."); r.appendChild(bb); chatBox.appendChild(r);
+    document.getElementById("mode-note").textContent = "Mode Live — Laurent tape librement"; input.focus();
+  }
+}));
+replayBtn.addEventListener("click", () => startScript());
+pauseBtn.addEventListener("click", () => setPaused(!paused));
+form.addEventListener("submit", e => { e.preventDefault(); if (mode !== 'live') return; const t = input.value.trim(); if (t) { input.value = ""; input.style.height = "auto"; liveSend(t); } });
+input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 90) + "px"; });
+
+/* ── Init : autoplay du scénario ── */
+renderFieldsInit();
+updatePauseUI();
+startScript();
+</script>
+</body>
+</html>

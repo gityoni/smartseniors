@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SmartSeniors — Bibliothèque de documents générables par Emma",
+  "type": "object",
+  "required": ["documents"],
+  "properties": {
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "titre", "categorie", "rempli_par", "emma_prefill", "mode_generation"],
+        "additionalProperties": false,
+        "properties": {
+          "id":          { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Identifiant technique" },
+          "titre":       { "type": "string", "description": "Titre affiché à la famille" },
+          "categorie":   { "type": "string", "enum": ["admission", "medical", "aide_financiere", "autonomie", "preparation", "ressource"] },
+          "description": { "type": "string", "description": "À quoi sert le document, en langage famille" },
+          "source":      { "type": "string", "description": "Formulaire officiel / origine (ex: Cerfa n°…)" },
+          "rempli_par":  { "type": "string", "enum": ["famille", "medecin", "equipe_medico_sociale"], "description": "Qui remplit officiellement le document" },
+          "emma_prefill":{ "type": "string", "enum": ["complet", "administratif_seulement", "aucun"], "description": "Ce qu'Emma a le droit de pré-remplir" },
+          "mode_generation": { "type": "string", "enum": ["html_pdf", "genere_depuis_donnees", "remplir_acroform", "template_vierge"], "description": "Comment le document est produit" },
+          "champs_lead": { "type": "array", "items": { "type": "string" }, "description": "Champs du lead utilisés pour pré-remplir" },
+          "champs_a_demander": { "type": "array", "items": { "type": "string" }, "description": "Infos non collectées par le funnel, à demander avant génération" },
+          "guardrail":   { "type": ["string", "null"], "description": "Avertissement / limite à afficher (médical, estimation…)" },
+          "fichier_source": { "type": ["string", "null"], "description": "Chemin du PDF source dans le repo, si committé" },
+          "actif":       { "type": "boolean", "default": true }
+        }
+      }
+    }
+  }
+}

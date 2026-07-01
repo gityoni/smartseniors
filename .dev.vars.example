@@ -1,0 +1,11 @@
+# ── Test du mode Live en local (Cloudflare Pages Functions) ──────────────────
+# Copiez ce fichier en `.dev.vars` (ignoré par git — il contiendra la vraie clé),
+# collez-y votre clé Anthropic, puis lancez le dev local :
+#
+#   cp .dev.vars.example .dev.vars        # puis éditez .dev.vars avec votre clé
+#   npx wrangler pages dev pages          # sert /api/chat + /api/extract en local
+#
+# Le mode Live de pages/demo.html (et l'accueil) appellera alors le vrai pipeline
+# Anthropic. NE JAMAIS committer `.dev.vars` ni la clé réelle.
+
+ANTHROPIC_API_KEY=sk-ant-VOTRE-CLE-ICI

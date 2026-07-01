@@ -1,0 +1,22 @@
+# Transcripts bruts d'appels réels = données personnelles/santé (RGPD).
+# On les garde en local, jamais dans le repo. Seules les versions anonymisées
+# (knowledge/transcripts/clean/) et les fiches sont versionnées.
+knowledge/transcripts/raw/*
+!knowledge/transcripts/raw/.gitkeep
+
+# Sorties locales du notebook
+*.m4a
+*.mp3
+*.wav
+transcript_brut.txt
+transcript_horodate.txt
+transcript_dialogue.txt
+fiche.json
+fiche.md
+
+# Divers
+.DS_Store
+node_modules/
+.env
+# Secrets locaux Cloudflare Pages (wrangler pages dev) — jamais committés
+.dev.vars
