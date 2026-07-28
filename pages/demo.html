@@ -406,10 +406,13 @@ function rowEl(who) {
 const emmaAv = document.getElementById("emma-av");
 const setSpeaking = (on) => emmaAv?.classList.toggle("speaking", on);
 
-async function botSay(text) {
-  // thinking
-  const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
-  chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+// `noThink` : pas de bulle « je réfléchis » — réservé à l'accueil, où Emma n'a
+// encore rien à traiter. Un accueil doit être instantané.
+async function botSay(text, noThink) {
+  if (!noThink) {
+    const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
+    chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  }
   // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
   const said = speak(text);
   setSpeaking(true);
@@ -523,7 +526,12 @@ async function showSent(step) {
 
 /* ════════ SCÉNARIO (déterministe) ════════ */
 const SCRIPT = [
-  { t:'bot',  text:"Bonjour, je suis Emma 💛 Je sais que cette étape est souvent difficile, alors n'hésitez pas à prendre tout le temps nécessaire. Racontez-moi simplement, avec vos propres mots, ce qui vous amène aujourd'hui." },
+  // Accueil en 2 bulles, sans « je réfléchis » : on pose le cadre (gratuit, pas de
+  // formulaire, pas d'appel sans accord) AVANT de questionner. La question nomme
+  // une émotion plutôt que de réclamer un récit — bien plus facile à attraper
+  // pour quelqu'un d'épuisé qui n'a peut-être jamais formulé la situation.
+  { t:'bot', noThink:true, text:"Bonjour, je suis **Emma**, conseillère chez SmartSeniors. 💛 Si vous êtes ici, c'est que la situation de votre maman ou de votre papa vous préoccupe — et on arrive souvent épuisé, avec beaucoup de questions et peu de réponses." },
+  { t:'bot', noThink:true, text:"Mon rôle est de vous aider à y voir clair, gratuitement. Vous n'aurez **aucun formulaire à remplir**, et personne ne vous appellera sans votre accord. Prenez votre temps : **qu'est-ce qui vous inquiète le plus en ce moment ?**" },
   { t:'user', text:"C'est pour ma mère… je n'en peux plus, je culpabilise, mais je n'y arrive plus. 82 ans, et ça se dégrade vite.", fills:[['lien','Fille']] },
   { t:'bot',  text:"Je comprends profondément votre épuisement, il n'est pas humainement possible de porter seul une telle charge indéfiniment. Ne soyez pas trop dur avec vous-même : vous avez fait bien plus que votre maximum. Pour mieux vous aider, pourriez-vous m'en dire davantage sur l'état actuel de votre maman ?" },
   { t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
@@ -637,7 +645,7 @@ async function startScript() {
         const next = SCRIPT.slice(si + 1).find(s => s.t === 'bot');
         if (next) getTTS(next.text).catch(() => {});
       }
-      if (step.t === 'bot') await botSay(step.text);
+      if (step.t === 'bot') await botSay(step.text, step.noThink);
       else if (step.t === 'user') await userSay(step.text);
       else if (step.t === 'aggir') await runAggir(step.items);
       else if (step.t === 'edi') await showEdi(step);
@@ -740,7 +748,7 @@ document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('c
   if (m === 'demo') { startScript(); }
   else {
     await stopScript(); setMode('live'); LIVE.history = []; LIVE.lead = {}; resetDossier(); chatBox.innerHTML = ""; updatePauseUI();
-    const r = rowEl("bot"); const bb = document.createElement("div"); bb.className = "cbub"; bb.innerHTML = mdBold("Bonjour, je suis **Emma** 💛 Dites-moi, avec vos mots, ce qui vous amène."); r.appendChild(bb); chatBox.appendChild(r);
+    const r = rowEl("bot"); const bb = document.createElement("div"); bb.className = "cbub"; bb.innerHTML = mdBold("Bonjour, je suis **Emma**, conseillère chez SmartSeniors. 💛 Je vous aide à y voir clair, **gratuitement** — aucun formulaire à remplir, et personne ne vous appellera sans votre accord. Qu'est-ce qui vous inquiète le plus en ce moment ?"); r.appendChild(bb); chatBox.appendChild(r);
     document.getElementById("mode-note").textContent = "Mode Live — Laurent tape librement"; input.focus();
   }
 }));
