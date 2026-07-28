@@ -620,7 +620,7 @@
   border-radius: 14px;
   border: 1px solid rgba(241, 247, 245, .09);
   background: rgba(255, 255, 255, .04);
-  transition: opacity .45s var(--ss-ease), background .45s, border-color .45s, transform .45s var(--ss-ease), box-shadow .45s;
+  transition: opacity .3s var(--ss-ease), background .3s, border-color .3s, transform .3s var(--ss-ease), box-shadow .3s;
 }
 .ss-root[data-premium] .lfield.filled {
   background: linear-gradient(120deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .05));
@@ -682,7 +682,7 @@
 .ss-root[data-premium] .lead-side.spotlight .lfield:not(.spot),
 .ss-root[data-premium] .lead-side.spotlight .lfield.filled:not(.spot) {
   opacity: .16;
-  transition: opacity .32s var(--ss-ease);
+  transition: opacity .2s var(--ss-ease);
 }
 /* Variante EDI : pendant l'interrogation du réseau partenaire, on éteint tout
    sauf le bloc EDI — et le score d'urgence, qu'on garde allumé pour que le
@@ -693,7 +693,7 @@
 .ss-root[data-premium] .lead-side.spot-edi .lfield,
 .ss-root[data-premium] .lead-side.spot-edi .lfield.filled {
   opacity: .16;
-  transition: opacity .32s var(--ss-ease);
+  transition: opacity .2s var(--ss-ease);
 }
 .ss-root[data-premium] .lead-side.spot-edi .lead-edi.on {
   border-color: rgba(110, 231, 183, .45);

@@ -390,7 +390,7 @@ function clearSpotlight() {
 function spotlight(el) {
   clearSpotlight();
   el.classList.add("spot"); leadSide.classList.add("spotlight");
-  spotTimer = setTimeout(clearSpotlight, 640 / pace());
+  spotTimer = setTimeout(clearSpotlight, 450 / pace());
 }
 
 function setField(key, val) {
@@ -729,10 +729,10 @@ async function startScript(from = 0) {
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
-      // Respiration : le projecteur tient 640 ms, on attend juste ce qu'il faut
-      // pour qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a
+      // Respiration : le projecteur tient 450 ms (fondu compris), on attend juste
+      // ce qu'il faut pour qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a
       // fini, la famille n'a pas répondu) — rien n'est coupé.
-      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(700); }
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(510); }
       // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
       // enchaîne : proportionnel à la longueur du message, pas une constante.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
