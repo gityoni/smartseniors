@@ -182,9 +182,9 @@
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
             <span id="dc-play-label">Lancer</span>
           </button>
-          <button class="dc-ghost" id="replay" type="button" aria-label="Reprendre depuis le début">
+          <button class="dc-ghost" id="replay" type="button" aria-label="Rejouer depuis le début">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-            Reprendre
+            Rejouer
           </button>
           <div class="dc-track" id="dc-track"><i id="dc-bar"></i></div>
           <span class="dc-step" id="dc-step">—</span>
@@ -384,13 +384,13 @@ const leadSide = document.querySelector(".lead-side");
 let spotTimer = null;
 function clearSpotlight() {
   clearTimeout(spotTimer); spotTimer = null;
-  leadSide.classList.remove("spotlight");
+  leadSide.classList.remove("spotlight", "spot-edi");
   fieldsEl.querySelectorAll(".lfield.spot").forEach(n => n.classList.remove("spot"));
 }
 function spotlight(el) {
   clearSpotlight();
   el.classList.add("spot"); leadSide.classList.add("spotlight");
-  spotTimer = setTimeout(clearSpotlight, 900 / pace());
+  spotTimer = setTimeout(clearSpotlight, 640 / pace());
 }
 
 function setField(key, val) {
@@ -519,6 +519,9 @@ async function showEdi(step) {
   count.textContent = "";
   block.classList.add("on");
   block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  // Projecteur sur le réseau partenaire : le reste du panneau s'éteint, sauf le
+  // score — « lead chaud » et validation se lisent alors d'un seul regard.
+  clearSpotlight(); leadSide.classList.add("spot-edi");
   let ok = 0;
   for (let i = 0; i < step.items.length; i++) {
     await wait(760);
@@ -529,16 +532,21 @@ async function showEdi(step) {
     else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
     count.textContent = `${ok}/${step.items.length} validée${ok > 1 ? "s" : ""}`;
   }
-  await wait(320);
+  await wait(520);
+  leadSide.classList.remove("spot-edi");
 }
-async function showScore(step) {
-  await wait(300);
-  const sc = document.getElementById("lead-score"); sc.classList.add("on");
+// Séparé de l'animation : `fastForward` doit pouvoir poser l'état du score sans
+// attente, sinon un saut de chapitre arrive avec un score éteint.
+function applyScore(step) {
+  document.getElementById("lead-score").classList.add("on");
   document.getElementById("ls-meter").style.width = (step.value * 10) + "%";
   const b = document.getElementById("ls-badge");
   b.className = "ls-badge " + step.statut;
   b.textContent = (step.statut === "chaud" ? "🔥 Chaud" : step.statut === "tiede" ? "⚡ Tiède" : "❄ Froid") + ` · ${step.value}/10`;
-  down();
+}
+async function showScore(step) {
+  await wait(300);
+  applyScore(step); down();
 }
 async function showSent(step) {
   await wait(350);
@@ -664,6 +672,7 @@ function fastForward(to) {
       const b = document.createElement('div'); b.className = 'cbub';
       b.innerHTML = mdBold(s.text); r.appendChild(b); chatBox.appendChild(r);
     }
+    if (s.t === 'score') applyScore(s);
     if (s.fills) for (const [k, v] of s.fills) {
       const el = fieldsEl.querySelector(`.lfield[data-key="${k}"]`);
       if (el) { el.querySelector('.lf-value').textContent = v; el.classList.add('filled'); }
@@ -720,10 +729,10 @@ async function startScript(from = 0) {
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
-      // Respiration : le projecteur tient 900 ms, on attend un peu plus pour
-      // qu'il soit retombé avant qu'Emma reprenne. Ce silence occupe un temps
-      // mort du chat (Emma a fini, la famille n'a pas répondu) — rien n'est coupé.
-      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(1000); }
+      // Respiration : le projecteur tient 640 ms, on attend juste ce qu'il faut
+      // pour qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a
+      // fini, la famille n'a pas répondu) — rien n'est coupé.
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(700); }
       // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
       // enchaîne : proportionnel à la longueur du message, pas une constante.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);

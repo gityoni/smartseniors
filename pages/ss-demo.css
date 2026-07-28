@@ -684,6 +684,25 @@
   opacity: .16;
   transition: opacity .32s var(--ss-ease);
 }
+/* Variante EDI : pendant l'interrogation du réseau partenaire, on éteint tout
+   sauf le bloc EDI — et le score d'urgence, qu'on garde allumé pour que le
+   « lead chaud » et sa validation se lisent ensemble. */
+.ss-root[data-premium] .lead-side.spot-edi .lead-head,
+.ss-root[data-premium] .lead-side.spot-edi .lead-prog,
+.ss-root[data-premium] .lead-side.spot-edi .lead-sent.show,
+.ss-root[data-premium] .lead-side.spot-edi .lfield,
+.ss-root[data-premium] .lead-side.spot-edi .lfield.filled {
+  opacity: .16;
+  transition: opacity .32s var(--ss-ease);
+}
+.ss-root[data-premium] .lead-side.spot-edi .lead-edi.on {
+  border-color: rgba(110, 231, 183, .45);
+  box-shadow:
+    0 0 0 1px rgba(110, 231, 183, .35),
+    0 18px 46px -14px rgba(0, 0, 0, .85),
+    0 0 44px -8px rgba(110, 231, 183, .35);
+}
+
 /* Le champ sous le projecteur : légèrement avancé, halo mint. */
 .ss-root[data-premium] .lfield.spot {
   transform: scale(1.03);
