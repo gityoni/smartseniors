@@ -18,7 +18,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 ## Stack technique
 - **Frontend** : HTML / JS vanilla, design **« Aurore »** (`ss-theme.css` + `ss-landing.css` + `ss-chat.css` + `ss-funnel.css`, `data-direction="aurore"`). `pages/index.html` = Accueil ⇄ Conversation ; `pages/demo.html` = démo partenaire
 - **API** : Cloudflare Pages Functions (`pages/functions/api/`)
-- **LLM** : chat Emma `claude-opus-4-8` (streaming SSE) · extraction lead `claude-haiku-4-5` (tool use)
+- **LLM** : chat Emma `claude-opus-5` (streaming SSE · réflexion adaptative · `effort: medium` · repli serveur activé) · extraction lead `claude-haiku-4-5` (tool use)
 - **Base de données** : Cloudflare D1 (SQLite edge) — binding `DB` (id `3c1a84ef-2d23-42d4-853a-748f0cc16847`)
 - **Email** : MailChannels (envoi des leads aux résidences partenaires)
 - **Hébergement** : Cloudflare Pages (auto-deploy sur push `main`)
@@ -31,7 +31,8 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `pages/index.html` | **Accueil famille (Aurore)** : 2 vues — landing (hero validé + 5 chips) ⇄ Conversation (chat Emma + funnel 13 étapes + cartes EHPAD + CSV) |
 | `pages/demo.html` | **Démo partenaire** : player déterministe (scénario Garches/Jeanne · AGGIR interactif A/B/C · cartes GIR/PDF/promo/vidéo/itinéraire) + mode **Live** (vrai `/api/chat` + `/api/extract`) |
 | `pages/ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` | Design system Aurore : tokens/top-bar · landing · chat+dossier · funnel re-skin + cartes EHPAD |
-| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma `opus-4-8` + prompt v3 nourri du playbook + contexte funnel + prompt caching) |
+| `pages/ss-demo.css` | **Couche « premium » de la démo** (scope `.ss-root[data-premium]`) : champ d'aurore animé, bordures dégradées, balayages lumineux, ✓ qui se dessine, halo d'Emma. Chargée en dernier dans `demo.html` — **n'affecte jamais `index.html`** |
+| `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma `opus-5` + prompt v3 nourri du playbook + bloc `<preference_ton>` + contexte funnel + prompt caching) |
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
 | `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
 | `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
@@ -131,7 +132,9 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 > Apprentissage : `knowledge/emma-playbook.md` (v3, vrais appels) nourrit le prompt ; régénéré via le notebook Colab Drive-persistant. Fiches brutes **non committées** (anonymisation Colab à durcir — lieux/hôpitaux résiduels).
 
 ## Stratégie & pitch — notes (06/2026)
+- **Argumentaire Cap Retraite (Bernard)** : `knowledge/pitch-cap-retraite.md` — message d'ouverture, 5 pitchs, objections, déroulé des 20 min, offre à poser. ⚠️ le pré-check dédup par hash y est présenté comme **engagement technique, pas comme livré**.
 - **Pitch partenaire** : Google Meet, **démo scriptée UNIQUEMENT** (le mode Live existe mais n'est pas montré — pas encore au point). Partager **un onglet Chrome avec « Partager l'audio »**, voix **Emma (studio)**, vitesse **1×**, run à blanc avant (cache audio = par datacenter régional), bouton Pause pour commenter. Présenter depuis la **prod après merge** (URL propre).
+- ⚠️ **L'alias de branche Cloudflare ment.** Après un push, `claude-<branche>.smartseniors.pages.dev` peut servir le déploiement **précédent** pendant plusieurs minutes — y compris avec un paramètre anti-cache, et alors que les autres fichiers du même build sont déjà à jour (`cache-control: max-age=0, must-revalidate` : ce n'est pas le navigateur, c'est l'alias qui pointe encore ailleurs). Pour vérifier une modif juste après un push, utiliser **l'URL épinglée au commit** donnée par le bot Cloudflare (`<hash>.smartseniors.pages.dev`) — elle est exacte. Et ouvrir l'URL de présentation **quelques minutes avant** le rendez-vous pour contrôler ce qui est réellement servi.
 - **Partenaire cible** : organisme de placement (type Cap Retraite) — ils ont les contrats résidences qui paient **1 000-4 000 € par admission** sur lead. Règle métier : à réception, la résidence fait une **validation dédup** (« prospect déjà en base ? ») ; si oui, le lead est mort.
 - **Business models** : **A** = vente de leads, CPL par score (chaud 120-150 € · tiède 80-100 €), payé au **lead validé**, clause dédup 72 h + plafond de rejet auditable · **B** = Emma intégrée à LEUR système (SaaS 1-2 k€/mois + **20-25 % par admission**, accès API au cycle de vie du lead). **Stratégie : signer A avec clause d'option vers B** (A = cash immédiat + données réelles ; B = passif, scale sur leur volume). Atout technique à pitcher : **pré-check dédup par hash** (empreinte nom+tél envoyée avant le lead en clair) — à développer sur `leads.js`.
 - **Simulation acquisition** (benchmark transfo secteur **7 %** — Cap Retraite & co) : 100 leads/mois = **~1 430 visites/mois (48/jour)**. Canal n°1 : **SEO local programmatique** — ~390 pages « EHPAD à [ville/dept] » générées depuis `data/ehpads.json` (même pattern que `_partners.js`). Pont **Google Ads** M1-M4 (CPL 21-57 €) → objectif atteint **M4-M5**, cumul 6 mois ≈ 12 k€, CPL blended ≈ 18 €. ⚠️ Le site n'a quasi **aucune surface indexable** aujourd'hui : les pages SEO sont LE chantier.
