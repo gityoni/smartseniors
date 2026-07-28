@@ -160,8 +160,8 @@
   <section class="ss-convo">
     <div class="ss-convo-head">
       <span class="ss-kicker" style="justify-content:center">Démo partenaire</span>
-      <h2 class="ss-sec-title">Emma en action · le dossier se crée en direct</h2>
-      <p class="ss-sec-lede">Une famille parle à Emma. Pendant qu'elle écoute, rassure et qualifie, le dossier se remplit à droite — jusqu'à la transmission aux résidences.</p>
+      <h2 class="ss-sec-title">Emma en action · le lead se crée en direct</h2>
+      <p class="ss-sec-lede">Une famille parle à Emma. Pendant qu'elle écoute, rassure et qualifie, le lead se construit à droite — jusqu'à la transmission aux résidences.</p>
     </div>
 
     <div class="ss-split" id="demo-split">
@@ -205,7 +205,7 @@
       <div class="lead-side">
         <div class="lead-head">
           <div class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></div>
-          <div><div class="lh-t">Dossier en direct</div><div class="lh-s">Back-office résidences partenaires</div></div>
+          <div><div class="lh-t">Création du lead</div><div class="lh-s">En direct · back-office partenaires</div></div>
           <span class="lead-live"><span class="ss-dot"></span> Live</span>
         </div>
         <div class="lead-prog"><i id="pbar"></i></div>
@@ -378,12 +378,28 @@ function renderFieldsInit() {
     </div>`).join("");
   updateProgress();
 }
+/* Projecteur : le dossier s'efface autour du champ qui vient de tomber, le temps
+   que l'œil y aille. La durée suit le curseur de vitesse, comme le reste. */
+const leadSide = document.querySelector(".lead-side");
+let spotTimer = null;
+function clearSpotlight() {
+  clearTimeout(spotTimer); spotTimer = null;
+  leadSide.classList.remove("spotlight");
+  fieldsEl.querySelectorAll(".lfield.spot").forEach(n => n.classList.remove("spot"));
+}
+function spotlight(el) {
+  clearSpotlight();
+  el.classList.add("spot"); leadSide.classList.add("spotlight");
+  spotTimer = setTimeout(clearSpotlight, 900 / pace());
+}
+
 function setField(key, val) {
   const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
   const v = el.querySelector(".lf-value");
   v.textContent = val; el.classList.add("filled");
   el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
   el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  spotlight(el);
   updateProgress(); down();
 }
 function updateProgress() {
@@ -391,6 +407,7 @@ function updateProgress() {
   document.getElementById("pbar").style.width = Math.round(n / FIELDS.length * 100) + "%";
 }
 function resetDossier() {
+  clearSpotlight();
   renderFieldsInit();
   document.getElementById("lead-sent").classList.remove("show");
   const sc = document.getElementById("lead-score"); sc.classList.remove("on");
@@ -662,7 +679,10 @@ async function startScript() {
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
-      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
+      // Respiration : le projecteur tient 900 ms, on attend un peu plus pour
+      // qu'il soit retombé avant qu'Emma reprenne. Ce silence occupe un temps
+      // mort du chat (Emma a fini, la famille n'a pas répondu) — rien n'est coupé.
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(1000); }
       // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
       // enchaîne : proportionnel à la longueur du message, pas une constante.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);

@@ -560,6 +560,33 @@
 @keyframes ss-draw { to { stroke-dashoffset: 0; } }
 .ss-root[data-premium] .lf-value { letter-spacing: -.005em; }
 
+/* ── PROJECTEUR ────────────────────────────────────────────────────────────
+   À l'instant d'une capture, tout le dossier s'efface sauf le champ qui vient
+   de tomber. L'œil part à droite sans qu'on ait rien à commenter.
+   Pas de calque de voile : `.lead-side` défile, un overlay en `position:absolute`
+   sortirait du champ de vision au premier scroll. On atténue donc les éléments
+   un par un — et `.lead-edi` / `.lead-sent` uniquement dans leur état visible,
+   sinon on les ferait *apparaître* à .18 alors qu'ils sont à 0.            */
+.ss-root[data-premium] .lead-side.spotlight .lead-head,
+.ss-root[data-premium] .lead-side.spotlight .lead-prog,
+.ss-root[data-premium] .lead-side.spotlight .lead-score,
+.ss-root[data-premium] .lead-side.spotlight .lead-edi.on,
+.ss-root[data-premium] .lead-side.spotlight .lead-sent.show,
+.ss-root[data-premium] .lead-side.spotlight .lfield:not(.spot),
+.ss-root[data-premium] .lead-side.spotlight .lfield.filled:not(.spot) {
+  opacity: .16;
+  transition: opacity .32s var(--ss-ease);
+}
+/* Le champ sous le projecteur : légèrement avancé, halo mint. */
+.ss-root[data-premium] .lfield.spot {
+  transform: scale(1.03);
+  border-color: rgba(110, 231, 183, .55);
+  box-shadow:
+    0 0 0 1px rgba(110, 231, 183, .45),
+    0 16px 38px -12px rgba(0, 0, 0, .8),
+    0 0 34px -6px rgba(110, 231, 183, .40);
+}
+
 /* Score d'urgence */
 .ss-root[data-premium] .lead-score {
   border-radius: 16px;
