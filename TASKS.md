@@ -1,7 +1,19 @@
 # SmartSeniors — Suivi des tâches
 
-> Branche de dev : `claude/nice-keller-ndfx1g` · prod = `main` (auto-deploy Cloudflare).
-> Previews automatiques par commit (`*.smartseniors.pages.dev`).
+> prod = `main` (auto-deploy Cloudflare) · previews automatiques par commit (`*.smartseniors.pages.dev`).
+> ⚠️ **L'alias de branche peut servir le déploiement précédent plusieurs minutes après un push** — vérifier via l'URL épinglée au commit.
+
+## 🔥 Prochain chantier — page de pitch « LeadsMagic » (29/07)
+
+Le rendez-vous Bernard est demain. À construire :
+
+- [ ] **Page de pitch sur le site SmartSeniors** — s'enchaîne **en fin de démo** : textes du pitch + effets cinéma, dans la continuité visuelle de `/demo` (couche premium, aurore, projecteur). C'est l'écran sur lequel on termine devant Bernard, pas un support à part.
+- [ ] **Trace écrite / visuelle du projet LeadsMagic** — PDF téléchargeable, ou à défaut une page imprimable : ce que Bernard garde après le rendez-vous et peut faire circuler en interne.
+- [ ] **Réécrire `knowledge/pitch-cap-retraite.md`** autour de l'axe arrêté (création de leads par conversation vs formulaire), avec les munitions du crawl Cap Retraite, **sans aucune offre chiffrée**. Le document actuel est faux.
+- [ ] **Run à blanc depuis la machine du pitch** (1× + voix Emma studio) — le cache audio est **par datacenter**, un run fait ailleurs ne sert à rien.
+- [ ] **Vidéo de secours** du run complet avec le son (plan B réseau).
+
+> Contenu et angle : CLAUDE.md § **L'axe du pitch — « LeadsMagic »**. Les chiffres du parcours Cap Retraite (16-18 écrans, 27 champs, écran GIR, 8h-20h) y sont consignés.
 
 ## ✅ Fait
 
@@ -63,7 +75,7 @@
 - [ ] **`npm run seed:remote`** : charger les 350 EHPAD en D1 prod (nécessite `npx wrangler login`). *Toujours nécessaire pour l'**envoi des emails partenaires*** (le fallback `_partners.js` ne couvre que l'affichage `/api/ehpads`).
 - [ ] Compléter dans le GSheet : **12 résidences sans e-mail** + **3 exclues** (1 belge, 2 sans CP) → re-export → re-seed.
 - [x] **`ELEVENLABS_API_KEY`** posée (Prod + Aperçu) · voix d'Emma choisie : **Shana** (`vUH2A53pJe77Jd2xNGHv`, défaut codé dans `tts.js`).
-- [ ] **Merger la branche vers `main`** avant le pitch → présenter depuis `smartseniors.pages.dev/demo` + run à blanc voix sur la machine du pitch.
+- [x] **Merger la branche vers `main`** — fait le 28/07 (PR #33, 9 commits). Prod vérifiée à jour : **https://smartseniors.pages.dev/demo**. Reste le run à blanc voix sur la machine du pitch.
 - [ ] **Enregistrer une vidéo de secours** du run complet avec le son (plan B si réseau).
 - [ ] **Verrouiller/retirer `/voix-test` + `/api/tts-voices`** maintenant que la voix est choisie (outil interne ouvert).
 - [ ] Restreindre la clé ElevenLabs à **Text to Speech seul** (l'écriture Voices ne sert plus après le choix).
@@ -75,7 +87,7 @@
 
 ## 🚧 À faire — démo & features
 - [ ] **SEO local programmatique** (canal n°1 du plan 100 leads/mois) : générateur de ~390 pages « EHPAD à [ville/département] » depuis `data/ehpads.json` + sitemap + schema.org — le site n'a quasi pas de surface indexable aujourd'hui.
-- [ ] **Pré-check dédup par hash** sur l'API leads (empreinte nom+tél → connu/inconnu avant envoi du lead en clair) — argument clé de la négociation partenaire.
+- [~] ~~**Pré-check dédup par hash**~~ — **abandonné (28/07)**. L'EDI des groupes exige nom + prénom + date de naissance **en clair** pour rapprocher un prospect : rien ne peut être dissimulé, et hacher côté partenaire supposerait qu'ils modifient leur système avant même de travailler ensemble. La contrainte devient un argument *pour l'intégration* (si Emma tourne sur leur trafic, le doublon n'existe plus). Détail : CLAUDE.md § L'axe du pitch.
 - [ ] **Mode Live** : continuer l'affinage (volontairement non montré au pitch).
 - [ ] **Démo** : répétition générale (Meet test avec un 2ᵉ appareil pour valider l'audio d'onglet) ; décider no-naming vs nommage résidence en mode famille.
 - [ ] **Moteur de génération de docs** (HTML→PDF pré-rempli) — pour de vrai (aujourd'hui simulé dans la démo) ; brancher sur les champs du lead ; remplacer les boutons `dl-visite`/`dl-dossier`/`dl-entree` de `index.html`.
@@ -88,6 +100,7 @@
 
 ## 📌 Repères
 - Consentement (règle métier) : oui → tél famille · **non → lead transmis avec le conseiller `07 57 99 11 40`**.
-- Démo : `/demo` (preview de branche ou prod après merge). Le **texte** tourne sans clé ; la **voix studio** nécessite `ELEVENLABS_API_KEY` (secours `OPENAI_API_KEY`).
+- Démo : **https://smartseniors.pages.dev/demo** (mergé en prod). Démarrage **manuel** via la console (plus d'autoplay). Le **texte** tourne sans clé ; la **voix studio** nécessite `ELEVENLABS_API_KEY` (secours `OPENAI_API_KEY`).
 - Pitch : **démo scriptée SEULE** (Live pas montré) · voix **Shana** · vitesse **1×** avec voix · partager **un onglet Chrome + audio** sur Meet.
-- Deal partenaire : résidences paient **1 000-4 000 €/admission** · **dédup obligatoire** à réception · modèles **A** (CPL au lead validé) / **B** (SaaS + 20-25 %/admission) · séquence **A → option B** · détail : CLAUDE.md § Stratégie.
+- Deal partenaire : résidences paient **1 000-4 000 €/admission** · **dédup obligatoire** à réception. ⚠️ **Aucune offre chiffrée à poser au pitch** — le modèle n'est pas arrêté, et c'est volontaire (celui qui annonce un prix en premier se fait ancrer). Détail : CLAUDE.md § L'axe du pitch.
+- Pitch : **on ne vend pas des leads, on révolutionne leur création** — 16-18 écrans côté Cap Retraite contre une conversation côté Emma.
