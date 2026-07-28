@@ -306,8 +306,10 @@ const speakable = (t) => t
   .replace(/\*\*/g, '')
   .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
   .replace(/→/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
-// Vitesse de lecture : jamais sous 1× (ralentir une voix la rend artificielle) ; suit le curseur au-dessus.
-const vRate = () => Math.min(1.5, Math.max(1, pace()));
+// Vitesse de lecture : base à 1,15× (Emma était un peu lente en 1×), jamais en
+// dessous — ralentir une voix la rend artificielle. Suit le curseur au-dessus.
+// Le timbre est préservé par `preservesPitch` : aucune distorsion jusqu'à ~1,3×.
+const vRate = () => Math.min(1.6, Math.max(1.15, pace() * 1.15));
 // Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
 const ttsMem = new Map();
 function getTTS(text) {
@@ -338,6 +340,9 @@ async function speakPremium(text) {
   await new Promise(res => {
     speakWaiters.push(res);
     const a = new Audio(url);
+    // Sans ça, accélérer monte le timbre (effet « chipmunk »). Vrai défaut de
+    // Chrome, mais on l'affirme explicitement + préfixes pour les autres.
+    a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true;
     a.playbackRate = vRate();
     currentAudio = a;
     const done = () => { if (currentAudio === a) currentAudio = null; res(); };
@@ -425,6 +430,11 @@ async function botSay(text, noThink) {
     await said;
   } finally { setSpeaking(false); }
 }
+// Temps de lecture d'une réplique famille : une base + ~14 ms par caractère,
+// borné à 2,6 s. Une constante ne marchait pas — « Oui, d'accord. » et un
+// paragraphe de six lignes ne demandent pas le même temps de lecture.
+const readPause = (t) => Math.min(2600, 700 + (t || '').length * 14);
+
 async function userSay(text) {
   await wait(520);
   const r = rowEl("user"); const b = document.createElement("div"); b.className = "cbub"; b.textContent = text; r.appendChild(b); chatBox.appendChild(r); down();
@@ -653,7 +663,9 @@ async function startScript() {
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
       if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(420); }
-      await wait(step.t === 'bot' ? 320 : 220);
+      // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
+      // enchaîne : proportionnel à la longueur du message, pas une constante.
+      await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
     }
     document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
   } catch (e) {
