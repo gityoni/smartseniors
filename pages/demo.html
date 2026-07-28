@@ -11,7 +11,10 @@
 <link rel="stylesheet" href="/ss-theme.css" />
 <link rel="stylesheet" href="/ss-chat.css" />
 <style>
-  html, body { margin: 0; padding: 0; background: #F1F7F5; }
+  /* La couleur de base vit sur <html> : <body> reste transparent pour laisser
+     voir le champ d'aurore de ss-demo.css (positionné en fixed, z-index 0). */
+  html { background: #EEF6F3; }
+  body { margin: 0; padding: 0; background: transparent; }
   /* Mise en page « face à face » : la carte tient dans l'écran, rien ne bouge pendant la démo —
      le chat ET le dossier défilent chacun en interne, la barre de saisie reste collée en bas. */
   .ss-root .ss-convo { padding-top: 12px; padding-bottom: 16px; }
@@ -91,10 +94,15 @@
   .ss-root .lead-edi .edi-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(241,247,245,.2); border-top-color: var(--c-online); animation: edi-spin .7s linear infinite; }
   @keyframes edi-spin { to { transform: rotate(360deg); } }
 </style>
+<!-- Couche « premium » : chargée en dernier pour gagner à spécificité égale -->
+<link rel="stylesheet" href="/ss-demo.css" />
 </head>
 <body>
 
-<div class="ss-root" data-direction="aurore" data-font="nunito" style="--c-accent:#5B8DEF; --c-accent2:#9D8CF0;">
+<!-- Fond ambiant (aurore) — décoratif, hors flux -->
+<div class="ss-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="ss-root" data-direction="aurore" data-font="nunito" data-premium="on" style="--c-accent:#5B8DEF; --c-accent2:#9D8CF0;">
 
   <!-- TOP BAR -->
   <header class="ss-topbar">
@@ -148,7 +156,7 @@
       <!-- CHAT -->
       <div class="chat-side">
         <div class="chat-top">
-          <div class="emma-av">
+          <div class="emma-av" id="emma-av">
             <svg viewBox="0 0 52 52" fill="none" aria-hidden="true">
               <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
               <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
@@ -381,18 +389,25 @@ function rowEl(who) {
   if (who === "bot") { const a = document.createElement("div"); a.className = "cav"; a.innerHTML = avatarSVG(); r.appendChild(a); }
   return r;
 }
+// Halo animé sur l'avatar d'en-tête pendant qu'Emma s'exprime (démo + live).
+const emmaAv = document.getElementById("emma-av");
+const setSpeaking = (on) => emmaAv?.classList.toggle("speaking", on);
+
 async function botSay(text) {
   // thinking
   const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
   chatBox.appendChild(tk); down(); await wait(650); tk.remove();
   // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
   const said = speak(text);
-  // stream
-  const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
-  const words = text.split(" "); let acc = "";
-  for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
-  b.innerHTML = mdBold(acc);
-  await said;
+  setSpeaking(true);
+  try {
+    // stream
+    const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
+    const words = text.split(" "); let acc = "";
+    for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
+    b.innerHTML = mdBold(acc);
+    await said;
+  } finally { setSpeaking(false); }
 }
 async function userSay(text) {
   await wait(520);
@@ -650,6 +665,7 @@ async function liveSend(text) {
       throw new Error("HTTP " + resp.status);
     }
     tk.remove(); const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r);
+    setSpeaking(true);
     const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
     while (true) { const { done, value } = await reader.read(); if (done) break;
       buf += dec.decode(value, { stream:true }); const lines = buf.split("\n"); buf = lines.pop();
@@ -657,6 +673,7 @@ async function liveSend(text) {
         try { const j = JSON.parse(d); const delta = j?.delta?.text ?? j?.delta?.content?.[0]?.text ?? null; if (delta) { full += delta; bb.innerHTML = mdBold(full) + '<span class="ccursor"></span>'; down(); } } catch {} } }
     bb.innerHTML = mdBold(full);
   } catch (e) { tk.remove(); if (!bb) { const r = rowEl("bot"); bb = document.createElement("div"); bb.className = "cbub"; r.appendChild(bb); chatBox.appendChild(r); } bb.textContent = apiErr ? "⚠️ " + apiErr : "Désolé, une erreur est survenue."; }
+  setSpeaking(false);
   if (full) { LIVE.history.push({ role:"assistant", content:full }); speak(full); }
   liveBusy = false; sendBtn.disabled = false; down();
   liveExtract();

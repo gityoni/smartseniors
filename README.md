@@ -37,7 +37,7 @@ Page de présentation (split-screen) pensée pour montrer la valeur à un parten
 |---|---|
 | Frontend | HTML / JS vanilla, PWA (manifest + service worker) |
 | API | Cloudflare Pages Functions (`pages/functions/api/`) |
-| LLM | Anthropic Claude — chat `claude-opus-4-6` (streaming SSE), extraction `claude-haiku-4-5` |
+| LLM | Anthropic Claude — chat `claude-opus-5` (streaming SSE, réflexion adaptative, effort `medium`), extraction `claude-haiku-4-5` |
 | Base de données | Cloudflare D1 (SQLite edge), binding `DB` |
 | Email | MailChannels (envoi des leads aux résidences) |
 | Hébergement | Cloudflare Pages (auto-deploy sur push `main`) |

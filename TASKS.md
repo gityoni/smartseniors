@@ -5,6 +5,15 @@
 
 ## ✅ Fait
 
+### Préparation pitch Cap Retraite — design premium + Emma sur Opus 5 (28/07)
+- **Cerveau d'Emma → `claude-opus-5`** (depuis `claude-opus-4-8`) : réflexion adaptative, `output_config.effort: "medium"` (compromis intelligence/latence pour une conversation courte ; passer à `"low"` si le TTFT gêne), `max_tokens` 1536 → **4096** (la réflexion est active par défaut et compte dans l'enveloppe). **Repli serveur** (`fallbacks: "default"` + bêta `server-side-fallback-2026-07-01`) activé, avec **nouvel essai automatique sans le bêta** si le compte ne l'a pas ouvert → aucun risque de couper le chat pendant la démo.
+- **Prompt affiné pour Opus 5** : bloc `<preference_ton>` en fin de `BASE_SYSTEM_PROMPT` (concision, une étape à la fois, pas d'ajout de démarches non sollicitées, pas de narration des corrections) — Opus 5 est plus bavard et plus enclin à élargir le périmètre que 4.8.
+- `extract.js` **laissé sur `claude-haiku-4-5`** : appelé à chaque tour sur un schéma figé, c'est le bon arbitrage coût/latence.
+- **`pages/ss-demo.css`** — couche « premium » de la démo, scope `.ss-root[data-premium]`, chargée **en dernier** dans `demo.html` : champ d'aurore animé en fond, bordures dégradées (carte maîtresse + carte promo en conique animé), balayages lumineux au remplissage des champs, ✓ qui se dessine, halo sur l'avatar d'Emma quand elle parle, jauges avec reflet, badge de score animé, aperçu e-mail retravaillé, selects et boutons re-stylés, `prefers-reduced-motion` respecté.
+- **`index.html` intentionnellement intact** (vérifié au navigateur : ni `data-premium`, ni aurore) — la couche premium ne touche que la démo.
+- **`knowledge/pitch-cap-retraite.md`** : message d'ouverture, **5 pitchs** (coût de la nuit · lead pré-dédupliqué · risque renversé · dossier prêt vs chatbot · qui industrialise en premier), objections/réponses, déroulé des 20 min, offre à poser (modèle A + clause d'option B).
+- ⚠️ Le **pré-check dédup par hash** est *spécifié, pas livré* — le document de pitch le dit explicitement pour éviter toute survente en RDV.
+
 ### Démo pitch-ready + voix Shana (10-11/06)
 - **Layout face-à-face plein écran** : carte à hauteur viewport, chat + dossier défilent **en interne** (plus aucun scroll de page), dossier auto-scroll vers le champ qui se remplit, **play/pause + Rejouer toujours visibles** (texte blanc dans les 2 états).
 - **Scénario reworded intégralement** (texte fourni et validé par Yonatan) : fugue + question agitation → unités sécurisées (décision médecin coordinateur) → AGGIR expliqué A/B/C → localisation amenée avec tact → présentation SmartSeniors → budget/APA → épargne 85 k€ → consentement → dossier → final features. Seule retouche : « maisons de retraite » → « établissements » (vocabulaire marque). 11 champs dossier ✅.
@@ -34,7 +43,7 @@
 - **Mode Live** conservé : vrai `/api/chat` + `/api/extract` → dossier en direct.
 
 ### Cerveau Emma
-- `chat.js` : **`claude-opus-4-8`** + prompt nourri du **playbook v3** (vrais appels) : objections (refus, maltraitance/grille de visite, APA vs ASH, « vous êtes qui ? », pathologie lourde, qualité≠prix…), empathie, pièges, **règle de consentement**, **caching ACTIF** (prompt > 4096 tok).
+- `chat.js` : **`claude-opus-5`** (réflexion adaptative · effort `medium` · repli serveur) + prompt nourri du **playbook v3** (vrais appels) : objections (refus, maltraitance/grille de visite, APA vs ASH, « vous êtes qui ? », pathologie lourde, qualité≠prix…), empathie, pièges, **règle de consentement**, **caching ACTIF** (prompt > 4096 tok).
 - `extract.js` : tool-use `claude-haiku-4-5`, enums harmonisés sur le schéma/funnel.
 - `knowledge/emma-playbook.md` (v3) + `notebooks/emma_transcription_biblio_drive.ipynb` (Colab Drive-persistant, idempotent).
 

@@ -120,7 +120,13 @@ Transition type : "Pour interroger nos résidences et vérifier les vraies dispo
 - Commence par reconnaître l'émotion ou la situation, puis informe, puis termine par UNE question ou proposition concrète.
 - Markdown léger (listes, **gras**) si utile. Pas de longs monologues : vulgarise par petites doses.
 - Fiabilise tout calcul que tu donnes.
-- Réponds directement à la famille, sans exposer ton raisonnement interne (pas de « Analysons… », pas de méta-commentaire sur ta démarche).`;
+- Réponds directement à la famille, sans exposer ton raisonnement interne (pas de « Analysons… », pas de méta-commentaire sur ta démarche).
+
+<preference_ton>
+Reste brève. Une réponse d'Emma = 2 à 4 phrases courtes, puis UNE question. Pas de récapitulatif de ce que la famille vient de dire, pas de liste à puces sauf pédagogie chiffrée explicitement demandée, pas de paragraphe de conclusion qui résume la conversation.
+Ne fais pas plus que ce qui est demandé : réponds au message, avance d'une étape dans le processus de découverte, c'est tout. N'ajoute pas de démarches, d'options ou de propositions que la famille n'a pas sollicitées.
+Ne commente jamais tes propres corrections : corrige et continue, sans t'excuser ni détailler l'erreur.
+</preference_ton>`;
 
 /* ── Calcul d'âge depuis date de naissance ─────────────────────────────────── */
 function calcAge(dateStr) {
@@ -341,22 +347,40 @@ export async function onRequestPost(context) {
   }));
   const messages = [...trimmedHistory, { role: "user", content: message.trim() }];
 
-  // Appel Anthropic streaming
-  const upstream = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-opus-4-8",
-      max_tokens: 1536,
-      stream: true,
-      system: systemBlocks,
-      messages,
-    }),
-  });
+  // Appel Anthropic streaming.
+  // `effort: medium` = le meilleur compromis intelligence / latence pour une
+  // conversation courte : Emma doit répondre vite tout en tenant l'ordre du
+  // processus de découverte. Passer à "low" si le time-to-first-token gêne.
+  // `max_tokens` couvre réflexion + réponse (la réflexion est active par défaut).
+  const callAnthropic = (withFallback) =>
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        ...(withFallback ? { "anthropic-beta": "server-side-fallback-2026-07-01" } : {}),
+      },
+      body: JSON.stringify({
+        model: "claude-opus-5",
+        max_tokens: 4096,
+        stream: true,
+        thinking: { type: "adaptive" },
+        output_config: { effort: "medium" },
+        system: systemBlocks,
+        messages,
+        ...(withFallback ? { fallbacks: "default" } : {}),
+      }),
+    });
+
+  // Repli serveur activé par défaut (un refus des classificateurs est rejoué sur
+  // un autre modèle). Si le bêta n'est pas ouvert sur le compte, on rejoue sans
+  // plutôt que de couper la conversation en pleine démo.
+  let upstream = await callAnthropic(true);
+  if (upstream.status === 400) {
+    console.warn("Repli serveur refusé, nouvel essai sans :", await upstream.text());
+    upstream = await callAnthropic(false);
+  }
 
   if (!upstream.ok) {
     const err = await upstream.text();
