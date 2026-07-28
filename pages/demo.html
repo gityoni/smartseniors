@@ -42,21 +42,12 @@
   .ss-root #demo-split .lead-fields { min-height: 0; flex: 0 0 auto; overflow: visible; gap: 8px; }
   .ss-root #demo-split .lfield { padding: 10px 13px; }
   .ss-root .chat-input textarea { resize: none; max-height: 90px; line-height: 1.45; }
-  .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled, .ss-root .chat-replay:disabled { opacity: .5; cursor: not-allowed; }
+  .ss-root .chat-input textarea:disabled, .ss-root .chat-send:disabled { opacity: .5; cursor: not-allowed; }
   .ss-root .cbub strong { color: var(--c-accent); }
   /* barre de contrôle démo */
   .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
   .ss-root .demo-ctrl select { font-family: var(--font); border: 1.5px solid var(--c-line); border-radius: 8px; padding: 5px 8px; font-size: .8rem; background: var(--c-surface); color: var(--c-ink); }
   .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
-  /* boutons play/pause + rejouer (groupés à droite de la barre Emma) */
-  .ss-root .chat-top .demo-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .ss-root .chat-top .demo-actions .chat-replay { margin-left: 0; }
-  /* bouton play/pause : fond plein + texte blanc dans les DEUX états (lecture / pause) */
-  .ss-root .chat-pause { font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer; border: none; background: var(--grad); color: #fff; border-radius: 999px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; box-shadow: 0 3px 12px rgba(91,141,239,.35); }
-  .ss-root .chat-pause:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
-  .ss-root .chat-pause svg { width: 13px; height: 13px; }
-  .ss-root .chat-pause.is-paused { background: #0E3B33; box-shadow: 0 3px 12px rgba(14,59,51,.4); }
-  .ss-root .chat-pause:disabled { opacity: .5; cursor: not-allowed; transform: none; }
   /* widget AGGIR */
   .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
   .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
@@ -181,19 +172,28 @@
             <span class="on"></span>
           </div>
           <div><div class="nm">Emma</div><div class="rl">Conseillère EHPAD · En ligne</div></div>
-          <div class="demo-actions">
-            <button class="chat-pause" id="pause" type="button" disabled aria-label="Mettre la démo en pause" aria-pressed="false">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
-              <span>Pause</span>
-            </button>
-            <button class="chat-replay" id="replay" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-              Rejouer
-            </button>
-          </div>
+          <span class="chat-chrono" id="chrono" aria-hidden="true"></span>
         </div>
         <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="Conversation avec Emma"></div>
-        <form id="form" class="chat-input" novalidate>
+
+        <!-- CONSOLE (mode Démo) — occupe la place de la barre de saisie, inutile ici -->
+        <div class="dconsole" id="console" role="group" aria-label="Console de la démo">
+          <button class="dc-play" id="pause" type="button" aria-label="Lancer la démo">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <span id="dc-play-label">Lancer</span>
+          </button>
+          <button class="dc-ghost" id="replay" type="button" aria-label="Reprendre depuis le début">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            Reprendre
+          </button>
+          <div class="dc-track" id="dc-track"><i id="dc-bar"></i></div>
+          <span class="dc-step" id="dc-step">—</span>
+          <label class="dc-chap">
+            <select id="chapter" aria-label="Aller à un moment du scénario"></select>
+          </label>
+        </div>
+
+        <form id="form" class="chat-input" novalidate hidden>
           <textarea id="input" rows="1" placeholder="Mode Live : écrivez à Emma…" aria-label="Votre message" maxlength="2000" disabled></textarea>
           <button type="submit" id="send" class="chat-send" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -557,17 +557,17 @@ const SCRIPT = [
   // formulaire, pas d'appel sans accord) AVANT de questionner. La question nomme
   // une émotion plutôt que de réclamer un récit — bien plus facile à attraper
   // pour quelqu'un d'épuisé qui n'a peut-être jamais formulé la situation.
-  { t:'bot', noThink:true, text:"Bonjour, je suis **Emma**, conseillère chez SmartSeniors. 💛 Si vous êtes ici, c'est que la situation de votre maman ou de votre papa vous préoccupe — et on arrive souvent épuisé, avec beaucoup de questions et peu de réponses." },
+  { chapter:"1 · Accueil", t:'bot', noThink:true, text:"Bonjour, je suis **Emma**, conseillère chez SmartSeniors. 💛 Si vous êtes ici, c'est que la situation de votre maman ou de votre papa vous préoccupe — et on arrive souvent épuisé, avec beaucoup de questions et peu de réponses." },
   { t:'bot', noThink:true, text:"Mon rôle est de vous aider à y voir clair, gratuitement. Vous n'aurez **aucun formulaire à remplir**, et personne ne vous appellera sans votre accord. Prenez votre temps : **qu'est-ce qui vous inquiète le plus en ce moment ?**" },
   { t:'user', text:"C'est pour ma mère… je n'en peux plus, je culpabilise, mais je n'y arrive plus. 82 ans, et ça se dégrade vite.", fills:[['lien','Fille']] },
   { t:'bot',  text:"Je comprends profondément votre épuisement, il n'est pas humainement possible de porter seul une telle charge indéfiniment. Ne soyez pas trop dur avec vous-même : vous avez fait bien plus que votre maximum. Pour mieux vous aider, pourriez-vous m'en dire davantage sur l'état actuel de votre maman ?" },
-  { t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
+  { chapter:"2 · La fugue nocturne", t:'user', text:"Elle perd la tête, répète tout, et la nuit elle se lève, elle sort… les voisins l'ont ramenée à 3 h. J'ai peur qu'il lui arrive quelque chose.", fills:[['situation',"À domicile · sorties nocturnes (risque)"]] },
   { t:'bot',  text:"De nombreuses familles me font part de ces déambulations nocturnes — je comprends tout à fait votre inquiétude. Bien que le diagnostic relève exclusivement du médecin, pourriez-vous me dire si un terme médical précis a déjà été posé sur cette situation ?" },
   { t:'user', text:"Le médecin a parlé d'Alzheimer, rien d'officiel. Et elle refuse, « pas dans un mouroir ».", fills:[['type','Alzheimer / unité protégée']] },
   { t:'bot',  text:"Je comprends tout à fait, et nous allons avancer ensemble, pas à pas. Il y a deux points essentiels dans ce que vous me confiez. Tout d'abord, **la sécurité de votre maman est notre priorité absolue** : ces sorties nocturnes, que l'on appelle **phénomènes de fugue**, sont très éprouvantes et il est légitime de vouloir la protéger. Pour m'aider à imaginer l'accompagnement le plus serein pour elle, pourriez-vous me dire si elle exprime parfois de l'agitation ou de la colère, que ce soit par les mots ou les gestes ?" },
   { t:'user', text:"Non… mais elle peut être agitée par moments." },
   { t:'bot',  text:"Merci pour cette précision importante. Rassurez-vous, il existe des **espaces de vie dédiés et sécurisés**, conçus justement pour les besoins de votre maman. Ces unités permettent de se déplacer en toute liberté et sécurité, avec des équipes formées pour apaiser l'agitation et prévenir les fugues. C'est toujours le **médecin coordinateur** qui, après avoir pris connaissance de son dossier, pourra vous conseiller la solution la plus adaptée à son bien-être. Quant à vos craintes sur les établissements, sachez que ce sont avant tout des **lieux de vie** chaleureux avec des jardins et des animations." },
-  { t:'bot',  text:"Pour avancer concrètement, j'aimerais mieux comprendre son autonomie au quotidien. Je vous propose une petite estimation simple avec 6 repères : pour chacun, dites-moi si elle agit **seule et correctement (A)**, **avec de l'aide (B)**, ou si elle **ne fait plus du tout (C)**. On peut commencer ?" },
+  { chapter:"3 · Grille AGGIR → GIR", t:'bot',  text:"Pour avancer concrètement, j'aimerais mieux comprendre son autonomie au quotidien. Je vous propose une petite estimation simple avec 6 repères : pour chacun, dites-moi si elle agit **seule et correctement (A)**, **avec de l'aide (B)**, ou si elle **ne fait plus du tout (C)**. On peut commencer ?" },
   { t:'user', text:"Oui, d'accord." },
   { t:'aggir', items:[
       ['Cohérence','suit une conversation, se comporte de façon sensée ?','C'],
@@ -579,12 +579,12 @@ const SCRIPT = [
     ], fills:[['autonomie','Dépendante · GIR 2 (estimé)']] },
   { t:'card', kind:'gir', value:'GIR 2', pct:82, note:"Estimation indicative — le classement officiel sera fixé par l'équipe médico-sociale du département." },
   { t:'bot',  text:"On voit que votre maman a besoin d'une **présence très soutenue au quotidien**, notamment pour les gestes de la vie de tous les jours comme la toilette. Cela correspondrait à un accompagnement proche d'un **GIR 2**. C'est un repère précieux pour nous. Et vous, dans ce tourbillon, comment vous sentez-vous ? Avez-vous la chance d'avoir des proches ou des voisins sur qui compter pour vous épauler un peu ?" },
-  { t:'user', text:"Je lui rends visite quotidiennement, nous résidons toutes deux à Garches. Mais pouvez-vous vous présenter ? Je crains qu'il ne s'agisse d'un démarchage commercial, ayant déjà été contactée à plusieurs reprises.", fills:[['zone','Garches (92)']] },
+  { chapter:"4 · « Vous êtes qui ? »", t:'user', text:"Je lui rends visite quotidiennement, nous résidons toutes deux à Garches. Mais pouvez-vous vous présenter ? Je crains qu'il ne s'agisse d'un démarchage commercial, ayant déjà été contactée à plusieurs reprises.", fills:[['zone','Garches (92)']] },
   { t:'bot',  text:"Votre méfiance est tout à fait compréhensible compte tenu de votre situation. Je m'appelle Emma, l'IA de SmartSeniors, et je suis là pour vous accompagner gratuitement. Mon rôle est d'être à vos côtés, gracieusement, pour vous aider à traverser cette étape avec plus de sérénité. Je suis là pour vous aider à trouver une solution d'hébergement adaptée, en vous renseignant sur les aides financières et en vous expliquant le fonctionnement des établissements. Nous avançons à votre propre rythme, sans aucune pression, car c'est vous qui gardez le fil de chaque décision." },
   { t:'user', text:"D'accord… merci. Excusez-moi, je suis à cran en ce moment." },
   { t:'bot',  text:"Ne vous excusez surtout pas, votre vigilance est tout à fait légitime et témoigne de l'attention que vous portez à votre maman. Pour continuer à vous accompagner, concentrons-nous sur sa situation : puisque vous vivez toutes deux à Garches, cherchons les établissements les plus proches. Dans quel périmètre souhaiteriez-vous que nous effectuions nos recherches ?" },
   { t:'user', text:"Le plus près possible — 5 km maximum.", fills:[['zone','Garches (92) · 5 km']] },
-  { t:'bot',  text:"Merci. Maintenant, pour nous permettre de cibler les solutions les plus sereines et pérennes pour votre maman, nous devons aborder un sujet délicat mais essentiel : celui du **budget**. Pourriez-vous m'indiquer, en toute confidentialité, le montant approximatif de ses revenus mensuels ?" },
+  { chapter:"5 · Budget & aides", t:'bot',  text:"Merci. Maintenant, pour nous permettre de cibler les solutions les plus sereines et pérennes pour votre maman, nous devons aborder un sujet délicat mais essentiel : celui du **budget**. Pourriez-vous m'indiquer, en toute confidentialité, le montant approximatif de ses revenus mensuels ?" },
   { t:'user', text:"1 600 € de retraite. À 3-4 000 €/mois, c'est mort." },
   { t:'bot',  text:"Je comprends que ces chiffres puissent inquiéter, mais rassurez-vous : **le tarif affiché n'est qu'une base de départ**. Entre l'**APA** qui allège considérablement les frais liés à la dépendance et le **crédit d'impôt de 25 %**, la charge réelle devient beaucoup plus douce. On peut regarder ensemble comment mobiliser un peu d'épargne pour compléter sereinement le budget, qu'en pensez-vous ?" },
   { t:'user', text:"Un livret et une assurance-vie, ~85 000 €. Locataire." },
@@ -592,9 +592,9 @@ const SCRIPT = [
   { t:'user', text:"Urgent. Je suis à bout, et avec les sorties la nuit, j'ai trop peur." },
   { t:'bot',  text:"Je comprends tout à fait, face à une telle situation et à l'inquiétude que vous ressentez, il est tout à fait légitime de vouloir **agir sans plus attendre** pour protéger votre maman et retrouver un peu de sérénité.", fills:[['delai','Urgent']] },
   { t:'score', value:9, statut:'chaud' },
-  { t:'bot',  text:"Pour vous simplifier les choses et avancer concrètement, **souhaitez-vous que je demande aux résidences de vous recontacter directement** afin d'organiser une première rencontre ?" },
+  { chapter:"6 · Consentement", t:'bot',  text:"Pour vous simplifier les choses et avancer concrètement, **souhaitez-vous que je demande aux résidences de vous recontacter directement** afin d'organiser une première rencontre ?" },
   { t:'user', text:"Oui, qu'elles m'appellent, c'est plus simple." },
-  { t:'bot',  text:"C'est entendu, **les établissements vont prendre contact avec vous** pour faire le point. Pour bien préparer la suite, je vais ouvrir le dossier de votre maman. Pourriez-vous me donner son nom et son prénom ?", fills:[['consent','Oui — résidences recontactent directement']] },
+  { chapter:"7 · Création du dossier", t:'bot',  text:"C'est entendu, **les établissements vont prendre contact avec vous** pour faire le point. Pour bien préparer la suite, je vais ouvrir le dossier de votre maman. Pourriez-vous me donner son nom et son prénom ?", fills:[['consent','Oui — résidences recontactent directement']] },
   { t:'user', text:"Jeanne Belkacem." },
   { t:'bot',  text:"Merci. Pour finaliser son **dossier d'admission** et faciliter ses démarches pour l'**APA**, pourriez-vous m'indiquer sa date de naissance ?" },
   { t:'user', text:"Le 12 mars 1942.", fills:[['proche','Jeanne Belkacem · née le 12/03/1942']] },
@@ -604,7 +604,7 @@ const SCRIPT = [
   { t:'user', text:"06 24 18 52 40, sylvie.belkacem@gmail.com.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 · sylvie.belkacem@gmail.com']] },
   { t:'bot',  text:"Avant de finaliser, je dois m'assurer que c'est bien vous : je viens de vous envoyer un **code de vérification par SMS** au 06 24 18 52 40. Merci de bien vouloir me donner le code de vérification que vous avez reçu de la part de SmartSeniors." },
   { t:'user', text:"C'est le 738 204.", fills:[['contact','Sylvie (fille) · 06 24 18 52 40 ✓ vérifié · sylvie.belkacem@gmail.com']] },
-  { t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
+  { chapter:"8 · Transmission EDI", t:'bot',  text:"Merci de votre confiance, le dossier de Jeanne est désormais **bien enregistré**. Pendant que les établissements prennent le relais pour vous recontacter, **je m'occupe de tout préparer de mon côté**." },
   { t:'edi', dept:'92', items:[
       ["EHPAD L'Empereur — Garches","ok"],
       ["Résidence partenaire — Garches","ok"],
@@ -622,15 +622,54 @@ const SCRIPT = [
   { t:'sent', n:4, dept:'92' },
 ];
 
-/* ── Contrôles play / pause ── */
+/* ── Console de contrôle ────────────────────────────────────────────────────
+   Trois états : au repos (rien n'a démarré ou le scénario est fini), en lecture,
+   en pause. Le bouton principal porte l'action suivante, jamais l'état courant. */
 const PAUSE_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
 const PLAY_ICO  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const consoleEl = document.getElementById('console');
+const chapterSel = document.getElementById('chapter');
+const dcBar = document.getElementById('dc-bar');
+const dcStep = document.getElementById('dc-step');
+let doneOnce = false;
+
 function updatePauseUI() {
-  pauseBtn.disabled = !running;
+  const label = !running ? (doneOnce ? 'Relancer' : 'Lancer') : paused ? 'Reprendre' : 'Pause';
+  pauseBtn.innerHTML = (running && !paused ? PAUSE_ICO : PLAY_ICO) + `<span>${label}</span>`;
   pauseBtn.classList.toggle('is-paused', running && paused);
-  pauseBtn.innerHTML = (paused ? PLAY_ICO : PAUSE_ICO) + '<span>' + (paused ? 'Reprendre' : 'Pause') + '</span>';
-  pauseBtn.setAttribute('aria-label', paused ? 'Reprendre la démo' : 'Mettre la démo en pause');
-  pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+  pauseBtn.setAttribute('aria-label', label + ' la démo');
+  replayBtn.disabled = !running && !doneOnce;
+  chapterSel.disabled = false;
+}
+function setProgress(i) {
+  const pct = Math.round((i / SCRIPT.length) * 100);
+  dcBar.style.width = pct + '%';
+  dcStep.textContent = `${i} / ${SCRIPT.length}`;
+}
+// Options de chapitre construites depuis le scénario : pas de liste à maintenir
+// en double, un `chapter:` sur un step suffit à le rendre atteignable.
+function buildChapters() {
+  chapterSel.innerHTML = '<option value="">Aller à…</option>' +
+    SCRIPT.map((s, i) => s.chapter ? `<option value="${i}">${s.chapter}</option>` : '')
+      .join('');
+}
+// Rejoue muettement tout ce qui précède le chapitre visé : les bulles sont posées
+// d'un coup et les champs remplis sans projecteur, pour arriver dans un état
+// cohérent — sinon on sauterait au budget avec un dossier vide.
+function fastForward(to) {
+  for (let i = 0; i < to; i++) {
+    const s = SCRIPT[i];
+    if (s.t === 'bot' || s.t === 'user') {
+      const r = rowEl(s.t === 'bot' ? 'bot' : 'user');
+      const b = document.createElement('div'); b.className = 'cbub';
+      b.innerHTML = mdBold(s.text); r.appendChild(b); chatBox.appendChild(r);
+    }
+    if (s.fills) for (const [k, v] of s.fills) {
+      const el = fieldsEl.querySelector(`.lfield[data-key="${k}"]`);
+      if (el) { el.querySelector('.lf-value').textContent = v; el.classList.add('filled'); }
+    }
+  }
+  clearSpotlight(); updateProgress(); down();
 }
 function setPaused(p) {
   if (!running) return;
@@ -650,8 +689,8 @@ async function stopScript() {
   cancelRequested = false;
 }
 
-// (Re)lance le scénario déterministe depuis le début — annule d'abord un éventuel run en cours/en pause.
-async function startScript() {
+// (Re)lance le scénario déterministe — depuis le début, ou depuis un chapitre.
+async function startScript(from = 0) {
   if (starting) return;                       // ignore les double-clics pendant la bascule
   starting = true;
   if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
@@ -660,12 +699,14 @@ async function startScript() {
   let resolveDone; runDone = new Promise(r => resolveDone = r);
   running = true;
   setMode('demo'); resetDossier(); chatBox.innerHTML = "";
-  replayBtn.disabled = false; updatePauseUI();
+  if (from > 0) fastForward(from);
+  setProgress(from); updatePauseUI();
   document.getElementById("mode-note").textContent = "Scénario en cours…";
   starting = false;
   try {
     await wait(400);
-    for (let si = 0; si < SCRIPT.length; si++) {
+    for (let si = from; si < SCRIPT.length; si++) {
+      setProgress(si);
       const step = SCRIPT[si];
       // voix studio : précharge la réplique d'Emma suivante pendant que celle-ci se joue
       if (step.t === 'bot' && voiceMode === 'premium') {
@@ -687,12 +728,32 @@ async function startScript() {
       // enchaîne : proportionnel à la longueur du message, pas une constante.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
     }
-    document.getElementById("mode-note").textContent = "Scénario terminé — Rejouer ou passer en Live";
+    setProgress(SCRIPT.length); doneOnce = true;
+    document.getElementById("mode-note").textContent = "Scénario terminé";
   } catch (e) {
     if (e !== CANCEL) throw e;                 // annulation = arrêt silencieux ; vraie erreur = on remonte
   } finally {
     running = false; updatePauseUI(); resolveDone();
   }
+}
+
+/* ── Écran d'attente : la démo ne démarre plus toute seule ────────────────── */
+function showIdle() {
+  chatBox.innerHTML = `
+    <div class="dstart">
+      <div class="ds-av">${avatarSVG()}</div>
+      <div class="ds-t">Démo prête</div>
+      <div class="ds-s">Sylvie cherche une place pour sa maman <b>Jeanne, 82 ans</b>, à Garches.<br>
+        <b>11 informations</b> captées en conversation · environ <b>2 minutes</b>.</div>
+      <button class="ds-go" id="ds-go" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+        Lancer la démo
+      </button>
+      <div class="ds-hint">Réglez la voix et la vitesse en haut à droite <em>avant</em> de lancer.</div>
+    </div>`;
+  document.getElementById('ds-go').addEventListener('click', () => startScript());
+  setProgress(0);
+  document.getElementById("mode-note").textContent = "En attente — cliquez sur Lancer";
 }
 
 /* ════════ MODE LIVE (vrai pipeline) ════════ */
@@ -774,6 +835,9 @@ function setMode(m) {
   mode = m;
   document.querySelectorAll('#mode-seg button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
   input.disabled = (m !== 'live'); sendBtn.disabled = (m !== 'live');
+  // La console occupe la place de la barre de saisie : l'une OU l'autre.
+  consoleEl.hidden = (m !== 'demo');
+  form.hidden = (m !== 'live');
 }
 document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('click', async () => {
   const m = b.dataset.mode;
@@ -785,15 +849,22 @@ document.querySelectorAll('#mode-seg button').forEach(b => b.addEventListener('c
   }
 }));
 replayBtn.addEventListener("click", () => startScript());
-pauseBtn.addEventListener("click", () => setPaused(!paused));
+// Bouton principal : lance si rien ne tourne, sinon bascule pause/reprise.
+pauseBtn.addEventListener("click", () => { if (!running) startScript(); else setPaused(!paused); });
+chapterSel.addEventListener("change", () => {
+  const i = chapterSel.value; if (i === "") return;
+  chapterSel.value = ""; startScript(+i);
+});
 form.addEventListener("submit", e => { e.preventDefault(); if (mode !== 'live') return; const t = input.value.trim(); if (t) { input.value = ""; input.style.height = "auto"; liveSend(t); } });
 input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 90) + "px"; });
 
-/* ── Init : autoplay du scénario ── */
+/* ── Init : on attend le présentateur, plus d'autoplay ── */
 renderFieldsInit();
+buildChapters();
+setMode('demo');
 updatePauseUI();
-startScript();
+showIdle();
 </script>
 </body>
 </html>

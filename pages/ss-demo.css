@@ -347,6 +347,113 @@
 }
 
 /* ════════════════════════════════════════════════════════════
+   5 bis. CONSOLE DE CONTRÔLE + ÉCRAN D'ATTENTE
+   La console prend la place de la barre de saisie (inutile en mode Démo).
+   ════════════════════════════════════════════════════════════ */
+.ss-root[data-premium] .dconsole {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .88), #FFFFFF);
+  border-top: 1px solid rgba(94, 126, 120, .12);
+}
+/* `[hidden]` ne suffit pas : le `display:flex` de ces deux blocs l'emporte sur
+   la feuille de l'agent utilisateur. Il faut le déclarer explicitement. */
+.ss-root[data-premium] .dconsole[hidden],
+.ss-root[data-premium] .chat-input[hidden] { display: none; }
+
+.ss-root[data-premium] .dc-play {
+  font-family: var(--font); font-size: .82rem; font-weight: 800; cursor: pointer;
+  border: none; background: var(--grad); color: #fff;
+  border-radius: 999px; padding: 9px 18px;
+  display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+  box-shadow: 0 5px 16px rgba(var(--ss-glow), .40), 0 1px 0 rgba(255, 255, 255, .4) inset;
+  transition: transform .2s var(--ss-ease), box-shadow .2s, background .25s;
+}
+.ss-root[data-premium] .dc-play svg { width: 13px; height: 13px; }
+.ss-root[data-premium] .dc-play:hover { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(var(--ss-glow), .52); }
+.ss-root[data-premium] .dc-play.is-paused { background: #0E3B33; box-shadow: 0 5px 16px rgba(14, 59, 51, .40); }
+
+.ss-root[data-premium] .dc-ghost {
+  font-family: var(--font); font-size: .78rem; font-weight: 800; cursor: pointer;
+  border: 1.5px solid rgba(94, 126, 120, .18); background: #fff; color: var(--c-ink-soft);
+  border-radius: 999px; padding: 8px 14px;
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  transition: transform .2s var(--ss-ease), border-color .2s, color .2s, opacity .2s;
+}
+.ss-root[data-premium] .dc-ghost svg { width: 12px; height: 12px; }
+.ss-root[data-premium] .dc-ghost:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--c-accent); color: var(--c-accent); }
+.ss-root[data-premium] .dc-ghost:disabled { opacity: .38; cursor: not-allowed; }
+
+.ss-root[data-premium] .dc-track {
+  flex: 1; min-width: 60px; height: 5px; border-radius: 99px;
+  background: rgba(94, 126, 120, .16);
+  box-shadow: 0 1px 2px rgba(14, 59, 51, .08) inset;
+  overflow: hidden;
+}
+.ss-root[data-premium] .dc-track i {
+  display: block; height: 100%; width: 0; border-radius: 99px;
+  background: var(--grad);
+  box-shadow: 0 0 10px rgba(var(--ss-glow), .5);
+  transition: width .45s var(--ss-ease);
+}
+.ss-root[data-premium] .dc-step {
+  font-size: .72rem; font-weight: 800; color: var(--c-ink-soft);
+  font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 52px; text-align: right;
+}
+.ss-root[data-premium] .dc-chap select {
+  appearance: none; -webkit-appearance: none; font-family: var(--font);
+  border: 1.5px solid rgba(94, 126, 120, .18); border-radius: 999px;
+  padding: 8px 30px 8px 13px; font-weight: 800; font-size: .78rem; color: var(--c-ink);
+  cursor: pointer; max-width: 190px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B8DEF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 11px center / 10px,
+    #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ss-root[data-premium] .dc-chap select:hover { border-color: var(--c-accent); }
+.ss-root[data-premium] .dc-chap select:focus-visible { outline: none; border-color: rgba(91, 141, 239, .7); box-shadow: 0 0 0 4px rgba(var(--ss-glow), .18); }
+
+/* Chrono discret dans l'en-tête d'Emma (remplace les boutons déplacés) */
+.ss-root[data-premium] .chat-chrono { margin-left: auto; }
+
+/* Écran d'attente */
+.ss-root[data-premium] .dstart {
+  margin: auto; text-align: center; max-width: 420px;
+  padding: 30px 26px; border-radius: 22px;
+  background: linear-gradient(170deg, rgba(255, 255, 255, .96), rgba(250, 253, 252, .9));
+  border: 1px solid rgba(94, 126, 120, .12);
+  box-shadow: 0 20px 50px -26px rgba(14, 59, 51, .55), 0 1px 0 rgba(255, 255, 255, .9) inset;
+  animation: ss-card-in .5s var(--ss-ease) both;
+}
+.ss-root[data-premium] .dstart .ds-av {
+  width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
+  background: var(--grad); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(var(--ss-glow), .42), 0 0 0 1px rgba(255, 255, 255, .6) inset;
+}
+.ss-root[data-premium] .dstart .ds-av svg { width: 27px; height: 27px; }
+.ss-root[data-premium] .dstart .ds-t {
+  font-size: 1.2rem; font-weight: 900; color: var(--c-ink); letter-spacing: -.02em;
+}
+.ss-root[data-premium] .dstart .ds-s {
+  font-size: .88rem; color: var(--c-ink-soft); line-height: 1.6; margin: 8px 0 18px; font-weight: 600;
+}
+.ss-root[data-premium] .dstart .ds-s b { color: var(--c-ink); font-weight: 800; }
+.ss-root[data-premium] .dstart .ds-go {
+  font-family: var(--font); font-size: .92rem; font-weight: 800; cursor: pointer;
+  border: none; background: var(--grad); color: #fff;
+  border-radius: 999px; padding: 12px 26px;
+  display: inline-flex; align-items: center; gap: 9px;
+  box-shadow: 0 8px 24px rgba(var(--ss-glow), .45), 0 1px 0 rgba(255, 255, 255, .4) inset;
+  transition: transform .2s var(--ss-ease), box-shadow .2s;
+}
+.ss-root[data-premium] .dstart .ds-go svg { width: 15px; height: 15px; }
+.ss-root[data-premium] .dstart .ds-go:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 14px 34px rgba(var(--ss-glow), .55); }
+.ss-root[data-premium] .dstart .ds-hint {
+  font-size: .74rem; color: var(--c-ink-soft); margin-top: 14px; opacity: .8;
+}
+.ss-root[data-premium] .dstart .ds-hint em { font-style: normal; font-weight: 800; }
+
+/* ════════════════════════════════════════════════════════════
    6. WIDGET AGGIR
    ════════════════════════════════════════════════════════════ */
 .ss-root[data-premium] .aggir {
