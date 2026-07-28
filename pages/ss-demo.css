@@ -72,6 +72,7 @@
    2. TOP BAR — verre dépoli + filet dégradé
    ════════════════════════════════════════════════════════════ */
 .ss-root[data-premium] .ss-topbar {
+  padding-top: 9px; padding-bottom: 9px;   /* 16px par défaut — rendu au chat */
   background: linear-gradient(180deg, rgba(255, 255, 255, .78), rgba(241, 247, 245, .58));
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   backdrop-filter: blur(18px) saturate(160%);
@@ -83,12 +84,12 @@
   position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: linear-gradient(90deg, transparent, rgba(var(--ss-glow), .38) 22%, rgba(var(--ss-glow2), .34) 68%, transparent);
 }
-.ss-root[data-premium] .wordmark { letter-spacing: -.7px; }
+.ss-root[data-premium] .wordmark { font-size: 1.3rem; letter-spacing: -.7px; }
 .ss-root[data-premium] .wm-sub {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 2px 9px; margin-top: 4px; border-radius: 999px;
+  padding: 1px 8px; margin-top: 3px; border-radius: 999px;
   background: rgba(91, 141, 239, .10);
-  color: #47657F; font-size: .64rem; letter-spacing: .04em; text-transform: uppercase;
+  color: #47657F; font-size: .6rem; letter-spacing: .04em; text-transform: uppercase;
 }
 
 /* Selects « premium » : pilule verre + chevron dessiné */
@@ -130,21 +131,21 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   3. EN-TÊTE DE SECTION
+   3. EN-TÊTE DE SECTION — compact : tout ce qu'on gagne ici va au chat
    ════════════════════════════════════════════════════════════ */
-.ss-root[data-premium] .ss-kicker {
-  padding: 5px 14px; border-radius: 999px;
-  background: linear-gradient(135deg, rgba(91, 141, 239, .12), rgba(157, 140, 240, .12));
-  border: 1px solid rgba(91, 141, 239, .20);
-  letter-spacing: .14em;
-}
+/* Le kicker « Démo partenaire » double la pastille de la top-bar → on le retire. */
+.ss-root[data-premium] .ss-convo-head .ss-kicker { display: none; }
 .ss-root[data-premium] .ss-convo-head .ss-sec-title {
+  font-size: clamp(1.2rem, 2.3vw, 1.6rem);
+  margin: 0 0 3px;
   letter-spacing: -.022em;
   background: linear-gradient(120deg, #0E3B33 0%, #17564A 42%, #3E6FA8 82%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
-.ss-root[data-premium] .ss-convo-head .ss-sec-lede { max-width: 62ch; }
+.ss-root[data-premium] .ss-convo-head .ss-sec-lede {
+  font-size: .88rem; line-height: 1.45; max-width: 78ch;
+}
 
 /* ════════════════════════════════════════════════════════════
    4. LA CARTE MAÎTRESSE — profondeur + bordure dégradée

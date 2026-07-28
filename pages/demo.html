@@ -17,9 +17,22 @@
   body { margin: 0; padding: 0; background: transparent; }
   /* Mise en page « face à face » : la carte tient dans l'écran, rien ne bouge pendant la démo —
      le chat ET le dossier défilent chacun en interne, la barre de saisie reste collée en bas. */
-  .ss-root .ss-convo { padding-top: 12px; padding-bottom: 16px; }
-  .ss-root .ss-convo-head { margin-bottom: 10px; }
-  .ss-root #demo-split { height: calc(100vh - 215px); min-height: 480px; grid-template-columns: 1fr 1.04fr; }
+  .ss-root .ss-convo { padding-top: 8px; padding-bottom: 12px; }
+  .ss-root .ss-convo-head { margin-bottom: 8px; }
+  /* Desktop : la page tient exactement dans le viewport et le split prend TOUT
+     l'espace restant sous l'en-tête. Plus de `calc(100vh - Xpx)` à réajuster à
+     la main dès qu'on touche au header. Le chat récupère la place gagnée. */
+  @media (min-width: 901px) {
+    .ss-root { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .ss-root .ss-convo { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+    /* `margin: 0 auto` empêche l'étirement en flex → largeur explicite. */
+    .ss-root .ss-convo-head { width: 100%; }
+    .ss-root #demo-split {
+      flex: 1 1 0; min-height: 0; height: auto;
+      width: 100%; max-width: 1180px;
+      grid-template-columns: 1.15fr .85fr;
+    }
+  }
   @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; grid-template-columns: 1fr; } }
   .ss-root #demo-split .chat-scroll { max-height: none; min-height: 0; }
   /* dossier : tout le panneau défile d'un bloc (auto-scroll vers l'élément actif), plus de mini-boîte champs */
