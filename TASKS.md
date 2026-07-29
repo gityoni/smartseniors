@@ -9,7 +9,7 @@ Le rendez-vous Bernard est demain. À construire :
 
 - [ ] **Page de pitch sur le site SmartSeniors** — s'enchaîne **en fin de démo** : textes du pitch + effets cinéma, dans la continuité visuelle de `/demo` (couche premium, aurore, projecteur). C'est l'écran sur lequel on termine devant Bernard, pas un support à part.
 - [ ] **Trace écrite / visuelle du projet LeadsMagic** — PDF téléchargeable, ou à défaut une page imprimable : ce que Bernard garde après le rendez-vous et peut faire circuler en interne.
-- [ ] **Réécrire `knowledge/pitch-cap-retraite.md`** autour de l'axe arrêté (création de leads par conversation vs formulaire), avec les munitions du crawl Cap Retraite, **sans aucune offre chiffrée**. Le document actuel est faux.
+- [x] **Réécrire `knowledge/pitch-cap-retraite.md`** autour de l'axe arrêté (création de leads par conversation vs formulaire), avec les munitions du crawl Cap Retraite, **sans aucune offre chiffrée** — fait le 29/07. Ajout de `knowledge/antiseche-rdv.md` (une page pour la visio) et `knowledge/acquisition.md` (pistes de canaux, note interne).
 - [ ] **Run à blanc depuis la machine du pitch** (1× + voix Emma studio) — le cache audio est **par datacenter**, un run fait ailleurs ne sert à rien.
 - [ ] **Vidéo de secours** du run complet avec le son (plan B réseau).
 
