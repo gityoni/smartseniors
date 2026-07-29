@@ -142,6 +142,10 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 - **Partenaire cible** : organisme de placement (type Cap Retraite) — ils ont les contrats résidences qui paient **1 000-4 000 € par admission** sur lead. Règle métier : à réception, la résidence fait une **validation dédup** (« prospect déjà en base ? ») ; si oui, le lead est mort.
 
 ### 🎯 L'axe du pitch — « LeadsMagic » (arrêté le 28/07)
+
+> **Ce qu'est LeadsMagic (précisé le 29/07)** — ni un renommage d'Emma, ni une offre faite à Cap Retraite : c'est **le procédé de création de leads par conversation**, éprouvé sur l'EHPAD avec Emma et **duplicable à d'autres secteurs**. Emma reste Emma côté famille. **LeadsMagic reste la propriété de smartseniors.fr.**
+> ⚠️ Le volet multi-secteurs se révèle **délibérément** : il prouve qu'on a un moteur et pas un bricolage, mais il dit aussi à Bernard qu'il est un secteur parmi d'autres, dans un marché où il défend son pipe tous les mois. Et **ne jamais ouvrir soi-même le sujet de la propriété** — l'annoncer sans qu'il l'ait demandé se lit comme de la défiance au premier rendez-vous.
+
 **On ne vend pas des leads, on révolutionne leur création.** Aujourd'hui c'est **la famille** qui fait le travail du conseiller : elle enchaîne les écrans d'un formulaire pour produire un dossier. Emma reprend cette charge — les mêmes informations arrivent par **une conversation naturelle**, à toute heure, et le coût du 10 000ᵉ dossier est celui du premier.
 
 **Munitions vérifiées au crawl de `capretraite.fr/zest/comparateur/ehpad/` (28/07)** — leur propre parcours, extrait de la config du comparateur :
