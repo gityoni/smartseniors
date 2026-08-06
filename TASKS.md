@@ -20,6 +20,13 @@ Le rendez-vous Bernard est demain. À construire :
 
 ## ✅ Fait
 
+### `/demo-he` devient bilingue — un sélecteur bascule toute la page (06/08)
+- **Un seul sélecteur « שפה / Langue »** commande scénario, acte 2, libellés, `dir` du document et langue de diction. Hébreu par défaut. Changer de langue **réinitialise la démo** (on ne mélange pas deux langues à l'écran).
+- **Vérifié au navigateur dans les deux sens** : en français la page est le miroir exact de `/demo` (chat x=130 / dossier x=809, `dir=ltr`, virgule décimale sur la vitesse), en hébreu le miroir inverse (chat x=632 / dossier x=130) ; **zéro chaîne résiduelle** dans l'autre langue, dans un sens comme dans l'autre. Scénario FR complet rejoué : 11/11 champs, `🔥 Chaud · 9/10`, `4/6 validées`, acte 2 jusqu'à la carte de fin. Zéro erreur JS.
+- **Le scénario français est dupliqué depuis `demo.html`, pas partagé.** Arbitrage assumé : `/demo` est la page du pitch, en prod, et tout son intérêt est « zéro API, zéro surprise » — on ne change pas son modèle de chargement avant un rendez-vous. Un test de parité vérifie qu'il reste **verbatim** identique. L'extraction en module commun se fera au moment de porter l'acte 2 sur `/demo`, où elle servira les deux pages.
+- **`/demo` strictement intacte** : `demo.html` n'est pas dans le diff, et le contrôle navigateur le confirme (positions, largeurs, 8 chapitres, mode Live).
+- ⚠️ **Le nom du fichier ment maintenant un peu** : `/demo-he` sert les deux langues. URL conservée volontairement — elle a déjà servi pour des previews.
+
 ### Acte 2 — le pitch mis en scène à la fin de la démo (06/08)
 - **`/demo-he` : à la fin du scénario, le bouton principal propose « לחלק השני ».** Le dossier glisse hors champ (`grid-template-columns: 1fr 0fr` + fondu), le chat prend toute la carte, et Emma **retourne l'outil vers celui qui regarde** — elle vient de qualifier une famille, elle qualifie maintenant son interlocuteur. C'est la démonstration la plus courte du produit : il se joue sur lui.
 - **17 temps** : 5 **questions-leviers** (grosses, liseré d'accent, seules à l'écran), 9 réponses, 2 punchlines pleine largeur en dégradé, 1 carte de fin. Contenu tiré de `knowledge/pitch-seo.md`, allégé pour être dit à voix haute. Fin : « השוק הזה יתועש. » → « אם לא נעשה את זה יחד — מישהו אחר יעשה את זה. » → « אז תגידו לי — מה הייתם עושים עם זה? ». **Durée 28 s à 1× voix coupée** (plus long avec la voix, chaque réplique étant lue).

@@ -30,7 +30,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 |---|---|
 | `pages/index.html` | **Accueil famille (Aurore)** : 2 vues — landing (hero validé + 5 chips) ⇄ Conversation (chat Emma + funnel 13 étapes + cartes EHPAD + CSV) |
 | `pages/demo.html` | **Démo partenaire** : **console de contrôle** (écran d'attente, Lancer/Pause/Rejouer, progression, saut à 8 chapitres) + player déterministe (scénario Garches/Jeanne · AGGIR interactif A/B/C · cartes GIR/PDF/promo/vidéo/itinéraire · **projecteur** à chaque capture) + mode **Live** (vrai `/api/chat` + `/api/extract`) |
-| `pages/demo-he.html` | **Démo partenaire en hébreu (RTL)** — copie 1:1 de `demo.html` : mêmes 49 étapes, mêmes 8 chapitres, mêmes 11 champs, même minutage. **Sans mode Live** (le prompt d'Emma impose le français). Voix via OpenAI (`lang:"he"`) |
+| `pages/demo-he.html` | **Démo partenaire BILINGUE** (hébreu RTL ⇄ français LTR) — un sélecteur « שפה / Langue » bascule **tout** : scénario, acte 2, libellés, sens de lecture, voix. Mêmes 49 étapes, 8 chapitres, 11 champs et acte 2 en 17 temps dans les deux langues. **Sans mode Live** (le prompt d'Emma impose le français) |
 | `pages/ss-rtl.css` | **Miroir RTL**, scopé `[dir="rtl"]`, chargé en dernier par `demo-he.html` — **n'affecte jamais** `demo.html` ni `index.html` |
 | `pages/ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` | Design system Aurore : tokens/top-bar · landing · chat+dossier · funnel re-skin + cartes EHPAD |
 | `pages/ss-demo.css` | **Couche « premium » de la démo** (scope `.ss-root[data-premium]`) : champ d'aurore animé, bordures dégradées, balayages lumineux, ✓ qui se dessine, halo d'Emma. Chargée en dernier dans `demo.html` — **n'affecte jamais `index.html`** |
@@ -135,9 +135,12 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 
 **Consentement (règle métier)** : Emma demande toujours « souhaitez-vous que les résidences vous recontactent directement ? » — oui → tél famille ; **non → le lead part avec le n° du conseiller `07 57 99 11 40`** (la famille n'est pas appelée).
 
-### Démo hébreu — `pages/demo-he.html` (`/demo-he`)
+### Démo bilingue — `pages/demo-he.html` (`/demo-he`)
 
 Copie **1:1** de la démo française pour une présentation en hébreu : **49 étapes**, **8 chapitres**, **11 champs**, même scénario (Sylvie ↔ Emma, Jeanne 82 ans, **Garches (92)**, AGGIR → **GIR 2**, **APA** + crédit d'impôt 25 %, L'Empereur), même console, même projecteur, même minutage. Parité vérifiée étape par étape (types, chapitres, clés de champs, valeurs). **Seule la langue change** — pas de transposition vers un dispositif israélien.
+
+**Bilingue depuis le 06/08.** Un sélecteur **« שפה / Langue »** en tête de top-bar commande **toute la page** : scénario, acte 2, libellés d'interface, `dir` du document, et langue de diction. Le hébreu est le défaut. Changer de langue **réinitialise la démo** — on ne mélange pas deux langues à l'écran. Vérifié : en français la page est le miroir exact de `/demo` (chat à gauche x=130, dossier à droite x=809), zéro chaîne hébreu résiduelle, et réciproquement.
+> Le **scénario français est dupliqué** depuis `demo.html`, pas partagé — `/demo` est la page du pitch, en production, et son intérêt est « zéro API, zéro surprise » ; on ne touche pas à son chargement avant un rendez-vous. Un test de parité vérifie qu'il reste **verbatim** identique à celui de `/demo`. L'extraction en module commun se fera quand l'acte 2 sera porté sur `/demo` — là elle servira les deux.
 
 **Trois écarts assumés, et pourquoi :**
 - **Pas de mode Live.** Le `BASE_SYSTEM_PROMPT` de `chat.js` impose le français : un Live sur la page hébreu répondrait en français devant l'audience. La demande portait sur le mode démo. Pour le rétablir un jour : prompt hébreu côté `chat.js` (le playbook v3 est français, ce n'est pas un simple `if`).

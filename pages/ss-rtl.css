@@ -27,16 +27,6 @@
 [dir="rtl"] .cthink          { border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
 [dir="rtl"] .ccursor         { margin-left: 0; margin-right: 2px; }
 
-/* ── Îlot LTR : l'acte 2 joué en français au milieu d'une page hébreu.
-      Le JS pose `dir="ltr"` sur le fil de discussion ; les sélecteurs
-      `[dir="rtl"] …` ci-dessus continuent pourtant de matcher à l'intérieur
-      (l'attribut RTL est sur <html>). On y annule donc les seuls miroirs
-      concernés — les bulles. Tout le reste de la page ne bouge pas. ── */
-[dir="rtl"] [dir="ltr"] .crow.bot .cbub  { border-bottom-left-radius: 4px; border-bottom-right-radius: 16px; }
-[dir="rtl"] [dir="ltr"] .crow.user .cbub { border-bottom-right-radius: 4px; border-bottom-left-radius: 16px; }
-[dir="rtl"] [dir="ltr"] .cthink          { border-bottom-left-radius: 4px; border-bottom-right-radius: 16px; }
-[dir="rtl"] [dir="ltr"] .ccursor         { margin-right: 0; margin-left: 2px; }
-
 /* ── Panneau « création du lead » : pastille décorative et lueurs de fond ── */
 [dir="rtl"] .lead-side::before { right: auto; left: -70px; }
 [dir="rtl"] .ss-root[data-premium] .lead-side::before { right: auto; left: -90px; }
