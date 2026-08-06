@@ -30,13 +30,15 @@ Répond en français, dans un langage simple, rassurant et structuré.
 |---|---|
 | `pages/index.html` | **Accueil famille (Aurore)** : 2 vues — landing (hero validé + 5 chips) ⇄ Conversation (chat Emma + funnel 13 étapes + cartes EHPAD + CSV) |
 | `pages/demo.html` | **Démo partenaire** : **console de contrôle** (écran d'attente, Lancer/Pause/Rejouer, progression, saut à 8 chapitres) + player déterministe (scénario Garches/Jeanne · AGGIR interactif A/B/C · cartes GIR/PDF/promo/vidéo/itinéraire · **projecteur** à chaque capture) + mode **Live** (vrai `/api/chat` + `/api/extract`) |
+| `pages/demo-he.html` | **Démo partenaire en hébreu (RTL)** — copie 1:1 de `demo.html` : mêmes 49 étapes, mêmes 8 chapitres, mêmes 11 champs, même minutage. **Sans mode Live** (le prompt d'Emma impose le français). Voix via OpenAI (`lang:"he"`) |
+| `pages/ss-rtl.css` | **Miroir RTL**, scopé `[dir="rtl"]`, chargé en dernier par `demo-he.html` — **n'affecte jamais** `demo.html` ni `index.html` |
 | `pages/ss-theme.css` · `ss-landing.css` · `ss-chat.css` · `ss-funnel.css` | Design system Aurore : tokens/top-bar · landing · chat+dossier · funnel re-skin + cartes EHPAD |
 | `pages/ss-demo.css` | **Couche « premium » de la démo** (scope `.ss-root[data-premium]`) : champ d'aurore animé, bordures dégradées, balayages lumineux, ✓ qui se dessine, halo d'Emma. Chargée en dernier dans `demo.html` — **n'affecte jamais `index.html`** |
 | `pages/functions/api/chat.js` | Edge function streaming Anthropic (persona Emma `opus-5` + prompt v3 nourri du playbook + bloc `<preference_ton>` + contexte funnel + prompt caching) |
 | `pages/functions/api/ehpads.js` | GET /api/ehpads?localite= — liste EHPAD par département (D1 → fallback **réel** `_partners.js`) |
 | `pages/functions/api/_partners.js` | **Généré** (`node scripts/build-partners-fallback.mjs` depuis `data/ehpads.json`) : 350 résidences par département + map ville→dept — ne pas éditer à la main |
 | `pages/functions/api/_geo.js` | `findDept(localite)` partagé ehpads/leads (CP → 2 chiffres → ville normalisée) |
-| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma : **ElevenLabs prioritaire** (`eleven_multilingual_v2`, voix FR native via `ELEVENLABS_VOICE_ID`), secours OpenAI `gpt-4o-mini-tts` (`coral`), cache edge par hash moteur+voix+texte |
+| `pages/functions/api/tts.js` | POST /api/tts — voix studio d'Emma : **ElevenLabs prioritaire** (`eleven_multilingual_v2`, voix FR native via `ELEVENLABS_VOICE_ID`), secours OpenAI `gpt-4o-mini-tts` (`coral`), cache edge par hash moteur+voix+texte. Param optionnel **`lang`** (`fr` défaut · `he`) → jeu d'instructions OpenAI dédié ; `lang` absent = comportement FR strictement inchangé (**même clé de cache, cache préchauffé conservé**) |
 | `pages/functions/api/tts-voices.js` + `pages/voix-test.html` | Outil interne de choix de voix : liste/écoute les voix FR ElevenLabs (compte + Voice Library), adopte et teste la réplique d'Emma — à verrouiller après choix |
 | `pages/functions/api/leads.js` | POST /api/leads — sauvegarde D1 + scoring urgence + email aux EHPAD partenaires (**consentement** : `non` → n° conseiller à la place du tél famille) |
 | `pages/functions/api/admin/import-ehpads.js` | Endpoint admin d'import EHPAD (depuis GSheet/JSON) |
@@ -73,7 +75,7 @@ Répond en français, dans un langage simple, rassurant et structuré.
 | `GET /api/ehpads?localite=` | GET | Liste EHPAD par localité (département extrait) |
 | `POST /api/leads` | POST | Sauvegarde lead en D1 + scoring + email MailChannels aux EHPAD partenaires |
 | `POST /api/extract` | POST | Extraction lead conversationnelle (haiku tool-use) — body `{ history }` → `{ lead }` |
-| `POST /api/tts` | POST | Voix d'Emma (**ElevenLabs Shana** prioritaire, secours OpenAI ; mp3, cache edge) — body `{ text, voice_id?, voice? }` |
+| `POST /api/tts` | POST | Voix d'Emma (**ElevenLabs Shana** prioritaire, secours OpenAI ; mp3, cache edge) — body `{ text, voice_id?, voice?, lang? }` (`lang:"he"` → instructions hébreu, voix OpenAI) |
 | `GET/POST /api/tts-voices` | — | Outil interne de choix de voix ElevenLabs (**à verrouiller/retirer**) |
 | `POST /api/admin/import-ehpads` | POST | Import administrateur des EHPAD partenaires |
 
@@ -132,6 +134,19 @@ Objectif : montrer à une société partenaire « seniors » qu'Emma **qualifie 
 **Scénario démo (fictif)** : Sylvie ↔ Emma pour sa mère **Jeanne, 82 ans** (Garches, fugue nocturne/Alzheimer non confirmé, refus, retraite modeste 1 600 € + épargne ~85 k€). Déroulé — **un sujet à la fois** : émotion → fugue nommée + **question violence/agitation** → unités adaptées (décision = **médecin coordinateur**) + réponse « mouroir » → **AGGIR interactif expliqué (A/B/C → GIR 2 indicatif)** → localisation amenée avec tact (« vous passez la voir régulièrement ? ») → objection « vous êtes qui ? » (présentation SmartSeniors : EHPAD adapté · aides financières · pédagogie · écoute, sans prétendre n'être lié à aucune résidence) → budget/aides → consentement → **création du lead** (nom, prénom, date de naissance, adresse, tél + e-mail du contact) → **final features** : carte GIR · PDF d'admission pré-rempli · **promo L'Empereur 110 €/j** · vidéo (youtu.be/DvSet0Rkjkk) · itinéraire vers L'Empereur (Garches) → score chaud + « lead envoyé à N résidences ».
 
 **Consentement (règle métier)** : Emma demande toujours « souhaitez-vous que les résidences vous recontactent directement ? » — oui → tél famille ; **non → le lead part avec le n° du conseiller `07 57 99 11 40`** (la famille n'est pas appelée).
+
+### Démo hébreu — `pages/demo-he.html` (`/demo-he`)
+
+Copie **1:1** de la démo française pour une présentation en hébreu : **49 étapes**, **8 chapitres**, **11 champs**, même scénario (Sylvie ↔ Emma, Jeanne 82 ans, **Garches (92)**, AGGIR → **GIR 2**, **APA** + crédit d'impôt 25 %, L'Empereur), même console, même projecteur, même minutage. Parité vérifiée étape par étape (types, chapitres, clés de champs, valeurs). **Seule la langue change** — pas de transposition vers un dispositif israélien.
+
+**Trois écarts assumés, et pourquoi :**
+- **Pas de mode Live.** Le `BASE_SYSTEM_PROMPT` de `chat.js` impose le français : un Live sur la page hébreu répondrait en français devant l'audience. La demande portait sur le mode démo. Pour le rétablir un jour : prompt hébreu côté `chat.js` (le playbook v3 est français, ce n'est pas un simple `if`).
+- **Voix = OpenAI, pas ElevenLabs.** `eleven_multilingual_v2` **ne couvre pas l'hébreu**. La page force donc une voix OpenAI (`voice:"coral"`, `lang:"he"`) → `tts.js` court-circuite ElevenLabs. Shana reste la voix française, intacte.
+- **Police : Nunito + Rubik.** Nunito n'a **aucun glyphe hébreu** — sans repli explicite, chaque poste rendrait la démo dans sa police système (Arial Hebrew, Segoe UI…). Rubik est la plus proche (grotesque légèrement arrondie), nativement hébreu. L'ordre `'Nunito','Rubik'` garde le latin (SmartSeniors, GIR, €) en Nunito.
+
+**Le miroir RTL vit dans `pages/ss-rtl.css`**, scopé `[dir="rtl"]` et chargé **après** `ss-demo.css` — il ne contient que des retournements de règles existantes, aucune décision de style nouvelle. Chat à **droite**, dossier à **gauche** (le projecteur envoie donc l'œil à gauche). Retournés : marges `auto`, pointes de bulles, liseré de champ, pastille avatar, flèche du select, lueurs du panneau, et les **dégradés qui portent une échelle** (froid→chaud, GIR 6→GIR 1) pour rester alignés sur leurs légendes.
+
+> ⚠️ **Piège bidi — le vrai risque de cette page.** Dans un paragraphe RTL, deux groupes de chiffres séparés par une espace sont rendus **dans l'ordre RTL** : `06 24 18 52 40` s'affiche `40 52 18 24 06`, `1 600 €` devient `600 1 €`, et le compteur `3 / 49` se lit `49 / 3`. Trois parades en place, à réutiliser pour tout nouveau texte : (1) `L()` pose des **isolats U+2066/U+2069** autour des téléphones, e-mails, codes et montants — invisibles, ils traversent `textContent`, `innerHTML` et l'échappement de `mdBold` ; (2) `bidiSegments()` enveloppe chaque segment `·` d'une valeur du dossier dans un `<bdi>` (échappement compris → sûr aussi pour des données d'API) ; (3) `direction: ltr` sur le compteur de la console. Le « × » de la vitesse est neutre lui aussi → isolats dans les `<option>`.
 
 > Apprentissage : `knowledge/emma-playbook.md` (v3, vrais appels) nourrit le prompt ; régénéré via le notebook Colab Drive-persistant. Fiches brutes **non committées** (anonymisation Colab à durcir — lieux/hôpitaux résiduels).
 

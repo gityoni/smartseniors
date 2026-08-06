@@ -1,0 +1,77 @@
+/* ============================================================
+   SmartSeniors — Couche RTL (hébreu)
+   Chargée EN DERNIER par demo-he.html, après ss-demo.css.
+
+   Tout est scopé sous [dir="rtl"] → aucune page LTR n'est touchée.
+   Ne contient QUE des miroirs de règles existantes : pas une seule
+   décision de style nouvelle. Si une règle apparaît ici, c'est qu'elle
+   code une gauche/droite physique quelque part dans theme/chat/demo.
+   ============================================================ */
+
+/* ── Le nom de marque reste latin : sans ça, l'algorithme bidi peut
+      réordonner les <span> du wordmark et la puce SVG au milieu. ── */
+[dir="rtl"] .wordmark { direction: ltr; }
+
+/* ── `margin-left: auto` = « pousse jusqu'au bout de la ligne ».
+      En RTL le bout de la ligne est à gauche. ── */
+[dir="rtl"] .ss-nav,
+[dir="rtl"] .lead-live,
+[dir="rtl"] .chat-replay,
+[dir="rtl"] .ss-root[data-premium] .chat-chrono { margin-left: 0; margin-right: auto; }
+
+/* ── Bulles : la pointe est du côté de l'avatar. En RTL Emma passe à
+      droite et la famille à gauche (flex row / row-reverse s'inversent
+      tout seuls) — restent les coins à retourner. ── */
+[dir="rtl"] .crow.bot .cbub  { border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
+[dir="rtl"] .crow.user .cbub { border-bottom-right-radius: 16px; border-bottom-left-radius: 4px; }
+[dir="rtl"] .cthink          { border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
+[dir="rtl"] .ccursor         { margin-left: 0; margin-right: 2px; }
+
+/* ── Panneau « création du lead » : pastille décorative et lueurs de fond ── */
+[dir="rtl"] .lead-side::before { right: auto; left: -70px; }
+[dir="rtl"] .ss-root[data-premium] .lead-side::before { right: auto; left: -90px; }
+[dir="rtl"] .ss-root[data-premium] .lead-side {
+  background:
+    radial-gradient(80% 55% at 12% -6%, rgba(91, 141, 239, .26), transparent 62%),
+    radial-gradient(70% 50% at 112% 108%, rgba(78, 205, 196, .18), transparent 60%),
+    linear-gradient(192deg, #14503F 0%, #10453B 46%, #0C3831 100%);
+}
+
+/* ── Liseré d'accent du champ qui vient de tomber ── */
+[dir="rtl"] .ss-root[data-premium] .lfield::before {
+  left: auto; right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* ── Jauges : un bloc en `width: X%` se remplit depuis la droite en RTL,
+      donc les dégradés qui portent une ÉCHELLE (froid→chaud, GIR 6→GIR 1)
+      doivent être retournés pour rester alignés avec leurs légendes.
+      Les dégradés purement décoratifs, eux, ne bougent pas. ── */
+[dir="rtl"] .ls-meter i { background: linear-gradient(270deg, #3B82F6, #FFD93D, #FF6B6B); }
+[dir="rtl"] .ss-root .dcard-gir .dc-gauge i { background: linear-gradient(270deg, #3B82F6, #FFD93D, #EF4444); }
+
+/* ── Balayages lumineux déclenchés par un remplissage : ils doivent
+      partir du même bord que le remplissage. ── */
+[dir="rtl"] .ss-root[data-premium] .lfield.flash::after,
+[dir="rtl"] .ss-root[data-premium] .lead-edi .edi-row[data-st="ok"]::after,
+[dir="rtl"] .ss-root[data-premium] .lead-sent.show .lead-sent-banner::after { animation-direction: reverse; }
+
+/* ── Console de contrôle ──
+   Le compteur « 3 / 49 » est une paire de nombres : en RTL il se rendrait
+   « 49 / 3 », donc l'inverse de ce qu'il annonce. C'est du numérique pur,
+   sa direction propre est LTR — seule sa POSITION suit le miroir. */
+[dir="rtl"] .ss-root[data-premium] .dc-step { direction: ltr; text-align: left; }
+[dir="rtl"] .ss-root[data-premium] .dc-chap select {
+  padding: 8px 13px 8px 30px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B8DEF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat left 11px center / 10px,
+    #fff;
+}
+
+/* ── Pastille « en ligne » sur l'avatar d'Emma ── */
+[dir="rtl"] .ss-root[data-premium] .chat-top .emma-av span.on { right: auto; left: -1px; }
+
+/* ── Champs du dossier : les valeurs mêlent hébreu et données latines.
+      `<bdi>` (posé par le JS sur chaque segment) fait le travail, mais la
+      ligne elle-même doit rester alignée au début de ligne RTL. ── */
+[dir="rtl"] .lf-value, [dir="rtl"] .lf-label { text-align: right; }

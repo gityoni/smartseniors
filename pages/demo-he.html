@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>SmartSeniors — הדגמה לשותפים · אמה בפעולה</title>
+<!--
+  Copie hébreu (RTL) de /demo — même scénario, même minutage, mêmes 11 champs,
+  mêmes 49 étapes. Deux écarts assumés avec la version française :
+   1. le miroir RTL vit dans /ss-rtl.css (chargé en dernier), jamais ici ;
+   2. le mode Live est absent : le BASE_SYSTEM_PROMPT de chat.js impose le
+      français, un « Live » sur cette page répondrait en français. La demande
+      portait sur le mode démo. Pour le rétablir : prompt hébreu côté chat.js.
+  La voix passe par OpenAI (`lang: "he"`) — ElevenLabs `eleven_multilingual_v2`
+  ne couvre pas l'hébreu.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/ss-theme.css" />
+<link rel="stylesheet" href="/ss-chat.css" />
+<style>
+  /* La couleur de base vit sur <html> : <body> reste transparent pour laisser
+     voir le champ d'aurore de ss-demo.css (positionné en fixed, z-index 0). */
+  html { background: #EEF6F3; }
+  body { margin: 0; padding: 0; background: transparent; }
+  /* Nunito ne contient AUCUN glyphe hébreu : sans repli explicite, chaque poste
+     rendrait la démo dans sa police système (Arial Hebrew, Segoe UI…) et le
+     visuel ne serait plus celui de /demo. Rubik est le plus proche de Nunito
+     (grotesque légèrement arrondie) et nativement hébreu. L'ordre compte :
+     le latin (SmartSeniors, GIR, €) reste en Nunito, l'hébreu tombe sur Rubik.
+     Même spécificité que ss-theme.css, mais déclaré après → c'est celui-ci qui gagne. */
+  .ss-root[data-font="nunito"] {
+    --font: 'Nunito', 'Rubik', system-ui, sans-serif;
+    --font-display: 'Nunito', 'Rubik', system-ui, sans-serif;
+  }
+  /* Mise en page « face à face » : la carte tient dans l'écran, rien ne bouge pendant la démo —
+     le chat ET le dossier défilent chacun en interne, la console reste collée en bas. */
+  .ss-root .ss-convo { padding-top: 8px; padding-bottom: 12px; }
+  .ss-root .ss-convo-head { margin-bottom: 8px; }
+  /* Desktop : la page tient exactement dans le viewport et le split prend TOUT
+     l'espace restant sous l'en-tête. Plus de `calc(100vh - Xpx)` à réajuster à
+     la main dès qu'on touche au header. Le chat récupère la place gagnée. */
+  @media (min-width: 901px) {
+    .ss-root { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .ss-root .ss-convo { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+    /* `margin: 0 auto` empêche l'étirement en flex → largeur explicite. */
+    .ss-root .ss-convo-head { width: 100%; }
+    .ss-root #demo-split {
+      flex: 1 1 0; min-height: 0; height: auto;
+      width: 100%; max-width: 1180px;
+      grid-template-columns: 1.15fr .85fr;
+    }
+  }
+  @media (max-width: 900px) { .ss-root #demo-split { height: auto; min-height: 0; grid-template-columns: 1fr; } }
+  .ss-root #demo-split .chat-scroll { max-height: none; min-height: 0; }
+  /* dossier : tout le panneau défile d'un bloc (auto-scroll vers l'élément actif), plus de mini-boîte champs */
+  .ss-root #demo-split .lead-side { overflow-y: auto; overflow-x: hidden; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar { width: 6px; }
+  .ss-root #demo-split .lead-side::-webkit-scrollbar-thumb { background: rgba(241,247,245,.18); border-radius: 4px; }
+  .ss-root #demo-split .lead-fields { min-height: 0; flex: 0 0 auto; overflow: visible; gap: 8px; }
+  .ss-root #demo-split .lfield { padding: 10px 13px; }
+  .ss-root .cbub strong { color: var(--c-accent); }
+  /* barre de contrôle démo */
+  .ss-root .demo-ctrl { display: flex; align-items: center; gap: 8px; }
+  .ss-root .demo-ctrl select { font-family: var(--font); border: 1.5px solid var(--c-line); border-radius: 8px; padding: 5px 8px; font-size: .8rem; background: var(--c-surface); color: var(--c-ink); }
+  .ss-root .demo-note { font-size: .72rem; color: var(--c-ink-soft); font-weight: 600; }
+  /* widget AGGIR */
+  .ss-root .aggir { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-soft); max-width: 88%; }
+  .ss-root .aggir-t { font-weight: 900; color: var(--c-ink); font-size: .9rem; margin-bottom: 4px; }
+  .ss-root .aggir-sub { font-size: .72rem; color: var(--c-ink-soft); margin-bottom: 8px; }
+  .ss-root .aggir-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--c-line); }
+  .ss-root .aggir-row .q { flex: 1; font-size: .85rem; color: var(--c-ink); font-weight: 600; }
+  .ss-root .aggir-opts { display: flex; gap: 5px; flex-shrink: 0; }
+  .ss-root .aggir-opt { width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--c-line); background: var(--c-bg); font-weight: 800; font-size: .82rem; color: var(--c-ink-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s; }
+  .ss-root .aggir-opt.sel { color: #fff; border-color: transparent; transform: scale(1.08); }
+  .ss-root .aggir-opt.sel[data-v="A"] { background: #15B79E; }
+  .ss-root .aggir-opt.sel[data-v="B"] { background: #F59E0B; }
+  .ss-root .aggir-opt.sel[data-v="C"] { background: #EF4444; }
+  .ss-root .aggir-leg { font-size: .64rem; color: var(--c-ink-soft); margin-top: 8px; line-height: 1.4; }
+  /* cartes features */
+  .ss-root .dcard { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-soft); max-width: 86%; animation: ss-slideup .3s ease both; }
+  .ss-root .dcard .dc-h { display: flex; align-items: center; gap: 11px; }
+  .ss-root .dcard .dc-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; background: var(--c-bg-alt); }
+  .ss-root .dcard .dc-t { font-weight: 800; color: var(--c-ink); font-size: .92rem; line-height: 1.2; }
+  .ss-root .dcard .dc-s { font-size: .8rem; color: var(--c-ink-soft); margin-top: 5px; line-height: 1.5; }
+  .ss-root .dcard .dc-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 11px; background: var(--grad); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; font-size: .82rem; cursor: pointer; font-family: var(--font); text-decoration: none; }
+  .ss-root .dcard-gir .dc-gauge { height: 10px; border-radius: 99px; background: var(--c-bg-alt); overflow: hidden; margin: 11px 0 4px; }
+  .ss-root .dcard-gir .dc-gauge i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#3B82F6,#FFD93D,#EF4444); border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .ss-root .dcard-gir .dc-scale { display: flex; justify-content: space-between; font-size: .62rem; color: var(--c-ink-soft); font-weight: 700; }
+  .ss-root .dcard-video iframe { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 11px; margin-top: 9px; }
+  .ss-root .dcard-promo { border: 1.5px solid var(--c-accent); }
+  .ss-root .dcard-promo .dc-ico { background: rgba(91,141,239,.14); }
+  .ss-root .dcard-promo .dc-prix { font-size: 1.45rem; font-weight: 900; color: var(--c-accent); margin-top: 8px; }
+  .ss-root .dcard-promo .dc-prix small { font-size: .8rem; font-weight: 700; color: var(--c-ink-soft); }
+  .ss-root .dcard-itin .dc-route { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--c-ink); margin-top: 9px; font-weight: 700; }
+  .ss-root .dcard-itin .dc-route .pin { color: var(--c-accent); }
+  /* validation EDI — bloc back-office (panneau du dossier, fond vert foncé) */
+  .ss-root .lead-edi { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(241,247,245,.1); position: relative; z-index: 1; opacity: 0; transform: translateY(8px); transition: opacity .4s, transform .4s; pointer-events: none; }
+  .ss-root .lead-edi.on { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .ss-root .lead-edi .le-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .ss-root .lead-edi .le-label { font-size: .82rem; font-weight: 900; color: #F1F7F5; }
+  .ss-root .lead-edi .le-count { font-size: .72rem; font-weight: 800; color: var(--c-online); }
+  .ss-root .lead-edi .edi-list { display: flex; flex-direction: column; gap: 6px; }
+  .ss-root .lead-edi .edi-row { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 9px; background: rgba(255,255,255,.04); border: 1px solid rgba(241,247,245,.1); transition: background .3s, border-color .3s, opacity .3s; }
+  .ss-root .lead-edi .edi-name { flex: 1; font-weight: 700; font-size: .78rem; color: rgba(241,247,245,.92); }
+  .ss-root .lead-edi .edi-st { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: .72rem; flex-shrink: 0; }
+  .ss-root .lead-edi .edi-row[data-st="pending"] .edi-st { color: rgba(241,247,245,.5); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] { border-color: rgba(110,231,183,.4); background: rgba(110,231,183,.1); }
+  .ss-root .lead-edi .edi-row[data-st="ok"] .edi-st { color: var(--c-online); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] { opacity: .5; }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-name { text-decoration: line-through; color: rgba(241,247,245,.55); }
+  .ss-root .lead-edi .edi-row[data-st="ko"] .edi-st { color: #FCA5A5; }
+  .ss-root .lead-edi .edi-motif { font-size: .64rem; font-weight: 700; color: rgba(241,247,245,.45); margin-inline-start: 5px; }
+  .ss-root .lead-edi .edi-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(241,247,245,.2); border-top-color: var(--c-online); animation: edi-spin .7s linear infinite; }
+  @keyframes edi-spin { to { transform: rotate(360deg); } }
+</style>
+<!-- Couche « premium » : chargée en dernier pour gagner à spécificité égale -->
+<link rel="stylesheet" href="/ss-demo.css" />
+<!-- Miroir RTL : APRÈS la couche premium, c'est elle qu'il retourne -->
+<link rel="stylesheet" href="/ss-rtl.css" />
+</head>
+<body>
+
+<!-- Fond ambiant (aurore) — décoratif, hors flux -->
+<div class="ss-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="ss-root" data-direction="aurore" data-font="nunito" data-premium="on" style="--c-accent:#5B8DEF; --c-accent2:#9D8CF0;">
+
+  <!-- TOP BAR -->
+  <header class="ss-topbar">
+    <div>
+      <div class="wordmark" aria-label="SmartSeniors">
+        <span>Smart</span><span class="wm-accent">Sen</span><span class="wm-chi"><span>ı</span><svg class="wm-chip" viewBox="0 0 14 14" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="1.5" fill="var(--c-accent)"/>
+          <rect x="6" y="0" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="6" y="11" width="2" height="3" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="0" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="11" y="6" width="3" height="2" rx=".8" fill="var(--c-accent2)"/>
+          <rect x="5.5" y="5.5" width="3" height="3" rx=".5" fill="var(--c-accent2)"/>
+        </svg></span><span class="wm-accent">ors</span>
+      </div>
+      <div class="wm-sub">הדגמה לשותפים · נתונים בדיוניים</div>
+    </div>
+    <nav class="ss-nav demo-ctrl" aria-label="בקרות ההדגמה">
+      <label class="demo-note">קול
+        <select id="voice-sel" aria-label="הקול של אמה">
+          <option value="off" selected>מושתק</option>
+          <option value="premium">אמה (אולפן)</option>
+          <option value="browser">דפדפן</option>
+        </select>
+      </label>
+      <label class="demo-note">מהירות
+        <!-- Isolats LTR (&#8294;…&#8297;) : sans eux « 2× » se rend « ×2 » dans un
+             paragraphe RTL, le signe multiplicateur étant un caractère neutre. -->
+        <select id="pace" aria-label="מהירות ההדגמה">
+          <option value="0.4" selected>&#8294;0.4×&#8297;</option>
+          <option value="0.5">&#8294;0.5×&#8297;</option>
+          <option value="1">&#8294;1×&#8297;</option>
+          <option value="1.5">&#8294;1.5×&#8297;</option>
+          <option value="2">&#8294;2×&#8297;</option>
+        </select>
+      </label>
+      <span class="demo-note" id="mode-note">ממתין — לחצו על «הפעלה»</span>
+    </nav>
+  </header>
+
+  <section class="ss-convo">
+    <div class="ss-convo-head">
+      <span class="ss-kicker" style="justify-content:center">הדגמה לשותפים</span>
+      <h2 class="ss-sec-title">אמה בפעולה · הליד נבנה בזמן אמת</h2>
+      <p class="ss-sec-lede">משפחה משוחחת עם אמה. בזמן שהיא מקשיבה, מרגיעה ומאפיינת את הצורך, הליד נבנה משמאל — עד להעברתו לבתי הדיור השותפים.</p>
+    </div>
+
+    <div class="ss-split" id="demo-split">
+
+      <!-- CHAT -->
+      <div class="chat-side">
+        <div class="chat-top">
+          <div class="emma-av" id="emma-av">
+            <svg viewBox="0 0 52 52" fill="none" aria-hidden="true">
+              <ellipse cx="26" cy="21" rx="12" ry="13" fill="rgba(255,255,255,.22)"/>
+              <path d="M14 20 Q13 7 26 7 Q39 7 38 20 Q40 30 38 40 L14 40 Q12 30 14 20Z" fill="rgba(255,255,255,.45)"/>
+              <circle cx="22" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <circle cx="30" cy="21" r="3.5" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <line x1="25.5" y1="21" x2="26.5" y2="21" stroke="#fff" stroke-width="1.5"/>
+              <path d="M22 28 Q26 32 30 28" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            </svg>
+            <span class="on"></span>
+          </div>
+          <div><div class="nm">אמה</div><div class="rl">יועצת מוסדות סיעודיים · מחוברת</div></div>
+          <span class="chat-chrono" id="chrono" aria-hidden="true"></span>
+        </div>
+        <div class="chat-scroll" id="chat-box" role="log" aria-live="polite" aria-label="השיחה עם אמה"></div>
+
+        <!-- CONSOLE — occupe la place de la barre de saisie, inutile ici -->
+        <div class="dconsole" id="console" role="group" aria-label="קונסולת ההדגמה">
+          <button class="dc-play" id="pause" type="button" aria-label="הפעלת ההדגמה">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <span id="dc-play-label">הפעלה</span>
+          </button>
+          <button class="dc-ghost" id="replay" type="button" aria-label="ניגון מחדש מההתחלה">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            נגן שוב
+          </button>
+          <div class="dc-track" id="dc-track"><i id="dc-bar"></i></div>
+          <span class="dc-step" id="dc-step">—</span>
+          <label class="dc-chap">
+            <select id="chapter" aria-label="קפיצה לרגע בתרחיש"></select>
+          </label>
+        </div>
+      </div>
+
+      <!-- DOSSIER EN DIRECT -->
+      <div class="lead-side">
+        <div class="lead-head">
+          <div class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></div>
+          <div><div class="lh-t">יצירת הליד</div><div class="lh-s">בזמן אמת · מערכת השותפים</div></div>
+          <span class="lead-live"><span class="ss-dot"></span> חי</span>
+        </div>
+        <div class="lead-prog"><i id="pbar"></i></div>
+        <div class="lead-fields" id="lead-fields"></div>
+        <div class="lead-score" id="lead-score">
+          <div class="ls-top"><span class="ls-label">ציון דחיפות</span><span class="ls-badge froid" id="ls-badge">—</span></div>
+          <div class="ls-meter"><i id="ls-meter"></i></div>
+          <div class="ls-scale"><span>קר</span><span>פושר</span><span>חם</span></div>
+        </div>
+        <div class="lead-edi" id="lead-edi" aria-live="polite">
+          <div class="le-top"><span class="le-label">📡 אימות מול רשת השותפים (EDI)</span><span class="le-count" id="le-count"></span></div>
+          <div class="edi-list" id="edi-list"></div>
+        </div>
+        <div class="lead-sent" id="lead-sent">
+          <div class="lead-sent-banner">
+            <div class="sb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><div class="sb-t" id="sent-t">הליד נשלח</div><div class="sb-s" id="sent-s"></div></div>
+          </div>
+          <div class="email-card" id="email-card"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<script>
+const TTS_URL = "/api/tts";
+const CONSEILLER_TEL = "07 57 99 11 40"; // backend : si consentement = non, le lead part avec ce numéro
+
+/* Isolat bidi (U+2066 LRI … U+2069 PDI). Sans lui, l'algorithme bidi rend les
+   groupes de chiffres d'un paragraphe hébreu dans l'ordre RTL : « 06 24 18 52 40 »
+   s'affiche « 40 52 18 24 06 ». Ce sont des caractères invisibles — ils traversent
+   `textContent`, `innerHTML` et l'échappement de `mdBold` sans dommage. */
+const L = (s) => "⁦" + s + "⁩";
+
+/* ── Dossier (lead-side) ── */
+const FIELDS = [
+  { key:'lien',     label:'קרבה משפחתית',   hint:'ממתין…' },
+  { key:'proche',   label:'האדם המבוגר',    hint:'שם · שם משפחה · תאריך לידה' },
+  { key:'adresse',  label:'כתובת',          hint:'רחוב · מיקוד · עיר' },
+  { key:'situation',label:'מצב נוכחי',      hint:'ממתין…' },
+  { key:'autonomie',label:'עצמאות (GIR)',   hint:'ממתין…' },
+  { key:'type',     label:'סוג המוסד',      hint:'ממתין…' },
+  { key:'zone',     label:'אזור החיפוש',    hint:'עיר + רדיוס' },
+  { key:'budget',   label:'תקציב / סיוע',   hint:'ממתין…' },
+  { key:'delai',    label:'לוח זמנים',      hint:'ממתין…' },
+  { key:'contact',  label:'איש קשר במשפחה', hint:'טלפון + אימייל' },
+  { key:'consent',  label:'אופן יצירת הקשר',hint:'ממתין…' },
+];
+
+const chatBox = document.getElementById("chat-box");
+const fieldsEl = document.getElementById("lead-fields");
+const replayBtn = document.getElementById("replay");
+const pauseBtn = document.getElementById("pause");
+
+/* ── État du player (démo déterministe) ──
+   running : un scénario est en cours (en lecture OU en pause)
+   paused  : l'utilisateur a mis en pause (gèle le streaming) */
+let running = false, paused = false;
+let cancelRequested = false, runDone = Promise.resolve(), starting = false;
+let pauseWaiters = [];
+const CANCEL = Symbol("cancel");
+const pace = () => parseFloat(document.getElementById('pace').value) || 1;
+const down = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+
+function releasePause() { const w = pauseWaiters; pauseWaiters = []; w.forEach(fn => fn()); }
+// Sas pause/annulation : bloque tant que `paused`, lève CANCEL si le run est annulé (Rejouer / saut de chapitre).
+async function gate() {
+  if (cancelRequested) throw CANCEL;
+  while (paused) {
+    await new Promise(res => pauseWaiters.push(res));
+    if (cancelRequested) throw CANCEL;
+  }
+}
+// Attente pace-aware et sensible à la pause (testée avant ET après le délai → gel net mi-phrase).
+async function wait(ms) {
+  await gate();
+  await new Promise(r => setTimeout(r, ms / pace()));
+  await gate();
+}
+const mdBold = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+const esc = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ── Voix d'Emma — 2 moteurs au choix (sélecteur top-bar) ──
+   « Emma (studio) » : POST /api/tts avec `lang: "he"` → OpenAI (mp3 mis en cache
+   edge). On force la voix OpenAI : `eleven_multilingual_v2`, moteur par défaut de
+   /api/tts, ne couvre pas l'hébreu.
+   « Navigateur »    : Web Speech API (voix hébreu installée sur le poste), zéro réseau.
+   Le scénario attend la fin de la lecture ; Pause gèle la voix ; Rejouer coupe net. */
+const TTS_VOICE = "coral";                     // voix OpenAI (cf. OPENAI_VOICES dans tts.js)
+const voiceSel = document.getElementById('voice-sel');
+const TTS_OK = 'speechSynthesis' in window;
+let voiceMode = 'off', heVoice = null, currentAudio = null, speechGen = 0, speakWaiters = [];
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('he'));
+  const prefs = ['carmit', 'google עברית', 'hebrew'];
+  heVoice = vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+}
+if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+else voiceSel.querySelector('option[value="browser"]')?.remove();
+const speakable = (t) => t
+  .replace(/\*\*/g, '')
+  .replace(/[⁦-⁩]/g, '')             // isolats bidi : invisibles à l'écran, hors sujet pour la voix
+  .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+  .replace(/→/g, ',').replace(/←/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
+// Vitesse de lecture : base à 1,15× (Emma était un peu lente en 1×), jamais en
+// dessous — ralentir une voix la rend artificielle. Suit le curseur au-dessus.
+// Le timbre est préservé par `preservesPitch` : aucune distorsion jusqu'à ~1,3×.
+const vRate = () => Math.min(1.6, Math.max(1.15, pace() * 1.15));
+// Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
+const ttsMem = new Map();
+function getTTS(text) {
+  if (!ttsMem.has(text)) {
+    const p = fetch(TTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: speakable(text), voice: TTS_VOICE, lang: 'he' }) })
+      .then(r => { if (!r.ok) throw new Error('TTS ' + r.status); return r.blob(); })
+      .then(b => URL.createObjectURL(b));
+    p.catch(() => ttsMem.delete(text));
+    ttsMem.set(text, p);
+  }
+  return ttsMem.get(text);
+}
+function speakBrowser(text) {
+  if (!TTS_OK) return Promise.resolve();
+  return new Promise(res => {
+    speakWaiters.push(res);
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    if (heVoice) u.voice = heVoice;
+    u.lang = 'he-IL'; u.rate = vRate(); u.pitch = 1.04;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+async function speakPremium(text) {
+  const gen = speechGen;
+  const url = await getTTS(text);              // échec → speak() bascule sur la voix navigateur
+  if (gen !== speechGen) return;               // annulé pendant le téléchargement
+  await new Promise(res => {
+    speakWaiters.push(res);
+    const a = new Audio(url);
+    // Sans ça, accélérer monte le timbre (effet « chipmunk »). Vrai défaut de
+    // Chrome, mais on l'affirme explicitement + préfixes pour les autres.
+    a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true;
+    a.playbackRate = vRate();
+    currentAudio = a;
+    const done = () => { if (currentAudio === a) currentAudio = null; res(); };
+    a.onended = done; a.onerror = done;
+    a.play().catch(done);
+  });
+}
+async function speak(text) {
+  if (voiceMode === 'premium') {
+    try { return await speakPremium(text); }
+    catch (e) {
+      voiceMode = TTS_OK ? 'browser' : 'off'; voiceSel.value = voiceMode;
+      document.getElementById('mode-note').textContent = "קול האולפן אינו זמין (OPENAI_API_KEY?) — מעבר לקול הדפדפן";
+    }
+  }
+  if (voiceMode === 'browser') return speakBrowser(text);
+}
+function stopSpeech() {
+  speechGen++;
+  if (TTS_OK) { try { speechSynthesis.cancel(); } catch {} }
+  if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+  const w = speakWaiters; speakWaiters = []; w.forEach(fn => fn());
+}
+voiceSel.addEventListener('change', () => { stopSpeech(); voiceMode = voiceSel.value; });
+// Anti-coupure Chrome (voix navigateur) : la synthèse se fige après ~15 s sans pause/resume.
+if (TTS_OK) setInterval(() => { if (voiceMode === 'browser' && speechSynthesis.speaking && !speechSynthesis.paused) { speechSynthesis.pause(); speechSynthesis.resume(); } }, 12000);
+
+function renderFieldsInit() {
+  fieldsEl.innerHTML = FIELDS.map(f => `
+    <div class="lfield" data-key="${f.key}">
+      <div class="lf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="lf-body"><div class="lf-label">${f.label}</div><div class="lf-value">${f.hint}</div></div>
+    </div>`).join("");
+  updateProgress();
+}
+/* Une valeur de dossier mélange hébreu et données latines (« סילבי (בת) · 06 24 18 52 40 »).
+   Chaque segment séparé par « · » devient un <bdi> : il garde sa direction propre,
+   pendant que l'ordre des segments, lui, reste RTL. */
+const bidiSegments = (val) => String(val).split(' · ').map(s => `<bdi>${esc(s)}</bdi>`).join(' · ');
+
+/* Projecteur : le dossier s'efface autour du champ qui vient de tomber, le temps
+   que l'œil y aille. La durée suit le curseur de vitesse, comme le reste. */
+const leadSide = document.querySelector(".lead-side");
+let spotTimer = null;
+function clearSpotlight() {
+  clearTimeout(spotTimer); spotTimer = null;
+  leadSide.classList.remove("spotlight", "spot-edi");
+  fieldsEl.querySelectorAll(".lfield.spot").forEach(n => n.classList.remove("spot"));
+}
+function spotlight(el) {
+  clearSpotlight();
+  el.classList.add("spot"); leadSide.classList.add("spotlight");
+  spotTimer = setTimeout(clearSpotlight, 450 / pace());
+}
+
+function setField(key, val) {
+  const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
+  const v = el.querySelector(".lf-value");
+  v.innerHTML = bidiSegments(val); el.classList.add("filled");
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  spotlight(el);
+  updateProgress(); down();
+}
+function updateProgress() {
+  const n = fieldsEl.querySelectorAll(".lfield.filled").length;
+  document.getElementById("pbar").style.width = Math.round(n / FIELDS.length * 100) + "%";
+}
+function resetDossier() {
+  clearSpotlight();
+  renderFieldsInit();
+  document.getElementById("lead-sent").classList.remove("show");
+  const sc = document.getElementById("lead-score"); sc.classList.remove("on");
+  document.getElementById("ls-meter").style.width = "0%";
+  document.getElementById("ls-badge").className = "ls-badge froid"; document.getElementById("ls-badge").textContent = "—";
+  document.getElementById("lead-edi").classList.remove("on");
+  document.getElementById("edi-list").innerHTML = ""; document.getElementById("le-count").textContent = "";
+}
+
+/* ── Rendu chat ── */
+function avatarSVG() { return `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`; }
+function rowEl(who) {
+  const r = document.createElement("div"); r.className = "crow " + who;
+  if (who === "bot") { const a = document.createElement("div"); a.className = "cav"; a.innerHTML = avatarSVG(); r.appendChild(a); }
+  return r;
+}
+// Halo animé sur l'avatar d'en-tête pendant qu'Emma s'exprime.
+const emmaAv = document.getElementById("emma-av");
+const setSpeaking = (on) => emmaAv?.classList.toggle("speaking", on);
+
+// `noThink` : pas de bulle « je réfléchis » — réservé à l'accueil, où Emma n'a
+// encore rien à traiter. Un accueil doit être instantané.
+async function botSay(text, noThink) {
+  if (!noThink) {
+    const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
+    chatBox.appendChild(tk); down(); await wait(650); tk.remove();
+  }
+  // la voix démarre avec le streaming ; on ne passe à la suite qu'une fois Emma silencieuse
+  const said = speak(text);
+  setSpeaking(true);
+  try {
+    // stream
+    const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
+    const words = text.split(" "); let acc = "";
+    for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
+    b.innerHTML = mdBold(acc);
+    await said;
+  } finally { setSpeaking(false); }
+}
+// Temps de lecture d'une réplique famille : une base + ~14 ms par caractère,
+// borné à 2,6 s. Une constante ne marchait pas — « כן, בסדר. » et un
+// paragraphe de six lignes ne demandent pas le même temps de lecture.
+const readPause = (t) => Math.min(2600, 700 + (t || '').length * 14);
+
+async function userSay(text) {
+  await wait(520);
+  const r = rowEl("user"); const b = document.createElement("div"); b.className = "cbub"; b.textContent = text; r.appendChild(b); chatBox.appendChild(r); down();
+}
+
+/* ── Widget AGGIR interactif ── */
+async function runAggir(items) {
+  const r = rowEl("bot");
+  const w = document.createElement("div"); w.className = "aggir";
+  w.innerHTML = `<div class="aggir-t">🧩 הערכה מהירה של רמת העצמאות (שאלון AGGIR)</div>
+    <div class="aggir-sub">6 סימנים מרכזיים · סמנו A, B או C</div>` +
+    items.map((it, i) => `
+      <div class="aggir-row" data-i="${i}">
+        <span class="q"><b>${it[0]}</b> — ${it[1]}</span>
+        <span class="aggir-opts">
+          <span class="aggir-opt" data-v="A">A</span><span class="aggir-opt" data-v="B">B</span><span class="aggir-opt" data-v="C">C</span>
+        </span>
+      </div>`).join("") +
+    `<div class="aggir-leg">A: עושה לבד, כראוי · B: חלקית / לא כראוי · C: כבר לא עושה</div>`;
+  r.appendChild(w); chatBox.appendChild(r); down();
+  for (let i = 0; i < items.length; i++) {
+    await wait(700);
+    const opt = w.querySelector(`.aggir-row[data-i="${i}"] .aggir-opt[data-v="${items[i][2]}"]`);
+    if (opt) opt.classList.add("sel");
+    down();
+  }
+  await wait(400);
+}
+
+/* ── Cartes features ── */
+function cardWrap(kind, html) {
+  const r = rowEl("bot"); const c = document.createElement("div"); c.className = "dcard dcard-" + kind; c.innerHTML = html;
+  r.appendChild(c); chatBox.appendChild(r); down(); return c;
+}
+async function showCard(step) {
+  await wait(300);
+  if (step.kind === "gir") {
+    const c = cardWrap("gir", `<div class="dc-h"><div class="dc-ico">🟢</div><div><div class="dc-t">הערכת דרגת ה-GIR — ${step.value}</div><div class="dc-s">${step.note}</div></div></div>
+      <div class="dc-gauge"><i></i></div><div class="dc-scale"><span>GIR 6</span><span>GIR 4</span><span>GIR 2</span><span>GIR 1</span></div>`);
+    await wait(150); c.querySelector(".dc-gauge i").style.width = (step.pct || 80) + "%";
+  } else if (step.kind === "pdf") {
+    cardWrap("pdf", `<div class="dc-h"><div class="dc-ico">📄</div><div><div class="dc-t">${step.titre}</div><div class="dc-s">${step.sous}</div></div></div>
+      <a class="dc-btn" href="#" onclick="return false">⬇ הורדת ה-PDF</a>`);
+  } else if (step.kind === "promo") {
+    cardWrap("promo", `<div class="dc-h"><div class="dc-ico">🏷️</div><div><div class="dc-t">${step.residence}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-prix">${step.prix} <small>חדר סטנדרטי</small></div>`);
+  } else if (step.kind === "video") {
+    cardWrap("video", `<div class="dc-h"><div class="dc-ico">▶️</div><div class="dc-t">${step.titre}</div></div>
+      <iframe loading="lazy" src="${step.embed}" title="סיור וידאו" allowfullscreen></iframe>`);
+  } else if (step.kind === "itineraire") {
+    // La flèche pointe vers la gauche : en RTL, `from` est à droite et `to` à gauche.
+    cardWrap("itineraire", `<div class="dc-h"><div class="dc-ico">🚇</div><div><div class="dc-t">מסלול הגעה אל ${step.to}</div><div class="dc-s">${step.detail}</div></div></div>
+      <div class="dc-route"><span class="pin">●</span> ${step.from} &nbsp;←&nbsp; <span class="pin">◆</span> ${step.to}</div>`);
+  }
+}
+// Validation EDI — back-office uniquement (panneau du dossier) : la famille ne voit jamais les rejets/dédup.
+async function showEdi(step) {
+  const block = document.getElementById("lead-edi");
+  const list = document.getElementById("edi-list");
+  const count = document.getElementById("le-count");
+  list.innerHTML = step.items.map((it, i) => `
+    <div class="edi-row" data-i="${i}" data-st="pending">
+      <span class="edi-name">${it[0]}</span>
+      <span class="edi-st"><span class="edi-spin"></span>בבדיקה…</span>
+    </div>`).join("");
+  count.textContent = "";
+  block.classList.add("on");
+  block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  // Projecteur sur le réseau partenaire : le reste du panneau s'éteint, sauf le
+  // score — « lead chaud » et validation se lisent alors d'un seul regard.
+  clearSpotlight(); leadSide.classList.add("spot-edi");
+  let ok = 0;
+  for (let i = 0; i < step.items.length; i++) {
+    await wait(760);
+    const it = step.items[i];
+    const row = list.querySelector(`.edi-row[data-i="${i}"]`);
+    const st = row.querySelector(".edi-st");
+    if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ אושרה"; }
+    else { row.dataset.st = "ko"; st.innerHTML = `✗ לא נקלטה${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
+    count.textContent = `${ok}/${step.items.length} אושרו`;
+  }
+  await wait(520);
+  leadSide.classList.remove("spot-edi");
+}
+// Séparé de l'animation : `fastForward` doit pouvoir poser l'état du score sans
+// attente, sinon un saut de chapitre arrive avec un score éteint.
+function applyScore(step) {
+  document.getElementById("lead-score").classList.add("on");
+  document.getElementById("ls-meter").style.width = (step.value * 10) + "%";
+  const b = document.getElementById("ls-badge");
+  b.className = "ls-badge " + step.statut;
+  b.textContent = (step.statut === "chaud" ? "🔥 חם" : step.statut === "tiede" ? "⚡ פושר" : "❄ קר") + ` · ${step.value}/10`;
+}
+async function showScore(step) {
+  await wait(300);
+  applyScore(step); down();
+}
+async function showSent(step) {
+  await wait(350);
+  document.getElementById("sent-t").textContent = `ההפניה אושרה על ידי ${step.n} בתי דיור שותפים`;
+  document.getElementById("sent-s").textContent = `העברת EDI בזמן אמת · מחוז ${step.dept}`;
+  document.getElementById("email-card").innerHTML = `
+    <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s"><bdi>leads@smartseniors.fr</bdi> · אל ${step.n} בתי דיור שאושרו</div></div></div>
+    <div class="email-subj">🔥 ליד חם חדש · גארש (92) · צורך דחוף</div>
+    <div class="email-body">משפחה מחפשת מקום עבור <b>ז'אן בלקסם, בת 82</b>, בירידה בעצמאות (<b>GIR 2</b>, מחלקה מוגנת), באזור <b>גארש (5 ק"מ)</b>. תקציב: פנסיה ${L('1 600 €')} + חיסכון, APA + זיכוי מס. לוח זמנים: <b>דחוף</b>. איש קשר: <b>סילבי (${L(CONSEILLER_TEL)} במקרה של אי-הסכמה)</b>. אנא צרו קשר עם המשפחה בהקדם.</div>`;
+  document.getElementById("lead-sent").classList.add("show"); down();
+}
+
+/* ════════ SCÉNARIO (déterministe) — traduction 1:1 du scénario français ════════
+   Même contexte (Garches, 92, AGGIR/GIR, APA, crédit d'impôt), même ordre, mêmes
+   49 étapes, mêmes 11 champs. Seule la langue change. */
+const SCRIPT = [
+  // Accueil en 2 bulles, sans « je réfléchis » : on pose le cadre (gratuit, pas de
+  // formulaire, pas d'appel sans accord) AVANT de questionner. La question nomme
+  // une émotion plutôt que de réclamer un récit — bien plus facile à attraper
+  // pour quelqu'un d'épuisé qui n'a peut-être jamais formulé la situation.
+  { chapter:"1 · פתיחה", t:'bot', noThink:true, text:"שלום, אני **אמה**, יועצת ב-SmartSeniors. 💛 אם הגעתם לכאן, סימן שמצבם של אמא או אבא שלכם מדאיג אתכם — ולרוב מגיעים מותשים, עם הרבה שאלות ומעט תשובות." },
+  { t:'bot', noThink:true, text:"התפקיד שלי הוא לעזור לכם לעשות סדר, ללא תשלום. **אין שום טופס למלא**, ואף אחד לא יתקשר אליכם בלי שתאשרו. קחו את הזמן: **מה הכי מדאיג אתכם כרגע?**" },
+  { t:'user', text:"זה בשביל אמא שלי… אני כבר לא מסוגלת, אני מרגישה אשמה, אבל אני לא עומדת בזה. בת 82, וזה מידרדר מהר.", fills:[['lien','בת']] },
+  { t:'bot',  text:"אני מבינה לעומק את התשישות שלך, אין דרך אנושית לשאת נטל כזה לבד לאורך זמן. אל תהיי קשה מדי עם עצמך: עשית הרבה מעבר למקסימום שלך. כדי שאוכל לעזור טוב יותר, תוכלי לספר לי עוד על מצבה של אמא שלך היום?" },
+  { chapter:"2 · היציאה בלילה", t:'user', text:"היא מאבדת את הראש, חוזרת על הכול, ובלילה היא קמה ויוצאת החוצה… השכנים החזירו אותה ב-3 לפנות בוקר. אני מפחדת שיקרה לה משהו.", fills:[['situation',"בבית · יציאות לילה (סיכון)"]] },
+  { t:'bot',  text:"משפחות רבות מספרות לי על השוטטות הלילית הזו — אני מבינה היטב את הדאגה שלך. האבחנה היא כמובן עניין של הרופא בלבד, אבל תוכלי לומר לי אם כבר נאמר מונח רפואי מסוים על המצב הזה?" },
+  { t:'user', text:"הרופא הזכיר אלצהיימר, שום דבר רשמי. והיא מסרבת, «לא לבית של גוססים».", fills:[['type','אלצהיימר / מחלקה מוגנת']] },
+  { t:'bot',  text:"אני מבינה לגמרי, ונתקדם יחד, צעד אחר צעד. יש שני דברים מהותיים במה שאת משתפת. קודם כול, **הבטיחות של אמא שלך היא בראש סדר העדיפויות**: היציאות הליליות האלה, שנקראות **תופעת הנדודים**, מתישות מאוד ולגיטימי לחלוטין לרצות להגן עליה. כדי שאוכל לחשוב על הליווי הרגוע ביותר עבורה, תוכלי לומר לי אם היא מביעה לעיתים חוסר שקט או כעס, במילים או בתנועות?" },
+  { t:'user', text:"לא… אבל היא יכולה להיות חסרת שקט לפעמים." },
+  { t:'bot',  text:"תודה על ההבהרה החשובה הזו. תהיי רגועה, קיימים **מרחבי מגורים ייעודיים ומאובטחים**, שתוכננו בדיוק לצרכים של אמא שלך. במחלקות האלה אפשר להתנייד בחופשיות ובביטחון, עם צוותים שהוכשרו להרגיע חוסר שקט ולמנוע יציאות. תמיד **הרופא המתאם** הוא זה שיוכל להמליץ, אחרי שיעיין בתיק שלה, על הפתרון המתאים ביותר לרווחתה. ולגבי החששות שלך מהמוסדות — דעי שאלה קודם כול **מקומות חיים** חמים, עם גינות ופעילויות." },
+  { chapter:"3 · משאלון AGGIR ל-GIR", t:'bot',  text:"כדי להתקדם באופן מעשי, אשמח להבין טוב יותר את רמת העצמאות שלה ביום-יום. אני מציעה הערכה קצרה ופשוטה עם 6 סימנים: על כל אחד, אמרי לי אם היא מתפקדת **לבד וכראוי (A)**, **בעזרה (B)**, או שהיא **כבר לא עושה זאת כלל (C)**. אפשר להתחיל?" },
+  { t:'user', text:"כן, בסדר." },
+  { t:'aggir', items:[
+      ['צלילות','עוקבת אחרי שיחה, מתנהגת בהיגיון?','C'],
+      ['התמצאות','מתמצאת בזמן ובמקום?','C'],
+      ['רחצה','מתרחצת לבד (פלג גוף עליון ותחתון)?','C'],
+      ['הלבשה','מתלבשת לבד?','C'],
+      ['אכילה','אוכלת לבד אחרי שמגישים לה?','B'],
+      ['ניידות','קמה והולכת לבד בבית?','B'],
+    ], fills:[['autonomie','תלותית · GIR 2 (הערכה)']] },
+  { t:'card', kind:'gir', value:'GIR 2', pct:82, note:"הערכה ראשונית בלבד — הסיווג הרשמי ייקבע על ידי הצוות הרפואי-סוציאלי של המחוז." },
+  { t:'bot',  text:"רואים שאמא שלך זקוקה ל**נוכחות צמודה מאוד ביום-יום**, במיוחד בפעולות היומיומיות כמו רחצה. זה מתאים לליווי בסביבות **GIR 2**. זה סימן דרך חשוב מאוד עבורנו. ואת, בתוך כל הסערה הזו, איך את מרגישה? יש לך בני משפחה או שכנים שאפשר לסמוך עליהם שיתמכו בך קצת?" },
+  { chapter:"4 · «מי אתם בכלל?»", t:'user', text:"אני מבקרת אותה כל יום, שתינו גרות בגארש. אבל תוכלי להציג את עצמך? אני חוששת שמדובר בשיווק טלפוני, כבר פנו אליי כמה פעמים.", fills:[['zone','גארש (92)']] },
+  { t:'bot',  text:"החשדנות שלך מובנת לחלוטין בהתחשב במצב שלך. קוראים לי אמה, ה-AI של SmartSeniors, ואני כאן כדי ללוות אותך ללא תשלום. התפקיד שלי הוא להיות לצידך, בחינם, ולעזור לך לעבור את השלב הזה ביתר שלווה. אני כאן כדי לעזור לך למצוא פתרון מגורים מתאים, להסביר לך על הסיוע הכספי ועל האופן שבו המוסדות פועלים. אנחנו מתקדמות בקצב שלך, בלי שום לחץ, כי את זו שמחזיקה בחוט של כל החלטה." },
+  { t:'user', text:"בסדר… תודה. סליחה, אני על הקצה בתקופה האחרונה." },
+  { t:'bot',  text:"בשום אופן אל תתנצלי, הערנות שלך לגיטימית לחלוטין ומעידה על תשומת הלב שאת נותנת לאמא שלך. כדי להמשיך ללוות אותך, נתמקד במצב שלה: מאחר ששתיכן גרות בגארש, נחפש את המוסדות הקרובים ביותר. באיזה רדיוס תרצי שנערוך את החיפוש?" },
+  { t:'user', text:"הכי קרוב שאפשר — 5 ק\"מ לכל היותר.", fills:[['zone','גארש (92) · 5 ק"מ']] },
+  { chapter:"5 · תקציב וסיוע", t:'bot',  text:"תודה. עכשיו, כדי שנוכל לכוון לפתרונות הרגועים והיציבים ביותר עבור אמא שלך, נצטרך לגעת בנושא רגיש אך חיוני: **התקציב**. תוכלי לומר לי, בדיסקרטיות מלאה, מה בערך ההכנסה החודשית שלה?" },
+  { t:'user', text:`פנסיה של ${L('1 600 €')}. ב-${L('3-4 000 €')} לחודש, אין סיכוי.` },
+  { t:'bot',  text:"אני מבינה שהמספרים האלה מדאיגים, אבל תהיי רגועה: **המחיר המוצג הוא רק נקודת פתיחה**. בין ה-**APA**, שמקל משמעותית על ההוצאות הקשורות לתלות, ל**זיכוי המס של 25%**, הנטל בפועל נעשה רך הרבה יותר. נוכל לבחון יחד איך לגייס קצת חיסכון כדי להשלים את התקציב בשלווה, מה דעתך?" },
+  { t:'user', text:`תוכנית חיסכון וביטוח חיים, כ-${L('85 000 €')}. שוכרת דירה.` },
+  { t:'bot',  text:`החיסכון הזה של ${L('85 000 €')} הוא משאב יקר ערך שנותן לך ביטחון אמיתי: הוא מאפשר **לתכנן את המימון בשלווה** ולהביט אל העתיד ברוגע. כדי ללוות אותך בצורה הטובה ביותר, אמרי לי, את מרגישה צורך לפעול בדחיפות או שאת מעדיפה שניקח קצת זמן יחד?`, fills:[['budget',`פנסיה ${L('1 600 €')} + חיסכון ${L('~85 000 €')} · APA + זיכוי מס`]] },
+  { t:'user', text:"דחוף. אני בסוף הכוחות, ועם היציאות בלילה, אני פוחדת מדי." },
+  { t:'bot',  text:"אני מבינה לגמרי — מול מצב כזה והדאגה שאת חשה, לגיטימי לחלוטין לרצות **לפעול בלי לחכות עוד** כדי להגן על אמא שלך ולהחזיר לעצמך קצת שלווה.", fills:[['delai','דחוף']] },
+  { t:'score', value:9, statut:'chaud' },
+  { chapter:"6 · הסכמה", t:'bot',  text:"כדי לפשט לך את הדברים ולהתקדם באופן מעשי, **תרצי שאבקש מבתי הדיור ליצור איתך קשר ישירות** כדי לתאם פגישה ראשונה?" },
+  { t:'user', text:"כן, שיתקשרו אליי, זה פשוט יותר." },
+  { chapter:"7 · פתיחת התיק", t:'bot',  text:"סגור, **המוסדות ייצרו איתך קשר** כדי לעשות סדר. כדי להיערך היטב להמשך, אפתח את התיק של אמא שלך. תוכלי למסור לי את שמה הפרטי ואת שם המשפחה?", fills:[['consent','כן — בתי הדיור יוצרים קשר ישירות']] },
+  { t:'user', text:"ז'אן בלקסם." },
+  { t:'bot',  text:"תודה. כדי להשלים את **תיק הקבלה** שלה ולהקל על הליכי ה-**APA**, תוכלי לומר לי מה תאריך הלידה שלה?" },
+  { t:'user', text:"ב-12 במרץ 1942.", fills:[['proche','ז\'אן בלקסם · ילידת 12/03/1942']] },
+  { t:'bot',  text:"תוכלי למסור לי את כתובתה הנוכחית (רחוב, מיקוד ועיר)? זה יאפשר להעביר את תיק ה-**APA** ל**מועצה המחוזית** הנכונה." },
+  { t:'user', text:"רחוב בוזנוואל 8, גארש 92380.", fills:[['adresse','רחוב בוזנוואל 8 · גארש 92380']] },
+  { t:'bot',  text:"כדי שאוכל לשלוח לך את הסיכום ואת המידע החשוב, תוכלי למסור לי את מספר הטלפון **שלך** וכתובת אימייל?" },
+  { t:'user', text:`${L('06 24 18 52 40')}, ${L('sylvie.belkacem@gmail.com')}.`, fills:[['contact',`סילבי (בת) · ${L('06 24 18 52 40')} · ${L('sylvie.belkacem@gmail.com')}`]] },
+  { t:'bot',  text:`לפני שנסיים, אני צריכה לוודא שזו באמת את: זה עתה שלחתי לך **קוד אימות ב-SMS** למספר ${L('06 24 18 52 40')}. אנא מסרי לי את קוד האימות שקיבלת מ-SmartSeniors.` },
+  { t:'user', text:`זה ${L('738 204')}.`, fills:[['contact',`סילבי (בת) · ${L('06 24 18 52 40')} ✓ מאומת · ${L('sylvie.belkacem@gmail.com')}`]] },
+  { chapter:"8 · העברה ב-EDI", t:'bot',  text:"תודה על האמון, התיק של ז'אן **נקלט בהצלחה**. בזמן שהמוסדות לוקחים את זה לידיים ויוצרים איתך קשר, **אני מכינה הכול מהצד שלי**." },
+  { t:'edi', dept:'92', items:[
+      ["מוסד L'Empereur — גארש","ok"],
+      ["בית דיור שותף — גארש","ok"],
+      ["בית דיור שותף — ווקרסון","ko","כבר קיים במאגר שלהם"],
+      ["בית דיור שותף — סן-קלו","ok"],
+      ["בית דיור שותף — מארן-לה-קוקט","ko","אין מקום פנוי"],
+      ["בית דיור שותף — ריי-מלמזון","ok"],
+    ] },
+  { t:'card', kind:'pdf', titre:"תיק קבלה — ז'אן בלקסם", sous:"ממולא מראש (זהות, כתובת, איש קשר) · נותר: החתימה שלך + החלק הרפואי (הרופא)." },
+  { t:'bot',  text:"ויש לי גם בשורה תקציבית מצוינת: בית הדיור **L'Empereur** בגארש מציע כרגע תנאים משתלמים מאוד." },
+  { t:'card', kind:'promo', residence:"מוסד L'Empereur — גארש", prix:`${L('110 €')} ליום`, detail:`מבצע פעיל (15 יום) · במקום כ-${L('145 €')} ליום` },
+  { t:'card', kind:'video', titre:"סיור וידאו — מוסד L'Empereur (גארש)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
+  { t:'card', kind:'itineraire', from:"רחוב בוזנוואל 8, גארש", to:"L'Empereur (גארש)", detail:"כ-7 דקות הליכה · או תחנת גארש–מארן-לה-קוקט (Transilien L) במרחק 5 דקות" },
+  { t:'bot',  text:"את כבר לא צריכה לרוץ לכל הכיוונים, **בתי הדיור יחזרו אלייך ישירות**. והכי חשוב, אל תשכחי לעולם, סילבי: **הנוכחות שלך אינה ניתנת להחלפה** לצד אמא שלך. 💛" },
+  { t:'sent', n:4, dept:'92' },
+];
+
+/* ── Console de contrôle ────────────────────────────────────────────────────
+   Trois états : au repos (rien n'a démarré ou le scénario est fini), en lecture,
+   en pause. Le bouton principal porte l'action suivante, jamais l'état courant. */
+const PAUSE_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
+const PLAY_ICO  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const chapterSel = document.getElementById('chapter');
+const dcBar = document.getElementById('dc-bar');
+const dcStep = document.getElementById('dc-step');
+let doneOnce = false;
+
+function updatePauseUI() {
+  const label = !running ? (doneOnce ? 'הפעלה מחדש' : 'הפעלה') : paused ? 'המשך' : 'השהיה';
+  pauseBtn.innerHTML = (running && !paused ? PAUSE_ICO : PLAY_ICO) + `<span>${label}</span>`;
+  pauseBtn.classList.toggle('is-paused', running && paused);
+  pauseBtn.setAttribute('aria-label', label + ' של ההדגמה');
+  replayBtn.disabled = !running && !doneOnce;
+  chapterSel.disabled = false;
+}
+function setProgress(i) {
+  const pct = Math.round((i / SCRIPT.length) * 100);
+  dcBar.style.width = pct + '%';
+  dcStep.textContent = `${i} / ${SCRIPT.length}`;
+}
+// Options de chapitre construites depuis le scénario : pas de liste à maintenir
+// en double, un `chapter:` sur un step suffit à le rendre atteignable.
+function buildChapters() {
+  chapterSel.innerHTML = '<option value="">קפיצה אל…</option>' +
+    SCRIPT.map((s, i) => s.chapter ? `<option value="${i}">${s.chapter}</option>` : '')
+      .join('');
+}
+// Rejoue muettement tout ce qui précède le chapitre visé : les bulles sont posées
+// d'un coup et les champs remplis sans projecteur, pour arriver dans un état
+// cohérent — sinon on sauterait au budget avec un dossier vide.
+function fastForward(to) {
+  for (let i = 0; i < to; i++) {
+    const s = SCRIPT[i];
+    if (s.t === 'bot' || s.t === 'user') {
+      const r = rowEl(s.t === 'bot' ? 'bot' : 'user');
+      const b = document.createElement('div'); b.className = 'cbub';
+      b.innerHTML = mdBold(s.text); r.appendChild(b); chatBox.appendChild(r);
+    }
+    if (s.t === 'score') applyScore(s);
+    if (s.fills) for (const [k, v] of s.fills) {
+      const el = fieldsEl.querySelector(`.lfield[data-key="${k}"]`);
+      if (el) { el.querySelector('.lf-value').innerHTML = bidiSegments(v); el.classList.add('filled'); }
+    }
+  }
+  clearSpotlight(); updateProgress(); down();
+}
+function setPaused(p) {
+  if (!running) return;
+  paused = p;
+  if (TTS_OK) { try { p ? speechSynthesis.pause() : speechSynthesis.resume(); } catch {} }
+  if (currentAudio) { try { p ? currentAudio.pause() : currentAudio.play(); } catch {} }
+  if (!paused) releasePause();
+  updatePauseUI();
+  document.getElementById("mode-note").textContent = paused ? "⏸ ההדגמה מושהית" : "התרחיש מתנגן…";
+}
+
+// (Re)lance le scénario déterministe — depuis le début, ou depuis un chapitre.
+async function startScript(from = 0) {
+  if (starting) return;                       // ignore les double-clics
+  starting = true;
+  if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
+  await runDone;                              // attend la fin (le dénouement) du run précédent
+  cancelRequested = false; paused = false; stopSpeech();
+  let resolveDone; runDone = new Promise(r => resolveDone = r);
+  running = true;
+  resetDossier(); chatBox.innerHTML = "";
+  if (from > 0) fastForward(from);
+  setProgress(from); updatePauseUI();
+  document.getElementById("mode-note").textContent = "התרחיש מתנגן…";
+  starting = false;
+  try {
+    await wait(400);
+    for (let si = from; si < SCRIPT.length; si++) {
+      setProgress(si);
+      const step = SCRIPT[si];
+      // voix studio : précharge la réplique d'Emma suivante pendant que celle-ci se joue
+      if (step.t === 'bot' && voiceMode === 'premium') {
+        const next = SCRIPT.slice(si + 1).find(s => s.t === 'bot');
+        if (next) getTTS(next.text).catch(() => {});
+      }
+      if (step.t === 'bot') await botSay(step.text, step.noThink);
+      else if (step.t === 'user') await userSay(step.text);
+      else if (step.t === 'aggir') await runAggir(step.items);
+      else if (step.t === 'edi') await showEdi(step);
+      else if (step.t === 'card') await showCard(step);
+      else if (step.t === 'score') await showScore(step);
+      else if (step.t === 'sent') await showSent(step);
+      // Respiration : le projecteur tient 450 ms (fondu compris), on attend juste
+      // ce qu'il faut pour qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a
+      // fini, la famille n'a pas répondu) — rien n'est coupé.
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(510); }
+      // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
+      // enchaîne : proportionnel à la longueur du message, pas une constante.
+      await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
+    }
+    setProgress(SCRIPT.length); doneOnce = true;
+    document.getElementById("mode-note").textContent = "התרחיש הסתיים";
+  } catch (e) {
+    if (e !== CANCEL) throw e;                 // annulation = arrêt silencieux ; vraie erreur = on remonte
+  } finally {
+    running = false; updatePauseUI(); resolveDone();
+  }
+}
+
+/* ── Écran d'attente : la démo ne démarre pas toute seule ────────────────── */
+function showIdle() {
+  chatBox.innerHTML = `
+    <div class="dstart">
+      <div class="ds-av">${avatarSVG()}</div>
+      <div class="ds-t">ההדגמה מוכנה</div>
+      <div class="ds-s">סילבי מחפשת מקום לאמא שלה, <b>ז'אן בת 82</b>, בגארש.<br>
+        <b>11 פרטים</b> נאספים תוך כדי שיחה · כ<b>שתי דקות</b>.</div>
+      <button class="ds-go" id="ds-go" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+        הפעלת ההדגמה
+      </button>
+      <div class="ds-hint">כוונו את הקול והמהירות בפינה השמאלית העליונה <em>לפני</em> ההפעלה.</div>
+    </div>`;
+  document.getElementById('ds-go').addEventListener('click', () => startScript());
+  setProgress(0);
+  document.getElementById("mode-note").textContent = "ממתין — לחצו על «הפעלה»";
+}
+
+/* ── Wiring ── */
+replayBtn.addEventListener("click", () => startScript());
+// Bouton principal : lance si rien ne tourne, sinon bascule pause/reprise.
+pauseBtn.addEventListener("click", () => { if (!running) startScript(); else setPaused(!paused); });
+chapterSel.addEventListener("change", () => {
+  const i = chapterSel.value; if (i === "") return;
+  chapterSel.value = ""; startScript(+i);
+});
+
+/* ── Init : on attend le présentateur, pas d'autoplay ── */
+renderFieldsInit();
+buildChapters();
+updatePauseUI();
+showIdle();
+</script>
+</body>
+</html>

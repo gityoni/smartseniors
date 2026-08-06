@@ -19,6 +19,20 @@ const INSTRUCTIONS =
   "Intonation : variée et humaine — descend en fin d'affirmation, légère montée chaleureuse sur les questions ; sourire audible. " +
   "Style : douce, posée, empathique, comme une vraie conversation téléphonique avec une famille — jamais monotone, jamais récitée, aucune sonorité robotique ou de voix de synthèse.";
 
+// Même Emma, en hébreu (démo `/demo-he`). Volontairement en hébreu : l'instruction
+// est un signal de langue autant qu'un signal de jeu pour gpt-4o-mini-tts.
+// ⚠️ ElevenLabs n'est pas une option ici — `eleven_multilingual_v2` ne couvre pas
+// l'hébreu ; la page hébreu demande donc explicitement une voix OpenAI.
+const INSTRUCTIONS_HE =
+  "את אמה, יועצת טלפונית בת 25 בערך, חמה ומרגיעה. " +
+  "מבטא: עברית ישראלית תקנית ורהוטה. " +
+  "קצב: שיחתי וחי, לא איטי ולא נחפז; הפסקות קטנות וטבעיות בפסיקים, נשימה עדינה בין המשפטים. " +
+  "אינטונציה: מגוונת ואנושית — יורדת בסוף משפט חיווי, עולה מעט ובחום בשאלות; חיוך שנשמע בקול. " +
+  "סגנון: רכה, שקולה, אמפתית, כמו שיחת טלפון אמיתית עם משפחה — לעולם לא מונוטונית, לא מוקראת, בלי צליל רובוטי או קול סינתטי.";
+
+// Langues ayant un jeu d'instructions dédié (défaut : français).
+const INSTRUCTIONS_BY_LANG = { fr: INSTRUCTIONS, he: INSTRUCTIONS_HE };
+
 // Voix OpenAI autorisées en surcharge par requête (comparaison / préférence)
 const OPENAI_VOICES = new Set(["alloy", "ash", "ballad", "coral", "echo", "fable", "marin", "cedar", "nova", "onyx", "sage", "shimmer", "verse"]);
 
@@ -135,7 +149,10 @@ export async function onRequestPost(context) {
   }
 
   const voice = OPENAI_VOICES.has(body.voice) ? body.voice : env.OPENAI_TTS_VOICE || "coral";
-  const keyStr = `oa|${voice}|${INSTRUCTIONS}|${text}`;
+  const instructions = INSTRUCTIONS_BY_LANG[body.lang] || INSTRUCTIONS;
+  // Les instructions font partie de la clé de cache : changer de langue crée
+  // naturellement une entrée distincte, aucune purge à prévoir.
+  const keyStr = `oa|${voice}|${instructions}|${text}`;
   const cached = await cacheGet(keyStr);
   if (cached) return audioResponse(cached, "HIT", "openai");
 
@@ -143,7 +160,7 @@ export async function onRequestPost(context) {
     model: "gpt-4o-mini-tts",
     voice,
     input: text,
-    instructions: INSTRUCTIONS,
+    instructions,
     response_format: "mp3",
   });
 
