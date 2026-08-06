@@ -319,7 +319,7 @@ function pickVoice() {
 if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 else voiceSel.querySelector('option[value="browser"]')?.remove();
 const speakable = (t) => t
-  .replace(/\*\*/g, '')
+  .replace(/\*+/g, '')                // **gras** et *accentué* : marqueurs d'écriture, pas de diction
   .replace(/[⁦-⁩]/g, '')             // isolats bidi : invisibles à l'écran, hors sujet pour la voix
   .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
   .replace(/→/g, ',').replace(/←/g, ',').replace(/\s·\s/g, ', ').replace(/\s+/g, ' ').trim();
@@ -452,7 +452,7 @@ const setSpeaking = (on) => emmaAv?.classList.toggle("speaking", on);
 
 // `noThink` : pas de bulle « je réfléchis » — réservé à l'accueil, où Emma n'a
 // encore rien à traiter. Un accueil doit être instantané.
-async function botSay(text, noThink) {
+async function botSay(text, noThink, cls) {
   if (!noThink) {
     const tk = rowEl("bot"); const t = document.createElement("div"); t.className = "cthink"; t.innerHTML = "<span></span><span></span><span></span>"; tk.appendChild(t);
     chatBox.appendChild(tk); down(); await wait(650); tk.remove();
@@ -462,7 +462,7 @@ async function botSay(text, noThink) {
   setSpeaking(true);
   try {
     // stream
-    const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub"; r.appendChild(b); chatBox.appendChild(r); down();
+    const r = rowEl("bot"); const b = document.createElement("div"); b.className = "cbub" + (cls ? " " + cls : ""); r.appendChild(b); chatBox.appendChild(r); down();
     const words = text.split(" "); let acc = "";
     for (let i = 0; i < words.length; i++) { acc += (i ? " " : "") + words[i]; b.innerHTML = mdBold(acc) + '<span class="ccursor"></span>'; down(); await wait(38); }
     b.innerHTML = mdBold(acc);
@@ -663,27 +663,35 @@ const PLAY_ICO  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="tru
 const chapterSel = document.getElementById('chapter');
 const dcBar = document.getElementById('dc-bar');
 const dcStep = document.getElementById('dc-step');
-let doneOnce = false;
+const splitEl = document.getElementById('demo-split');
+let doneOnce = false, pitchDone = false;
 
 function updatePauseUI() {
-  const label = !running ? (doneOnce ? 'הפעלה מחדש' : 'הפעלה') : paused ? 'המשך' : 'השהיה';
+  // Le bouton principal porte toujours l'action SUIVANTE. À la fin du scénario,
+  // l'action suivante n'est pas « rejouer » : c'est l'acte 2.
+  const toPitch = !running && doneOnce && !pitchDone;
+  const label = running ? (paused ? 'המשך' : 'השהיה')
+              : toPitch ? 'לחלק השני'
+              : (doneOnce || pitchDone) ? 'הפעלה מחדש' : 'הפעלה';
   pauseBtn.innerHTML = (running && !paused ? PAUSE_ICO : PLAY_ICO) + `<span>${label}</span>`;
   pauseBtn.classList.toggle('is-paused', running && paused);
-  pauseBtn.setAttribute('aria-label', label + ' של ההדגמה');
-  replayBtn.disabled = !running && !doneOnce;
+  pauseBtn.classList.toggle('is-next', toPitch);
+  pauseBtn.setAttribute('aria-label', label);
+  replayBtn.disabled = !running && !doneOnce && !pitchDone;
   chapterSel.disabled = false;
 }
-function setProgress(i) {
-  const pct = Math.round((i / SCRIPT.length) * 100);
-  dcBar.style.width = pct + '%';
-  dcStep.textContent = `${i} / ${SCRIPT.length}`;
+function setProgress(i, total) {
+  const n = total || SCRIPT.length;
+  dcBar.style.width = Math.round((i / n) * 100) + '%';
+  dcStep.textContent = `${i} / ${n}`;
 }
 // Options de chapitre construites depuis le scénario : pas de liste à maintenir
-// en double, un `chapter:` sur un step suffit à le rendre atteignable.
+// en double, un `chapter:` sur un step suffit à le rendre atteignable. L'acte 2
+// s'ajoute à la fin — il n'a pas d'index dans SCRIPT, d'où la valeur littérale.
 function buildChapters() {
   chapterSel.innerHTML = '<option value="">קפיצה אל…</option>' +
-    SCRIPT.map((s, i) => s.chapter ? `<option value="${i}">${s.chapter}</option>` : '')
-      .join('');
+    SCRIPT.map((s, i) => s.chapter ? `<option value="${i}">${s.chapter}</option>` : '').join('') +
+    '<option value="pitch">9 · החלק השני</option>';
 }
 // Rejoue muettement tout ce qui précède le chapitre visé : les bulles sont posées
 // d'un coup et les champs remplis sans projecteur, pour arriver dans un état
@@ -711,7 +719,7 @@ function setPaused(p) {
   if (currentAudio) { try { p ? currentAudio.pause() : currentAudio.play(); } catch {} }
   if (!paused) releasePause();
   updatePauseUI();
-  document.getElementById("mode-note").textContent = paused ? "⏸ ההדגמה מושהית" : "התרחיש מתנגן…";
+  document.getElementById("mode-note").textContent = paused ? "⏸ ההדגמה מושהית" : "מתנגן…";
 }
 
 // (Re)lance le scénario déterministe — depuis le début, ou depuis un chapitre.
@@ -722,7 +730,8 @@ async function startScript(from = 0) {
   await runDone;                              // attend la fin (le dénouement) du run précédent
   cancelRequested = false; paused = false; stopSpeech();
   let resolveDone; runDone = new Promise(r => resolveDone = r);
-  running = true;
+  running = true; pitchDone = false;
+  splitEl.classList.remove('pitch');          // sortie de l'acte 2 : le dossier revient
   resetDossier(); chatBox.innerHTML = "";
   if (from > 0) fastForward(from);
   setProgress(from); updatePauseUI();
@@ -762,8 +771,118 @@ async function startScript(from = 0) {
   }
 }
 
+/* ════════ ACTE 2 — LE PITCH ══════════════════════════════════════════════
+   La démo vient de finir. Le dossier s'efface, le chat prend toute la carte, et
+   Emma retourne l'outil vers celui qui regarde : elle vient de qualifier une
+   famille, elle qualifie maintenant son interlocuteur. C'est la démonstration
+   la plus courte du produit — il se joue sur lui.
+
+   Chaque temps est une QUESTION qui doit rester seule à l'écran, puis la
+   réponse. Pas de démonstration technique : le contenu vient de
+   `knowledge/pitch-seo.md`, allégé pour être dit à voix haute.
+
+   ⚠️ Jamais d'enchaînement automatique. La fin du scénario est précisément le
+   moment où l'autre va parler — le présentateur garde la main (bouton console).
+   ────────────────────────────────────────────────────────────────────────── */
+const PITCH = [
+  { t:'a', noThink:true, text:"הרגע ראיתם אותי מאפיינת משפחה. שתי דקות, **11 פרטים**, תיק מלא." },
+  { t:'a', noThink:true, text:"עכשיו אני מבקשת עוד דקה — הפעם לא בשביל משפחה. בשבילכם." },
+
+  { t:'q', text:"כמה מהעמודים שלכם יושבים ראשונים בגוגל, ולא מביאים אף פנייה?" },
+  { t:'a', text:"אתם יודעים בדיוק על אילו עמודים אני מדברת. אלה שאתם קוראים להם «תוכן מקדים». אלה שאף פעם לא הצלחתם לחייב עליהם." },
+
+  { t:'q', text:"ולמה אף אחד לא מתחרה על מילות המפתח האלה?" },
+  { t:'a', text:"לא בגלל שאין תנועה. **בגלל שהן לא מומרות בטופס.** מי שמחפש תשובה לא ממלא שמונה עשר מסכים." },
+  { t:'punch', text:"אני לא צריכה טופס. עם האנשים האלה פשוט *מדברים*." },
+
+  { t:'q', text:"ומה קורה כשמישהו נוחת על העמוד בשתיים בלילה?" },
+  { t:'a', text:"כלום. הוא אפילו לא מופיע לכם כליד שאבד. **אני שם.**" },
+
+  { t:'q', text:"וכמה קישורים נכנסים צריך כדי לשפר את זה?" },
+  { t:'a', text:"**אפס.** התנועה כבר שולמה. כל אחוז המרה שנוסף הוא רווח נקי על הוצאה שכבר הוצאתם." },
+
+  { t:'q', text:"ומה זה משנה בשבילכם?" },
+  { t:'a', text:"אתם מפסיקים למכור מיקומים למנהל השיווק, ומתחילים לספק **תיקים מוכנים** למנכ״ל. זו לא אותה שיחה — וזה לא אותו מחיר." },
+
+  { t:'a', text:"ומה שראיתם לפני רגע? הוא רץ בצרפתית ובעברית. אותו מנוע, אותו תסריט, אותו תזמון." },
+  { t:'punch', text:"המקצוע הוא ב*כיול* — לא בקוד." },
+  { t:'a', text:"כל תחום שבו מבקשים מהלקוח לענות על משהו שהוא לא באמת יכול לדעת — הוא מועמד." },
+
+  { t:'end',
+    titre:"השוק הזה יתועש.",
+    sous:"אם לא נעשה את זה יחד — מישהו אחר יעשה את זה.",
+    question:"אז תגידו לי — מה הייתם עושים עם זה?" },
+];
+
+// `*mot*` → accentué en dégradé. `mdBold` a déjà consommé `**gras**` et échappé
+// le `<`, donc il ne reste que les astérisques simples à traiter.
+const mdPitch = (t) => mdBold(t).replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+// Une réplique qui frappe n'a pas à être tapée mot à mot : elle apparaît d'un bloc.
+async function punchSay(text) {
+  const said = speak(text);
+  setSpeaking(true);
+  try {
+    const d = document.createElement("div"); d.className = "p-punch";
+    d.innerHTML = mdPitch(text);
+    chatBox.appendChild(d); down();
+    await said;
+  } finally { setSpeaking(false); }
+}
+async function showPitchEnd(step) {
+  const said = speak(`${step.titre} ${step.sous} ${step.question}`);
+  const d = document.createElement("div"); d.className = "pitch-end";
+  d.innerHTML = `<div class="pe-t">${mdPitch(step.titre)}</div>
+    <div class="pe-s">${mdPitch(step.sous)}</div>
+    <div class="pe-q">${step.question}</div>`;
+  chatBox.appendChild(d); down();
+  await said;
+}
+
+async function startPitch() {
+  if (starting) return;
+  starting = true;
+  if (running) { cancelRequested = true; paused = false; releasePause(); stopSpeech(); }
+  await runDone;
+  cancelRequested = false; paused = false; stopSpeech();
+  let resolveDone; runDone = new Promise(r => resolveDone = r);
+  running = true; doneOnce = true; pitchDone = false;
+  splitEl.classList.add("pitch");             // le dossier part, le chat s'ouvre
+  updatePauseUI();
+  document.getElementById("mode-note").textContent = "החלק השני מתנגן…";
+  starting = false;
+  try {
+    await wait(750);                          // on laisse le panneau finir de glisser
+    chatBox.innerHTML = "";
+    await wait(300);
+    for (let i = 0; i < PITCH.length; i++) {
+      setProgress(i, PITCH.length);
+      const s = PITCH[i];
+      if (s.t === 'bot' || s.t === 'a' || s.t === 'q') {
+        if (voiceMode === 'premium') {        // précharge la réplique suivante
+          const n = PITCH[i + 1];
+          if (n && n.text) getTTS(n.text).catch(() => {});
+        }
+        await botSay(s.text, s.noThink, s.t === 'q' ? 'p-q' : 'p-a');
+      }
+      else if (s.t === 'punch') await punchSay(s.text);
+      else if (s.t === 'end') await showPitchEnd(s);
+      // Une question doit rester seule à l'écran le temps qu'elle travaille.
+      await wait(s.t === 'q' ? 1100 : s.t === 'punch' ? 900 : 420);
+    }
+    setProgress(PITCH.length, PITCH.length);
+    pitchDone = true;
+    document.getElementById("mode-note").textContent = "החלק השני הסתיים";
+  } catch (e) {
+    if (e !== CANCEL) throw e;
+  } finally {
+    running = false; updatePauseUI(); resolveDone();
+  }
+}
+
 /* ── Écran d'attente : la démo ne démarre pas toute seule ────────────────── */
 function showIdle() {
+  splitEl.classList.remove('pitch');
   chatBox.innerHTML = `
     <div class="dstart">
       <div class="ds-av">${avatarSVG()}</div>
@@ -783,11 +902,17 @@ function showIdle() {
 
 /* ── Wiring ── */
 replayBtn.addEventListener("click", () => startScript());
-// Bouton principal : lance si rien ne tourne, sinon bascule pause/reprise.
-pauseBtn.addEventListener("click", () => { if (!running) startScript(); else setPaused(!paused); });
+// Bouton principal : pause/reprise si ça tourne ; sinon il enchaîne — démo,
+// puis acte 2, puis relance. Il porte l'action suivante, jamais l'état courant.
+pauseBtn.addEventListener("click", () => {
+  if (running) return setPaused(!paused);
+  if (doneOnce && !pitchDone) return startPitch();
+  startScript();
+});
 chapterSel.addEventListener("change", () => {
-  const i = chapterSel.value; if (i === "") return;
-  chapterSel.value = ""; startScript(+i);
+  const v = chapterSel.value; if (v === "") return;
+  chapterSel.value = "";
+  if (v === "pitch") startPitch(); else startScript(+v);
 });
 
 /* ── Init : on attend le présentateur, pas d'autoplay ── */

@@ -7,7 +7,7 @@
 
 Le rendez-vous Bernard est demain. À construire :
 
-- [ ] **Page de pitch sur le site SmartSeniors** — textes du pitch + effets cinéma, dans la continuité visuelle de `/demo` (couche premium, aurore, projecteur). **Déclenchement : un bouton dans la console**, jamais d'enchaînement automatique — la fin du scénario est précisément le moment où Bernard va parler, il faut garder la main.
+- [x] **Page de pitch sur le site SmartSeniors** — fait le 06/08 **sur `/demo-he`** sous forme d'**acte 2 intégré à la démo** plutôt que de page séparée : à la fin du scénario, le dossier glisse hors champ, le chat passe en plein écran et Emma retourne l'outil vers celui qui regarde. Déclenchement **par le bouton de la console**, conformément à la décision du 29/07. Contenu = `knowledge/pitch-seo.md`. **Reste à porter sur `/demo`** avec le contenu Cap Retraite (le CSS est déjà partagé et inerte, cf. ci-dessous).
 - [ ] **Trace écrite / visuelle du projet LeadsMagic** — PDF téléchargeable, ou à défaut une page imprimable : ce que Bernard garde après le rendez-vous et peut faire circuler en interne.
 
 > **Définition de LeadsMagic (arrêtée le 29/07)** : ce n'est pas un renommage d'Emma ni une offre faite à Cap Retraite. C'est **le procédé de création de leads par conversation**, éprouvé sur l'EHPAD avec Emma, et **duplicable à d'autres secteurs d'activité**. Emma reste Emma côté famille. **LeadsMagic reste la propriété de smartseniors.fr.**
@@ -19,6 +19,15 @@ Le rendez-vous Bernard est demain. À construire :
 > Contenu et angle : CLAUDE.md § **L'axe du pitch — « LeadsMagic »**. Les chiffres du parcours Cap Retraite (16-18 écrans, 27 champs, écran GIR, 8h-20h) y sont consignés.
 
 ## ✅ Fait
+
+### Acte 2 — le pitch mis en scène à la fin de la démo (06/08)
+- **`/demo-he` : à la fin du scénario, le bouton principal propose « לחלק השני ».** Le dossier glisse hors champ (`grid-template-columns: 1fr 0fr` + fondu), le chat prend toute la carte, et Emma **retourne l'outil vers celui qui regarde** — elle vient de qualifier une famille, elle qualifie maintenant son interlocuteur. C'est la démonstration la plus courte du produit : il se joue sur lui.
+- **17 temps** : 5 **questions-leviers** (grosses, liseré d'accent, seules à l'écran), 9 réponses, 2 punchlines pleine largeur en dégradé, 1 carte de fin. Contenu tiré de `knowledge/pitch-seo.md`, allégé pour être dit à voix haute. Fin : « השוק הזה יתועש. » → « אם לא נעשה את זה יחד — מישהו אחר יעשה את זה. » → « אז תגידו לי — מה הייתם עושים עם זה? ». **Durée 28 s à 1× voix coupée** (plus long avec la voix, chaque réplique étant lue).
+- **Chapitre `9 · החלק השני`** dans le sélecteur → répétable sans rejouer les 49 étapes. « Rejouer » ramène le dossier et sort proprement de l'acte 2 (vérifié).
+- ⚠️ **Aucun enchaînement automatique** — décision du 29/07 respectée : la fin du scénario est le moment où l'autre va parler. Le bouton **Pause** est l'outil pour laisser une question travailler.
+- **Le CSS vit dans `ss-demo.css` § 8 bis** (couche partagée), conditionné à la classe `.pitch` → **inerte sur `/demo`**. Régression vérifiée au navigateur : `/demo` garde chat 130/679 et dossier 809/502, pas de classe `.pitch`, 8 chapitres, mode Live intact, zéro erreur JS. Écrit en **propriétés logiques** → aucune règle ajoutée à `ss-rtl.css`.
+- **Deux bugs trouvés au navigateur, pas à la lecture** : (1) la carte de fin faisait **90 px au lieu de 243** — enfant direct d'un flex colonne, elle se faisait écraser par `flex-shrink` et son `overflow:hidden` rognait deux lignes sur trois ; corrigé par `flex: 0 0 auto` ; (2) les questions gardaient le fond blanc des bulles d'Emma — `.crow.bot .cbub` (0,5,0) l'emporte sur `.cbub.p-q` (0,4,0) ; corrigé en scopant sous `.crow.bot`.
+- **Reste à faire** : porter l'acte 2 sur `/demo` avec le contenu Cap Retraite (`knowledge/pitch-cap-retraite.md`) — le CSS et le mécanisme sont déjà là, il n'y a qu'un tableau `PITCH` et trois branchements de console à ajouter.
 
 ### Démo hébreu `/demo-he` — copie 1:1 RTL pour présentation (06/08)
 - **`pages/demo-he.html`** : réplique conforme de `/demo` en hébreu. Parité **vérifiée par diff structurel** étape par étape — **49/49 étapes**, **8/8 chapitres**, **13 événements de remplissage sur 11 champs**, mêmes types, mêmes valeurs (score 9/10 chaud, EDI 4/6, 4 résidences). Scénario **traduit, pas transposé** : Garches (92), AGGIR → GIR 2, APA + crédit d'impôt 25 %, L'Empereur restent tels quels (arbitrage retenu : « copie conforme », pas de réécriture métier vers un dispositif israélien).
