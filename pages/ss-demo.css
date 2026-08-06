@@ -91,6 +91,13 @@
   background: rgba(91, 141, 239, .10);
   color: #47657F; font-size: .6rem; letter-spacing: .04em; text-transform: uppercase;
 }
+/* Signature « Powered by BinAI Leads » dans la pastille : la marque passe en
+   dégradé et échappe au `text-transform` ci-dessus — « BINAI » n'est pas le nom,
+   la casse Bin-AI fait partie de la marque. Inerte tant qu'aucun <b> n'est posé. */
+.ss-root[data-premium] .wm-sub b {
+  text-transform: none; font-weight: 800; letter-spacing: 0;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 
 /* Selects « premium » : pilule verre + chevron dessiné */
 .ss-root[data-premium] .demo-ctrl label.demo-note {

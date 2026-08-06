@@ -524,7 +524,7 @@ const LOCALES = {
     ],
     ui: {
       title:"SmartSeniors — הדגמה לשותפים · אמה בפעולה",
-      wmSub:"הדגמה לשותפים · נתונים בדיוניים",
+      wmSub:"<bdi>Powered by <b>BinAI Leads</b></bdi> · הדגמה לשותפים · נתונים בדיוניים",
       langLabel:"שפה", voiceLabel:"קול", paceLabel:"מהירות",
       voiceOff:"מושתק", voiceStudio:"אמה (אולפן)", voiceBrowser:"דפדפן",
       paceLabels:["0.4×","0.5×","1×","1.5×","2×"],
@@ -579,7 +579,7 @@ const LOCALES = {
     ],
     ui: {
       title:"SmartSeniors — Démo partenaire · Emma en action",
-      wmSub:"Démo partenaire · données fictives",
+      wmSub:"<bdi>Powered by <b>BinAI Leads</b></bdi> · Démo partenaire · données fictives",
       langLabel:"Langue", voiceLabel:"Voix", paceLabel:"Vitesse",
       voiceOff:"Coupée", voiceStudio:"Emma (studio)", voiceBrowser:"Navigateur",
       paceLabels:["0,4×","0,5×","1×","1,5×","2×"],
@@ -1147,7 +1147,9 @@ function applyLocale(code) {
   document.documentElement.lang = T.htmlLang;
   document.title = u.title;
   const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-  set('ui-wm-sub', u.wmSub); set('ui-lang-label', u.langLabel); set('ui-voice-label', u.voiceLabel);
+  // Seule exception : la signature de marque porte du balisage (chaîne d'auteur, pas de donnée externe).
+  document.getElementById('ui-wm-sub').innerHTML = u.wmSub;
+  set('ui-lang-label', u.langLabel); set('ui-voice-label', u.voiceLabel);
   set('ui-pace-label', u.paceLabel); set('ui-kicker', u.kicker); set('ui-h2', u.h2); set('ui-lede', u.lede);
   set('ui-emma-name', u.emmaName); set('ui-emma-role', u.emmaRole);
   set('ui-lead-t', u.leadT); set('ui-lead-s', u.leadS); set('ui-live', u.live);

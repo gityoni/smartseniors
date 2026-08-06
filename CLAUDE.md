@@ -1,7 +1,7 @@
 # SmartSeniors — Mémoire projet (Claude Code)
 
 ## Identité du projet
-**Société éditrice : BinAI.** SmartSeniors est sa plateforme EHPAD ; **BinAI Leads – génération de prospects** est la ligne produit qui industrialise le procédé (la création de leads par conversation, éprouvée avec Emma) vers d'autres secteurs. *Nommé le 06/08 — remplace « LeadsMagic », qui ne doit plus apparaître nulle part.*
+**SmartSeniors est un produit développé par BinAI.** **BinAI Leads – génération de prospects** est la ligne produit qui industrialise le procédé (la création de leads par conversation, éprouvée sur l'EHPAD avec Emma) vers d'autres secteurs. Signature affichée : **« Powered by BinAI Leads »**. *Nommé le 06/08 — remplace « LeadsMagic », qui ne doit plus apparaître nulle part.*
 
 SmartSeniors est une plateforme de **génération de leads qualifiés** pour la recherche d'EHPAD (établissements d'hébergement pour personnes âgées dépendantes).
 Emma, conseillère IA, accompagne les familles dans leur recherche avec empathie et professionnalisme **et** qualifie le besoin au fil de la conversation. Chaque dossier complet devient un **lead exclusif transmis en temps réel aux résidences partenaires** du secteur.
