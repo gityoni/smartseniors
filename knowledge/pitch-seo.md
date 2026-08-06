@@ -186,9 +186,9 @@ en tant que revendeur. C'est aussi le seul qu'il n'a jamais entendu.
 On annonce la direction, on ne la fait pas passer pour un acquis — même discipline que sur le
 hash et les PDF.
 
-## 11. LeadsMagic — ce n'est plus du *know-how*, c'est du *know-see*
+## 11. BinAI Leads – génération de prospects — ce n'est plus du *know-how*, c'est du *know-see*
 
-> « Ce que je te montre n'est pas un produit EHPAD. **LeadsMagic**, c'est l'ambition de faire le
+> « Ce que je te montre n'est pas un produit EHPAD. **BinAI Leads**, c'est l'ambition de faire le
 > meilleur générateur de leads par conversation — et de le calibrer sur n'importe quel métier.
 > L'EHPAD est simplement le secteur sur lequel on l'a éprouvé en premier.
 >
@@ -200,8 +200,8 @@ lui dit qu'il n'achète pas un one-shot mais un moteur.
 
 ⚠️ Le volet multi-secteurs se révèle **délibérément** (cf. `CLAUDE.md`) : il prouve qu'on a un
 moteur et pas un bricolage, mais il dit aussi à l'interlocuteur qu'il est un secteur parmi
-d'autres. Et **ne jamais ouvrir soi-même le sujet de la propriété** — LeadsMagic reste la
-propriété de smartseniors.fr, mais l'annoncer sans qu'on l'ait demandé se lit comme de la
+d'autres. Et **ne jamais ouvrir soi-même le sujet de la propriété** — BinAI Leads reste la
+propriété de **BinAI**, mais l'annoncer sans qu'on l'ait demandé se lit comme de la
 défiance au premier rendez-vous.
 
 ---
