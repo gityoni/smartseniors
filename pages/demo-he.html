@@ -162,6 +162,12 @@
           <option value="2">&#8294;2×&#8297;</option>
         </select>
       </label>
+      <label class="demo-note">שפת החלק השני
+        <select id="pitch-lang" aria-label="שפת החלק השני">
+          <option value="he" selected>עברית</option>
+          <option value="fr">Français</option>
+        </select>
+      </label>
       <span class="demo-note" id="mode-note">ממתין — לחצו על «הפעלה»</span>
     </nav>
   </header>
@@ -310,11 +316,17 @@ const esc = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&g
 const TTS_VOICE = "coral";                     // voix OpenAI (cf. OPENAI_VOICES dans tts.js)
 const voiceSel = document.getElementById('voice-sel');
 const TTS_OK = 'speechSynthesis' in window;
-let voiceMode = 'off', heVoice = null, currentAudio = null, speechGen = 0, speakWaiters = [];
+// Langue de diction courante : 'he' partout, 'fr' quand l'acte 2 est joué en français.
+let speakLang = 'he';
+let voiceMode = 'off', navVoice = { he: null, fr: null }, currentAudio = null, speechGen = 0, speakWaiters = [];
 function pickVoice() {
-  const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('he'));
-  const prefs = ['carmit', 'google עברית', 'hebrew'];
-  heVoice = vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+  const all = speechSynthesis.getVoices();
+  const pick = (code, prefs) => {
+    const vs = all.filter(v => (v.lang || '').toLowerCase().startsWith(code));
+    return vs.find(v => prefs.some(p => v.name.toLowerCase().includes(p))) || vs[0] || null;
+  };
+  navVoice.he = pick('he', ['carmit', 'google עברית', 'hebrew']);
+  navVoice.fr = pick('fr', ['amelie', 'amélie', 'audrey', 'aurelie', 'aurélie', 'marie', 'julie', 'hortense', 'google français', 'denise']);
 }
 if (TTS_OK) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 else voiceSel.querySelector('option[value="browser"]')?.remove();
@@ -329,23 +341,32 @@ const speakable = (t) => t
 const vRate = () => Math.min(1.6, Math.max(1.15, pace() * 1.15));
 // Mémo + préchargement des mp3 studio (le cache edge rend les lectures suivantes instantanées)
 const ttsMem = new Map();
-function getTTS(text) {
-  if (!ttsMem.has(text)) {
-    const p = fetch(TTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: speakable(text), voice: TTS_VOICE, lang: 'he' }) })
+function getTTS(text, lang) {
+  // Hébreu → on force la voix OpenAI (`eleven_multilingual_v2` ne couvre pas l'hébreu).
+  // Français → aucun paramètre de voix : /api/tts retombe sur la voix officielle
+  // d'Emma, Shana (ElevenLabs), exactement comme /demo — donc même clé de cache
+  // edge que la démo française, déjà préchauffée.
+  const l = lang || speakLang;
+  const key = l + '|' + text;
+  if (!ttsMem.has(key)) {
+    const body = l === 'fr' ? { text: speakable(text) }
+                            : { text: speakable(text), voice: TTS_VOICE, lang: 'he' };
+    const p = fetch(TTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(r => { if (!r.ok) throw new Error('TTS ' + r.status); return r.blob(); })
       .then(b => URL.createObjectURL(b));
-    p.catch(() => ttsMem.delete(text));
-    ttsMem.set(text, p);
+    p.catch(() => ttsMem.delete(key));
+    ttsMem.set(key, p);
   }
-  return ttsMem.get(text);
+  return ttsMem.get(key);
 }
 function speakBrowser(text) {
   if (!TTS_OK) return Promise.resolve();
   return new Promise(res => {
     speakWaiters.push(res);
     const u = new SpeechSynthesisUtterance(speakable(text));
-    if (heVoice) u.voice = heVoice;
-    u.lang = 'he-IL'; u.rate = vRate(); u.pitch = 1.04;
+    const v = navVoice[speakLang];
+    if (v) u.voice = v;
+    u.lang = speakLang === 'fr' ? 'fr-FR' : 'he-IL'; u.rate = vRate(); u.pitch = 1.04;
     u.onend = res; u.onerror = res;
     speechSynthesis.speak(u);
   });
@@ -372,7 +393,7 @@ async function speak(text) {
     try { return await speakPremium(text); }
     catch (e) {
       voiceMode = TTS_OK ? 'browser' : 'off'; voiceSel.value = voiceMode;
-      document.getElementById('mode-note').textContent = "קול האולפן אינו זמין (OPENAI_API_KEY?) — מעבר לקול הדפדפן";
+      document.getElementById('mode-note').textContent = "קול האולפן אינו זמין — מעבר לקול הדפדפן";
     }
   }
   if (voiceMode === 'browser') return speakBrowser(text);
@@ -731,7 +752,9 @@ async function startScript(from = 0) {
   cancelRequested = false; paused = false; stopSpeech();
   let resolveDone; runDone = new Promise(r => resolveDone = r);
   running = true; pitchDone = false;
-  splitEl.classList.remove('pitch');          // sortie de l'acte 2 : le dossier revient
+  // Sortie de l'acte 2 : le dossier revient, et la page redevient hébreu de bout en bout.
+  splitEl.classList.remove('pitch');
+  chatBox.setAttribute('dir', 'rtl'); speakLang = 'he';
   resetDossier(); chatBox.innerHTML = "";
   if (from > 0) fastForward(from);
   setProgress(from); updatePauseUI();
@@ -784,7 +807,7 @@ async function startScript(from = 0) {
    ⚠️ Jamais d'enchaînement automatique. La fin du scénario est précisément le
    moment où l'autre va parler — le présentateur garde la main (bouton console).
    ────────────────────────────────────────────────────────────────────────── */
-const PITCH = [
+const PITCH_HE = [
   { t:'a', noThink:true, text:"הרגע ראיתם אותי מאפיינת משפחה. שתי דקות, **11 פרטים**, תיק מלא." },
   { t:'a', noThink:true, text:"עכשיו אני מבקשת עוד דקה — הפעם לא בשביל משפחה. בשבילכם." },
 
@@ -813,6 +836,42 @@ const PITCH = [
     sous:"אם לא נעשה את זה יחד — מישהו אחר יעשה את זה.",
     question:"אז תגידו לי — מה הייתם עושים עם זה?" },
 ];
+
+/* Même acte 2, en français — sélecteur « שפת החלק השני » dans la top-bar.
+   Traduction 1:1 : mêmes 17 temps, mêmes types, même ordre. Le français étant
+   LTR, le runner pose `dir="ltr"` sur le fil de discussion le temps de l'acte. */
+const PITCH_FR = [
+  { t:'a', noThink:true, text:"Vous venez de me voir qualifier une famille. Deux minutes, **11 informations**, un dossier complet." },
+  { t:'a', noThink:true, text:"Maintenant je vous demande une minute de plus. Cette fois, pas pour une famille. Pour vous." },
+
+  { t:'q', text:"Combien de vos pages sont premières sur Google et ne rapportent aucune demande ?" },
+  { t:'a', text:"Vous savez exactement de quelles pages je parle. Celles que vous appelez « haut de funnel ». Celles que vous n'avez jamais réussi à facturer." },
+
+  { t:'q', text:"Et pourquoi personne n'enchérit sur ces mots-clés ?" },
+  { t:'a', text:"Pas par manque de volume. **Parce qu'ils ne convertissent pas en formulaire.** Quelqu'un qui cherche une réponse ne remplit pas dix-huit écrans." },
+  { t:'punch', text:"Je n'ai pas besoin d'un formulaire. Ces gens-là, on leur *parle*." },
+
+  { t:'q', text:"Et que se passe-t-il quand quelqu'un arrive sur la page à deux heures du matin ?" },
+  { t:'a', text:"Rien. Il n'apparaît même pas comme un lead perdu. **Moi, je suis là.**" },
+
+  { t:'q', text:"Et combien de liens faut-il pour améliorer ça ?" },
+  { t:'a', text:"**Aucun.** Le trafic est déjà payé. Chaque point de conversion gagné est de la marge pure sur une dépense déjà engagée." },
+
+  { t:'q', text:"Et qu'est-ce que ça change pour vous ?" },
+  { t:'a', text:"Vous arrêtez de vendre des positions à un responsable marketing. Vous livrez des **dossiers prêts** à un dirigeant. Ce n'est pas la même conversation — et ce n'est pas le même prix." },
+
+  { t:'a', text:"Et ce que vous venez de voir ? Il tourne en français et en hébreu. Même moteur, même scénario, même minutage." },
+  { t:'punch', text:"Le métier est dans le *calibrage* — pas dans le code." },
+  { t:'a', text:"Tout secteur où l'on demande au client de trancher quelque chose qu'il ne peut pas savoir est un candidat." },
+
+  { t:'end',
+    titre:"Ce marché va être industrialisé.",
+    sous:"Si nous ne le faisons pas ensemble — quelqu'un d'autre le fera.",
+    question:"Alors dites-moi — vous, vous en feriez quoi ?" },
+];
+
+const PITCHES = { he: PITCH_HE, fr: PITCH_FR };
+const pitchLangSel = document.getElementById('pitch-lang');
 
 // `*mot*` → accentué en dégradé. `mdBold` a déjà consommé `**gras**` et échappé
 // le `<`, donc il ne reste que les astérisques simples à traiter.
@@ -847,6 +906,13 @@ async function startPitch() {
   cancelRequested = false; paused = false; stopSpeech();
   let resolveDone; runDone = new Promise(r => resolveDone = r);
   running = true; doneOnce = true; pitchDone = false;
+  // Langue de l'acte 2. Le français est LTR : on en fait un îlot dans la page
+  // hébreu (`dir` sur le fil), sinon la ponctuation et l'alignement partent à
+  // l'envers. ss-rtl.css annule les miroirs de bulles sous cet îlot.
+  const lang = PITCHES[pitchLangSel.value] ? pitchLangSel.value : 'he';
+  const steps = PITCHES[lang];
+  speakLang = lang;
+  chatBox.setAttribute('dir', lang === 'fr' ? 'ltr' : 'rtl');
   splitEl.classList.add("pitch");             // le dossier part, le chat s'ouvre
   updatePauseUI();
   document.getElementById("mode-note").textContent = "החלק השני מתנגן…";
@@ -855,12 +921,12 @@ async function startPitch() {
     await wait(750);                          // on laisse le panneau finir de glisser
     chatBox.innerHTML = "";
     await wait(300);
-    for (let i = 0; i < PITCH.length; i++) {
-      setProgress(i, PITCH.length);
-      const s = PITCH[i];
+    for (let i = 0; i < steps.length; i++) {
+      setProgress(i, steps.length);
+      const s = steps[i];
       if (s.t === 'bot' || s.t === 'a' || s.t === 'q') {
         if (voiceMode === 'premium') {        // précharge la réplique suivante
-          const n = PITCH[i + 1];
+          const n = steps[i + 1];
           if (n && n.text) getTTS(n.text).catch(() => {});
         }
         await botSay(s.text, s.noThink, s.t === 'q' ? 'p-q' : 'p-a');
@@ -870,7 +936,7 @@ async function startPitch() {
       // Une question doit rester seule à l'écran le temps qu'elle travaille.
       await wait(s.t === 'q' ? 1100 : s.t === 'punch' ? 900 : 420);
     }
-    setProgress(PITCH.length, PITCH.length);
+    setProgress(steps.length, steps.length);
     pitchDone = true;
     document.getElementById("mode-note").textContent = "החלק השני הסתיים";
   } catch (e) {
@@ -883,6 +949,7 @@ async function startPitch() {
 /* ── Écran d'attente : la démo ne démarre pas toute seule ────────────────── */
 function showIdle() {
   splitEl.classList.remove('pitch');
+  chatBox.setAttribute('dir', 'rtl'); speakLang = 'he';
   chatBox.innerHTML = `
     <div class="dstart">
       <div class="ds-av">${avatarSVG()}</div>
@@ -914,6 +981,10 @@ chapterSel.addEventListener("change", () => {
   chapterSel.value = "";
   if (v === "pitch") startPitch(); else startScript(+v);
 });
+// Changer de langue devant la carte de fin rejoue l'acte 2 dans l'autre langue.
+// Pendant la démo, le réglage se contente d'attendre son tour — comme la voix
+// et la vitesse, il se pose avant de lancer.
+pitchLangSel.addEventListener("change", () => { if (!running && pitchDone) startPitch(); });
 
 /* ── Init : on attend le présentateur, pas d'autoplay ── */
 renderFieldsInit();
