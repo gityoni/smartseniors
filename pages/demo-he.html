@@ -425,22 +425,38 @@ const SCRIPT_FR = [
    moment où l'autre va parler, le présentateur garde la main.
    ════════════════════════════════════════════════════════════════════════════ */
 const PITCH_HE = [
+  // 1. L'inversion
   { t:'a', noThink:true, text:"הרגע ראיתם אותי מאפיינת משפחה. שתי דקות, **11 פרטים**, תיק מלא." },
-  { t:'a', noThink:true, text:"עכשיו אני מבקשת עוד דקה — הפעם לא בשביל משפחה. בשבילכם." },
-  { t:'q', text:"כמה מהעמודים שלכם יושבים ראשונים בגוגל, ולא מביאים אף פנייה?" },
-  { t:'a', text:"אתם יודעים בדיוק על אילו עמודים אני מדברת. אלה שאתם קוראים להם «תוכן מקדים». אלה שאף פעם לא הצלחתם לחייב עליהם." },
-  { t:'q', text:"ולמה אף אחד לא מתחרה על מילות המפתח האלה?" },
+  { t:'a', noThink:true, text:"עכשיו דקה בשבילכם. ולא אדבר איתכם על מיקומים." },
+  // 2. La vraie douleur — pas « vos pages ne convertissent pas »
+  { t:'q', text:"בכמה בקרים אתם פותחים את הדשבורד של לקוח, ואין שם אף פנייה מאתמול?" },
+  { t:'a', text:"התנועה לא זזה. המיקומים לא זזו. פשוט אין אף אחד בקצה." },
+  { t:'q', text:"וביום שמתחרה מכפיל את ההצעות על מילות המפתח שלכם — מה אתם עושים?" },
+  { t:'a', text:"כלום. אתם סופגים. כי מה שקורה **אחרי** הקליק לא שייך לכם — רק הקליק שייך לכם." },
+  { t:'punch', text:"צינור הלידים של לקוח מתרוקן *מהר יותר* משהוא מתמלא." },
+  // 3. Le formulaire, coupable structurel
+  { t:'q', text:"ולמה אף אחד לא מתחרה על חצי ממילות המפתח שלכם?" },
   { t:'a', text:"לא בגלל שאין תנועה. **בגלל שהן לא מומרות בטופס.** מי שמחפש תשובה לא ממלא שמונה עשר מסכים." },
   { t:'punch', text:"אני לא צריכה טופס. עם האנשים האלה פשוט *מדברים*." },
-  { t:'q', text:"ומה קורה כשמישהו נוחת על העמוד בשתיים בלילה?" },
-  { t:'a', text:"כלום. הוא אפילו לא מופיע לכם כליד שאבד. **אני שם.**" },
-  { t:'q', text:"וכמה קישורים נכנסים צריך כדי לשפר את זה?" },
-  { t:'a', text:"**אפס.** התנועה כבר שולמה. כל אחוז המרה שנוסף הוא רווח נקי על הוצאה שכבר הוצאתם." },
-  { t:'q', text:"ומה זה משנה בשבילכם?" },
-  { t:'a', text:"אתם מפסיקים למכור מיקומים למנהל השיווק, ומתחילים לספק **תיקים מוכנים** למנכ״ל. זו לא אותה שיחה — וזה לא אותו מחיר." },
-  { t:'a', text:"ומה שראיתם לפני רגע? הוא רץ בצרפתית ובעברית. אותו מנוע, אותו תסריט, אותו תזמון." },
-  { t:'punch', text:"המקצוע הוא ב*כיול* — לא בקוד." },
-  { t:'a', text:"כל תחום שבו מבקשים מהלקוח לענות על משהו שהוא לא באמת יכול לדעת — הוא מועמד." },
+  // 4. La génération qui arrive — l'argument le plus fort
+  { t:'q', text:"תסתכלו איך הילדים שלכם מחפשים מידע." },
+  { t:'a', text:"הם לא נכנסים לעשרה אתרים כדי להשוות. הם לא יורדים שלושה תפריטים כדי למצוא מחיר. הם שואלים — ורוצים את התשובה. לא קישור לתשובה. **את התשובה.**" },
+  { t:'a', text:"הם נולדו עם אייפון ביד. בשבילם חיפוש, קנייה, שאלה, התלבטות — **חלון אחד.**" },
+  { t:'punch', text:"ה-AI הגנרטיבי *בולע הכול* בדרכו." },
+  { t:'a', text:"זו לא תחזית, זה כבר קורה — הקליקים שלכם אומרים לכם את זה לפניי." },
+  { t:'a', text:"והראשון שידבר עם הדור הזה בשפה שלו — יקבל את ההרגל. **ובאקוויזישן, הרגל לא לוקחים בחזרה.**" },
+  // 5. Ce qu'Emma est
+  { t:'q', text:"אז מה אני בעצם?" },
+  { t:'a', text:"ליד אחד ביום או עשרת אלפים — **אין שום הבדל**. בלי תור, בלי גיוס, בלי הכשרה." },
+  { t:'a', text:"אני נותנת את כל המידע, ועוד הרבה מעבר — כמו בן אדם רענן, **ביום שלישי באחת עשרה בבוקר**." },
+  { t:'punch', text:"רק שזה *365 ימים בשנה*. בלי מצבי רוח. בלי עייפות." },
+  { t:'q', text:"וכמה קישורים נכנסים צריך בשביל זה?" },
+  { t:'a', text:"**אפס.** התנועה כבר שולמה. כל מה שנאסף אחריה הוא רווח נקי על הוצאה שכבר הוצאתם." },
+  // 6. LeadsMagic — le moteur, pas le produit
+  { t:'a', text:"ומה שראיתם לפני רגע רץ בצרפתית ובעברית. אותו מנוע, אותו תסריט, אותו תזמון." },
+  { t:'a', text:"כי **LeadsMagic** הוא לא מוצר לבתי אבות. זו השאיפה לבנות את מחולל הלידים הטוב ביותר — ולכייל אותו ל**כל עסק**." },
+  { t:'punch', text:"זה כבר לא *know-how*. זה *know-see*." },
+  { t:'a', text:"לא מסבירים לכם איך זה עובד. מראים לכם את זה עובד — הרגע ראיתם פעמיים." },
   { t:'end',
     titre:"השוק הזה יתועש.",
     sous:"אם לא נעשה את זה יחד — מישהו אחר יעשה את זה.",
@@ -448,22 +464,38 @@ const PITCH_HE = [
 ];
 
 const PITCH_FR = [
+  // 1. L'inversion
   { t:'a', noThink:true, text:"Vous venez de me voir qualifier une famille. Deux minutes, **11 informations**, un dossier complet." },
-  { t:'a', noThink:true, text:"Maintenant je vous demande une minute de plus. Cette fois, pas pour une famille. Pour vous." },
-  { t:'q', text:"Combien de vos pages sont premières sur Google et ne rapportent aucune demande ?" },
-  { t:'a', text:"Vous savez exactement de quelles pages je parle. Celles que vous appelez « haut de funnel ». Celles que vous n'avez jamais réussi à facturer." },
-  { t:'q', text:"Et pourquoi personne n'enchérit sur ces mots-clés ?" },
+  { t:'a', noThink:true, text:"Maintenant une minute pour vous. Et je ne vais pas vous parler de positions." },
+  // 2. La vraie douleur — pas « vos pages ne convertissent pas », qui est un lieu commun
+  { t:'q', text:"Combien de matins vous ouvrez le tableau de bord d'un client, et il n'y a aucune demande de la veille ?" },
+  { t:'a', text:"Le trafic n'a pas bougé. Les positions n'ont pas bougé. Il n'y a juste personne au bout." },
+  { t:'q', text:"Et le jour où un concurrent double les enchères sur vos mots-clés — vous faites quoi ?" },
+  { t:'a', text:"Rien. Vous encaissez. Parce que ce qui se passe **après** le clic ne vous appartient pas — vous ne possédez que le clic." },
+  { t:'punch', text:"Le pipe d'un client se vide *plus vite* qu'il ne se remplit." },
+  // 3. Le formulaire, coupable structurel
+  { t:'q', text:"Et pourquoi personne n'enchérit sur la moitié de vos mots-clés ?" },
   { t:'a', text:"Pas par manque de volume. **Parce qu'ils ne convertissent pas en formulaire.** Quelqu'un qui cherche une réponse ne remplit pas dix-huit écrans." },
   { t:'punch', text:"Je n'ai pas besoin d'un formulaire. Ces gens-là, on leur *parle*." },
-  { t:'q', text:"Et que se passe-t-il quand quelqu'un arrive sur la page à deux heures du matin ?" },
-  { t:'a', text:"Rien. Il n'apparaît même pas comme un lead perdu. **Moi, je suis là.**" },
-  { t:'q', text:"Et combien de liens faut-il pour améliorer ça ?" },
-  { t:'a', text:"**Aucun.** Le trafic est déjà payé. Chaque point de conversion gagné est de la marge pure sur une dépense déjà engagée." },
-  { t:'q', text:"Et qu'est-ce que ça change pour vous ?" },
-  { t:'a', text:"Vous arrêtez de vendre des positions à un responsable marketing. Vous livrez des **dossiers prêts** à un dirigeant. Ce n'est pas la même conversation — et ce n'est pas le même prix." },
-  { t:'a', text:"Et ce que vous venez de voir ? Il tourne en français et en hébreu. Même moteur, même scénario, même minutage." },
-  { t:'punch', text:"Le métier est dans le *calibrage* — pas dans le code." },
-  { t:'a', text:"Tout secteur où l'on demande au client de trancher quelque chose qu'il ne peut pas savoir est un candidat." },
+  // 4. La génération qui arrive — l'argument le plus fort
+  { t:'q', text:"Regardez comment vos enfants cherchent une information." },
+  { t:'a', text:"Ils ne vont pas sur dix sites pour comparer. Ils ne descendent pas trois menus pour trouver un prix. Ils demandent — et ils veulent la réponse. Pas un lien vers la réponse. **La réponse.**" },
+  { t:'a', text:"Ils sont nés avec un iPhone dans la main. Pour eux, une recherche, un achat, une question, un doute : **une seule fenêtre.**" },
+  { t:'punch', text:"L'IA générative *engloutit tout* sur son passage." },
+  { t:'a', text:"Ce n'est pas une prédiction, c'est déjà en cours — vos clics vous le disent avant moi." },
+  { t:'a', text:"Et le premier qui parle à cette génération dans sa langue prend l'habitude. **En acquisition, une habitude ne se reprend pas.**" },
+  // 5. Ce qu'Emma est
+  { t:'q', text:"Alors qu'est-ce que je suis, concrètement ?" },
+  { t:'a', text:"Un lead par jour ou dix mille : **aucune différence**. Pas de file d'attente, pas de recrutement, pas de formation." },
+  { t:'a', text:"Je donne toutes les informations, et bien plus — comme un humain bien réveillé, **un mardi à onze heures**." },
+  { t:'punch', text:"Sauf que c'est *365 jours sur 365*. Sans humeur. Sans fatigue." },
+  { t:'q', text:"Et combien de liens faut-il pour obtenir ça ?" },
+  { t:'a', text:"**Aucun.** Le trafic est déjà payé. Tout ce qu'on récupère derrière est de la marge pure sur une dépense déjà engagée." },
+  // 6. LeadsMagic — le moteur, pas le produit
+  { t:'a', text:"Et ce que vous venez de voir tourne en français et en hébreu. Même moteur, même scénario, même minutage." },
+  { t:'a', text:"Parce que **LeadsMagic** n'est pas un produit EHPAD. C'est l'ambition de faire le meilleur générateur de leads par conversation — et de le calibrer sur **n'importe quel métier**." },
+  { t:'punch', text:"Ce n'est plus du *know-how*. C'est du *know-see*." },
+  { t:'a', text:"On ne vous explique pas comment ça marche. On vous le montre en train de marcher — vous venez de le voir deux fois." },
   { t:'end',
     titre:"Ce marché va être industrialisé.",
     sous:"Si nous ne le faisons pas ensemble — quelqu'un d'autre le fera.",

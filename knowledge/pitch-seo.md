@@ -17,6 +17,13 @@ On ne lui vend pas des leads, on lui vend **la moitié manquante de sa prestatio
   dont on lui reproche quand même le rendement.
 - Sa phrase la plus redoutée, il l'entend tous les trimestres :
   *« on est premier sur le mot-clé, mais le téléphone ne sonne pas. »*
+- **Les matins à zéro demande.** Il ouvre le tableau de bord d'un client : le trafic n'a pas
+  bougé, les positions non plus, et il n'y a personne au bout. Il n'a rien à dire, parce qu'il
+  n'a rien fait de mal.
+- **Le pipe d'un client se vide plus vite qu'il ne se remplit** — et quand ça arrive, c'est lui
+  qu'on appelle.
+- **Un concurrent double les enchères sur ses mots-clés du jour au lendemain.** Il n'a aucun
+  levier : il ne possède pas ce qui se passe après le clic, il ne possède que le clic.
 - Son livrable le plus dur (les liens, l'autorité) est aussi le plus lent et le plus cher.
   Améliorer les résultats d'un client lui coûte des mois.
 - Les **AI Overviews** rognent le clic. Son produit de base rétrécit, et il le sait avant ses
@@ -41,7 +48,8 @@ On ne lui vend pas des leads, on lui vend **la moitié manquante de sa prestatio
 **Il vend du trafic. On lui vend de quoi le transformer — sans un lien de plus.**
 
 Et surtout : **on lui rend monétisable la moitié de sa carte de mots-clés qu'il n'a jamais pu
-facturer.**
+facturer** — au moment précis où la génération qui arrive cesse de naviguer entre dix sites pour
+tout demander dans une seule fenêtre.
 
 ---
 
@@ -69,7 +77,30 @@ Pourquoi ça gagne : ça ne lui demande **aucun travail nouveau**, ça revaloris
 publié, et ça transforme une catégorie de pages qu'il présentait comme « notoriété » en source de
 dossiers facturables. C'est le seul argument qui augmente son chiffre sans augmenter sa charge.
 
-## 2. Le trafic est déjà gagné — chaque point est de la marge pure
+## 2. 🔥 La génération qui arrive — et elle ne remplira jamais un formulaire
+
+**C'est l'argument le plus lourd du pitch, et le seul qui parle de son avenir à lui.**
+
+> « Regardez comment vos enfants cherchent une information. Ils ne vont pas sur dix sites pour
+> comparer. Ils ne descendent pas trois menus pour trouver un prix. Ils demandent — et ils veulent
+> la réponse. Pas un lien vers la réponse : **la réponse**.
+>
+> Ils sont nés avec un iPhone dans la main. Pour eux, une recherche, un achat, une question, un
+> doute — c'est **une seule fenêtre**. L'IA générative engloutit tout sur son passage, et ce n'est
+> pas une prédiction : c'est déjà en cours. Vos clics vous le disent avant moi.
+>
+> Le premier qui parle à cette génération dans sa langue prend l'habitude. Et en acquisition,
+> **une habitude ne se reprend pas**. »
+
+Pourquoi ça gagne : **la preuve est chez lui** — il vérifie tout seul, ce soir, en regardant ses
+enfants. Et ça déplace le sujet de « comment améliorer ta conversion » vers « comment tu existes
+encore dans cinq ans », ce qui n'est pas la même conversation ni le même budget.
+
+⚠️ **Ne jamais le jouer comme une menace.** Le « on » est inclusif : *nous deux, ou quelqu'un
+qu'on n'a pas vu venir*. Et ne pas le sortir sur un interlocuteur froid — sur quelqu'un de fermé,
+le registre visionnaire sonne creux.
+
+## 3. Le trafic est déjà gagné — chaque point est de la marge pure
 
 > « Une page première position qui convertit à deux pour cent, c'est quatre-vingt-dix-huit pour
 > cent de ton travail qui part à la poubelle. Tu as payé les liens, le contenu, les mois
@@ -81,7 +112,7 @@ dossiers facturables. C'est le seul argument qui augmente son chiffre sans augme
 C'est l'argument qui parle à son économie à lui : son levier le plus cher est l'acquisition, et
 on lui propose le seul gain qui ne passe pas par elle.
 
-## 3. L'unité de facturation change — et son interlocuteur aussi
+## 4. L'unité de facturation change — et son interlocuteur aussi
 
 > « Aujourd'hui tu vends des positions à un responsable marketing. Le jour où tu livres des
 > dossiers qualifiés, tu parles au dirigeant. Ce n'est pas la même conversation, et ce n'est pas
@@ -90,7 +121,7 @@ on lui propose le seul gain qui ne passe pas par elle.
 Sans jamais lui promettre un montant. On installe l'unité — **le dossier prêt à traiter** — et on
 le laisse faire son calcul, exactement comme avec Bernard.
 
-## 4. Elle travaille quand ses clients dorment
+## 5. Elle travaille quand ses clients dorment
 
 > « Ton trafic SEO ne s'arrête pas à dix-huit heures, et il ne s'arrête pas le dimanche. Ton
 > client, si. Ces visiteurs-là ne t'apparaissent même pas comme des leads perdus — ils
@@ -99,18 +130,21 @@ le laisse faire son calcul, exactement comme avec Bernard.
 Question à poser plutôt qu'affirmer : *« regarde dans Analytics quelle part de ton trafic arrive
 entre 20h et 8h et le week-end. Tu as le chiffre, moi pas. »*
 
-## 5. L'élasticité — mais cette fois c'est lui qui en profite
+## 6. L'élasticité — mais cette fois c'est lui qui en profite
 
-> « Un moteur, un prompt par client. Le persona, le vocabulaire, les champs à collecter, les
-> règles métier. Ton dixième client ne te coûte pas dix fois ton premier — il te coûte une
-> calibration.
+> « Un lead par jour ou dix mille : **aucune différence**. Pas de file d'attente, pas de
+> recrutement, pas de formation. Je donne toutes les informations, et bien plus — comme un humain
+> bien réveillé, **un mardi à onze heures**. Sauf que c'est **365 jours sur 365**, sans humeur et
+> sans fatigue.
 >
-> Ça arrête d'être un projet et ça devient une ligne de produit que tu vends à tout ton
-> portefeuille. »
+> Et côté toi : un moteur, un prompt par client. Le persona, le vocabulaire, les champs à
+> collecter, les règles métier. Ton dixième client ne te coûte pas dix fois ton premier — il te
+> coûte une calibration. Ça arrête d'être un projet et ça devient une ligne de produit que tu
+> vends à tout ton portefeuille. »
 
 C'est l'argument d'élasticité du pitch Cap Retraite, retourné de son côté de la table.
 
-## 6. La rétention — ce qui reste branché quand le forfait est renégocié
+## 7. La rétention — ce qui reste branché quand le forfait est renégocié
 
 > « Un client peut changer d'agence SEO. Il ne débranche pas ce qui produit ses dossiers et qui
 > contient sa logique de qualification. Tu arrêtes de vendre un forfait qu'on te renégocie tous
@@ -118,7 +152,7 @@ C'est l'argument d'élasticité du pitch Cap Retraite, retourné de son côté d
 
 À dire calmement, une fois. C'est son intérêt le plus égoïste, il n'a pas besoin qu'on insiste.
 
-## 7. Elle ne touche pas à son référencement — il va le demander
+## 8. Elle ne touche pas à son référencement — il va le demander
 
 À placer **avant** qu'il objecte, comme l'escalade humaine chez Bernard.
 
@@ -127,13 +161,13 @@ C'est l'argument d'élasticité du pitch Cap Retraite, retourné de son côté d
 > l'équation — ni en bien ni en mal. Je ne te vends pas un effet SEO, je te vends ce qui se passe
 > après. »
 
-## 8. Elle protège son client de son propre commercial
+## 9. Elle protège son client de son propre commercial
 
 > « Ton client a deux commerciaux. Tu lui envoies cent formulaires, il en appelle trente et il te
 > dit que les leads sont pourris. Vingt dossiers finis valent mieux que cent formulaires — et
 > c'est la fin de la seule reproche qu'on te fait vraiment. »
 
-## 9. 🔥 [Direction, pas fonctionnalité] La donnée que personne ne lui vend
+## 10. 🔥 [Direction, pas fonctionnalité] La donnée que personne ne lui vend
 
 **⚠️ À formuler comme une direction, jamais comme une livraison — voir « ce qu'on ne dit pas ».**
 
@@ -151,6 +185,24 @@ en tant que revendeur. C'est aussi le seul qu'il n'a jamais entendu.
 **Honnêteté obligatoire** : `schema.sql` ne stocke aujourd'hui que le lead, aucune conversation.
 On annonce la direction, on ne la fait pas passer pour un acquis — même discipline que sur le
 hash et les PDF.
+
+## 11. LeadsMagic — ce n'est plus du *know-how*, c'est du *know-see*
+
+> « Ce que je te montre n'est pas un produit EHPAD. **LeadsMagic**, c'est l'ambition de faire le
+> meilleur générateur de leads par conversation — et de le calibrer sur n'importe quel métier.
+> L'EHPAD est simplement le secteur sur lequel on l'a éprouvé en premier.
+>
+> Et je ne vais pas t'expliquer comment ça marche. Je te le montre en train de marcher : tu viens
+> de le voir deux fois, dans deux langues. **Ce n'est plus du know-how, c'est du know-see.** »
+
+C'est la formule qui referme la démo : elle transforme trois minutes d'écran en preuve, et elle
+lui dit qu'il n'achète pas un one-shot mais un moteur.
+
+⚠️ Le volet multi-secteurs se révèle **délibérément** (cf. `CLAUDE.md`) : il prouve qu'on a un
+moteur et pas un bricolage, mais il dit aussi à l'interlocuteur qu'il est un secteur parmi
+d'autres. Et **ne jamais ouvrir soi-même le sujet de la propriété** — LeadsMagic reste la
+propriété de smartseniors.fr, mais l'annoncer sans qu'on l'ait demandé se lit comme de la
+défiance au premier rendez-vous.
 
 ---
 
