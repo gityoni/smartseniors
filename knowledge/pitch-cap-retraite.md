@@ -1,6 +1,6 @@
 # Pitch partenaire — Bernard (Cap Retraite)
 
-> Réécrit le 29/07/2026 sur l'axe **LeadsMagic** arrêté le 28/07.
+> Réécrit le 29/07/2026 sur l'axe **BinAI Leads** arrêté le 28/07 (nommé « LeadsMagic » jusqu'au 06/08).
 > Remplace la version « vente de leads » (5 pitchs, tarifs, pré-check par hash) — **périmée**.
 > Objectif du rendez-vous : qu'il fasse lui-même le calcul. Pas de signature, pas de prix.
 
@@ -34,7 +34,7 @@
 
 ---
 
-## L'axe — « LeadsMagic »
+## L'axe — « BinAI Leads »
 
 **On ne vend pas des leads, on révolutionne leur création.**
 
