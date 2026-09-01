@@ -170,9 +170,9 @@
       </label>
       <label class="demo-note"><span id="ui-pace-label"></span>
         <select id="pace">
-          <option value="0.4" selected></option>
+          <option value="0.4"></option>
           <option value="0.5"></option>
-          <option value="1"></option>
+          <option value="1" selected></option>
           <option value="1.5"></option>
           <option value="2"></option>
         </select>
@@ -792,20 +792,58 @@ function clearSpotlight() {
   leadSide.classList.remove("spotlight", "spot-edi", "spot-score", "spot-sent");
   fieldsEl.querySelectorAll(".lfield.spot").forEach(n => n.classList.remove("spot"));
 }
+// Le plateau — le seul moment réellement lisible — vaut le maintien moins le
+// fondu d'entrée (~157 ms). À 450 ms il ne restait que 294 ms à 1x et 68 ms à
+// 2x : moins qu'une saccade oculaire, le champ s'éteignait avant que l'œil
+// n'arrive. Le maintien est donc borné en TEMPS RÉEL, pas proportionnel.
+const SPOT_HOLD = () => Math.min(1400, Math.max(520, 900 / pace()));
 function spotlight(el) {
   clearSpotlight();
   el.classList.add("spot"); leadSide.classList.add("spotlight");
   // Minuteur de secours pour tout remplissage hors boucle du scénario.
-  spotTimer = setTimeout(clearSpotlight, 450 / pace());
+  spotTimer = setTimeout(clearSpotlight, SPOT_HOLD());
 }
 /* Dans le scénario, c'est la BOUCLE qui tient le projecteur, pas un minuteur :
    `wait()` passe par `gate()`, donc le halo reste allumé tant que la démo est en
    pause — l'instant précis où on veut s'arrêter pour commenter la capture. */
-async function holdSpot(ms) {
+async function holdSpot() {
   clearTimeout(spotTimer); spotTimer = null;
-  await wait(ms);
+  await wait(SPOT_HOLD() * pace());          // wait() divise par pace → durée réelle
   clearSpotlight();
 }
+/* ── Le pli du dossier ──────────────────────────────────────────────────────
+   Le bord bas de la zone visible ne doit jamais tomber au MILIEU d'une carte :
+   une carte tranchée en deux se lit comme un défaut, et c'est le bloc EDI — le
+   moment central du pitch — qui en souffrait le plus. Après chaque défilement,
+   on ramène donc le pli dans une gouttière entre deux cartes, sans jamais faire
+   sortir la carte visée ni la laisser passer sous le bandeau collant.
+   Appelé aussi pendant la séquence EDI : le bloc GRANDIT de 22 px après avoir
+   été amené à l'écran (le compteur « n/6 » apparaît, un nom passe sur 2 lignes),
+   et personne ne recadrait derrière. */
+const GUT = 6;                                   // < gap des cartes (8 px)
+function snapPanel(target) {
+  const ch = leadSide.clientHeight, st = leadSide.scrollTop;
+  const base = leadSide.getBoundingClientRect().top - st;
+  const box = el => { const r = el.getBoundingClientRect(); return { t: r.top - base, b: r.bottom - base }; };
+  const fold = st + ch;
+  const blocks = [...fieldsEl.children, ...leadSide.querySelectorAll(".lead-score, .lead-edi, .lead-sent")].map(box);
+  const cut = blocks.find(b => b.t < fold - 1 && b.b > fold + 1);
+  if (!cut) return;                              // aucun bloc à cheval sur le pli
+  const sticky = document.querySelector(".lead-progline")?.offsetHeight || 0;
+  const tg = target ? box(target) : null;
+  const max = Math.max(0, leadSide.scrollHeight - ch);
+  const fits = s => !tg || (tg.t >= s + sticky && tg.b <= s + ch - GUT);
+  // ⚠️ Un candidat borné à 0 (ou au maximum) revient au point de départ : il faut
+  // revérifier qu'il résout vraiment la coupure, sinon il gagne le tri par
+  // proximité — distance nulle — sans rien recadrer du tout.
+  const clean = s => !blocks.some(b => b.t < s + ch - 1 && b.b > s + ch + 1);
+  const s = [cut.b + GUT - ch, cut.t - GUT - ch]  // pli sous le bloc, ou au-dessus
+    .map(v => Math.max(0, Math.min(max, v)))
+    .filter(v => clean(v) && fits(v))
+    .sort((a, b) => Math.abs(a - st) - Math.abs(b - st))[0];
+  if (s !== undefined) leadSide.scrollTop = s;
+}
+
 function setField(key, val) {
   const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
   el.querySelector(".lf-value").innerHTML = bidiSegments(val);
@@ -814,6 +852,7 @@ function setField(key, val) {
   // Instantané, pas « smooth » : un défilement doux dure autant que le
   // projecteur, le halo pouvait s'éteindre pendant que le champ arrivait.
   el.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(el);
   spotlight(el);
   updateProgress(); down();
 }
@@ -933,6 +972,7 @@ async function showEdi(step) {
   count.textContent = "";
   block.classList.add("on");
   block.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(block);
   // Projecteur sur le réseau partenaire : le reste s'éteint, sauf le score —
   // « lead chaud » et validation se lisent alors d'un seul regard.
   clearSpotlight(); leadSide.classList.add("spot-edi");
@@ -945,6 +985,9 @@ async function showEdi(step) {
     if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = U().ediOk; }
     else { row.dataset.st = "ko"; st.innerHTML = `${U().ediKo}${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
     count.textContent = U().ediCount(ok, step.items.length);
+    // Le bloc grandit au fil des lignes résolues (compteur, nom sur 2 lignes) :
+    // sans ce recadrage il débordait de 14 px pile pendant « 3/6 validées ».
+    snapPanel(block);
   }
   await wait(520);
   leadSide.classList.remove("spot-edi");
@@ -964,7 +1007,9 @@ async function showScore(step) {
   applyScore(step);
   // Le badge « chaud · 9/10 » est une preuve commerciale : jamais sous la ligne
   // de flottaison, jamais noyé dans un panneau uniformément éclairé.
-  document.getElementById("lead-score").scrollIntoView({ block: "nearest", behavior: "instant" });
+  const sc = document.getElementById("lead-score");
+  sc.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(sc);
   clearSpotlight(); leadSide.classList.add("spot-score");
   down();
   await wait(900);
@@ -991,6 +1036,7 @@ async function showSent(step) {
   // Point de sortie du pitch : amené à l'écran et tenu sous projecteur, quelle
   // que soit la hauteur du poste.
   sent.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(sent);
   clearSpotlight(); leadSide.classList.add("spot-sent");
   down();
   await wait(1200);
@@ -1049,7 +1095,7 @@ function fastForward(to) {
       if (el) { el.querySelector('.lf-value').innerHTML = bidiSegments(v); el.classList.add('filled'); }
     }
   }
-  clearSpotlight(); updateProgress(); down();
+  clearSpotlight(); updateProgress(); down(); snapPanel(null);
 }
 function setPaused(p) {
   if (!running) return;
@@ -1101,7 +1147,7 @@ async function startScript(from = 0) {
       else if (step.t === 'sent') await showSent(step);
       // Respiration : le projecteur tient 450 ms (fondu compris). Ce silence
       // occupe un temps mort du chat — rien n'est coupé.
-      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await holdSpot(450); await wait(60); }
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await holdSpot(); await wait(60); }
       // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
       // enchaîne : proportionnel à la longueur du message.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
