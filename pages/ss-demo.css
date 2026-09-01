@@ -683,6 +683,7 @@
    sinon on les ferait *apparaître* à .18 alors qu'ils sont à 0.            */
 .ss-root[data-premium] .lead-side.spotlight .lead-head,
 .ss-root[data-premium] .lead-side.spotlight .lead-prog,
+.ss-root[data-premium] .lead-side.spotlight .lead-count,
 .ss-root[data-premium] .lead-side.spotlight .lead-score,
 .ss-root[data-premium] .lead-side.spotlight .lead-edi.on,
 .ss-root[data-premium] .lead-side.spotlight .lead-sent.show,
@@ -696,6 +697,7 @@
    « lead chaud » et sa validation se lisent ensemble. */
 .ss-root[data-premium] .lead-side.spot-edi .lead-head,
 .ss-root[data-premium] .lead-side.spot-edi .lead-prog,
+.ss-root[data-premium] .lead-side.spot-edi .lead-count,
 .ss-root[data-premium] .lead-side.spot-edi .lead-sent.show,
 .ss-root[data-premium] .lead-side.spot-edi .lfield,
 .ss-root[data-premium] .lead-side.spot-edi .lfield.filled {
@@ -708,6 +710,94 @@
     0 0 0 1px rgba(110, 231, 183, .35),
     0 18px 46px -14px rgba(0, 0, 0, .85),
     0 0 44px -8px rgba(110, 231, 183, .35);
+}
+
+/* Variantes score & envoi : le score d'urgence et le bandeau « lead envoyé »
+   sont les deux preuves qu'on veut pouvoir commenter à l'arrêt. Elles se jouent
+   donc sous projecteur comme une capture de champ, et non dans un panneau
+   uniformément éclairé où l'œil ne sait pas où aller. */
+.ss-root[data-premium] .lead-side.spot-score .lead-head,
+.ss-root[data-premium] .lead-side.spot-score .lead-prog,
+.ss-root[data-premium] .lead-side.spot-score .lead-count,
+.ss-root[data-premium] .lead-side.spot-score .lead-edi.on,
+.ss-root[data-premium] .lead-side.spot-score .lead-sent.show,
+.ss-root[data-premium] .lead-side.spot-score .lfield,
+.ss-root[data-premium] .lead-side.spot-score .lfield.filled,
+.ss-root[data-premium] .lead-side.spot-sent .lead-head,
+.ss-root[data-premium] .lead-side.spot-sent .lead-prog,
+.ss-root[data-premium] .lead-side.spot-sent .lead-count,
+.ss-root[data-premium] .lead-side.spot-sent .lead-edi.on,
+.ss-root[data-premium] .lead-side.spot-sent .lead-score,
+.ss-root[data-premium] .lead-side.spot-sent .lfield,
+.ss-root[data-premium] .lead-side.spot-sent .lfield.filled {
+  opacity: .16;
+  transition: opacity .2s var(--ss-ease);
+}
+.ss-root[data-premium] .lead-side.spot-score .lead-score.on {
+  border-color: rgba(255, 122, 122, .45);
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 122, .35),
+    0 18px 46px -14px rgba(0, 0, 0, .85),
+    0 0 44px -8px rgba(226, 61, 61, .35);
+}
+.ss-root[data-premium] .lead-side.spot-sent .lead-sent.show .lead-sent-banner {
+  border-color: rgba(110, 231, 183, .5);
+  box-shadow:
+    0 0 0 1px rgba(110, 231, 183, .35),
+    0 18px 46px -14px rgba(0, 0, 0, .85),
+    0 0 44px -8px rgba(110, 231, 183, .4);
+}
+
+/* Hors projecteur, ces blocs ne déclaraient aucune durée de transition (le
+   `transition: all` hérité vaut 0 s) : ils repassaient à pleine lumière en une
+   seule image pendant que les champs voisins, eux, remontaient en 300 ms. Ce
+   « pop » asymétrique se lit comme « c'est déjà fini » et annulait la fin du
+   plateau. On leur donne la rampe qui leur manquait — coût : 0 ms de scénario. */
+.ss-root[data-premium] .lead-head,
+.ss-root[data-premium] .lead-prog,
+.ss-root[data-premium] .lead-count,
+.ss-root[data-premium] .lead-score { transition: opacity .26s var(--ss-ease); }
+
+/* ── LIGNE DE PROGRESSION COLLANTE ─────────────────────────────────────────
+   Le dossier descend au fil des captures ; le compteur, lui, reste à l'écran.
+   C'est ce qui rend la densification lisible à distance en visio — la barre
+   seule ne dit pas « 7 sur 11 ». Fond opaque obligatoire : les champs défilent
+   dessous. Écrit en propriétés logiques → aucun miroir à ajouter en RTL. */
+/* `scrollIntoView` cale la cible AU PIXEL sur le bord du scrollport : le champ
+   capté se retrouvait collé au cadre (0,4 px), son ombre portée de 23 px
+   entièrement rognée — et, en remontée, calé sous le bandeau collant opaque,
+   donc allumé par le projecteur alors qu'il n'était pas visible du tout.
+   ⚠️ Le 67 du haut doit rester ≥ la hauteur de `.lead-progline` (55 px mesurés) :
+   c'est elle qui masque le haut du scrollport. Le 28 du bas dégage l'ombre. */
+.ss-root[data-premium] .lead-side { padding-top: 0; scroll-padding-block: 67px 28px; }
+.ss-root[data-premium] .lead-head { padding-top: 24px; }
+.ss-root[data-premium] .lead-progline {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #12463C;
+  padding-block: 12px;
+  margin-block: 0 8px;
+}
+.ss-root[data-premium] .lead-progline .lead-prog { margin: 0 0 9px; }
+.ss-root[data-premium] .lead-count {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: .72rem;
+  font-weight: 800;
+  color: rgba(241, 247, 245, .55);
+  position: relative;
+  z-index: 1;
+}
+.ss-root[data-premium] .lead-count .lc-n {
+  /* « 7 / 11 » : deux groupes de chiffres séparés par des espaces se lisent
+     « 11 / 7 » dans un paragraphe RTL. Même parade que le compteur de console. */
+  direction: ltr;
+  font-size: .82rem;
+  font-weight: 900;
+  color: var(--c-online);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Le champ sous le projecteur : légèrement avancé, halo mint. */

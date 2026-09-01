@@ -137,9 +137,9 @@
       </label>
       <label class="demo-note">Vitesse
         <select id="pace" aria-label="Vitesse de la démo">
-          <option value="0.4" selected>0,4×</option>
+          <option value="0.4">0,4×</option>
           <option value="0.5">0,5×</option>
-          <option value="1">1×</option>
+          <option value="1" selected>1×</option>
           <option value="1.5">1,5×</option>
           <option value="2">2×</option>
         </select>
@@ -208,7 +208,10 @@
           <div><div class="lh-t">Création du lead</div><div class="lh-s">En direct · back-office partenaires</div></div>
           <span class="lead-live"><span class="ss-dot"></span> Live</span>
         </div>
-        <div class="lead-prog"><i id="pbar"></i></div>
+        <div class="lead-progline">
+          <div class="lead-prog"><i id="pbar"></i></div>
+          <div class="lead-count"><span class="lc-n" id="lead-count">0 / 11</span> informations qualifiées</div>
+        </div>
         <div class="lead-fields" id="lead-fields"></div>
         <div class="lead-score" id="lead-score">
           <div class="ls-top"><span class="ls-label">Score d'urgence</span><span class="ls-badge froid" id="ls-badge">—</span></div>
@@ -347,7 +350,10 @@ async function speakPremium(text) {
     currentAudio = a;
     const done = () => { if (currentAudio === a) currentAudio = null; res(); };
     a.onended = done; a.onerror = done;
-    a.play().catch(done);
+    // Si l'utilisateur a mis en pause PENDANT le téléchargement, on ne démarre
+    // pas : `setPaused(false)` relancera cet `<audio>`. Sans ça, Emma repartait
+    // par-dessus le commentaire, une pause plus tard.
+    if (!paused) a.play().catch(done);
   });
 }
 async function speak(text) {
@@ -384,27 +390,81 @@ const leadSide = document.querySelector(".lead-side");
 let spotTimer = null;
 function clearSpotlight() {
   clearTimeout(spotTimer); spotTimer = null;
-  leadSide.classList.remove("spotlight", "spot-edi");
+  leadSide.classList.remove("spotlight", "spot-edi", "spot-score", "spot-sent");
   fieldsEl.querySelectorAll(".lfield.spot").forEach(n => n.classList.remove("spot"));
 }
+// Le plateau — le seul moment réellement lisible — vaut le maintien moins le
+// fondu d'entrée (~157 ms). À 450 ms il ne restait que 294 ms à 1x et 68 ms à
+// 2x : moins qu'une saccade oculaire, le champ s'éteignait avant que l'œil
+// n'arrive. Le maintien est donc borné en TEMPS RÉEL, pas proportionnel.
+const SPOT_HOLD = () => Math.min(1400, Math.max(520, 900 / pace()));
 function spotlight(el) {
   clearSpotlight();
   el.classList.add("spot"); leadSide.classList.add("spotlight");
-  spotTimer = setTimeout(clearSpotlight, 450 / pace());
+  // Minuteur de secours : le mode Live remplit le dossier hors de la boucle du
+  // scénario, il n'a personne pour éteindre le projecteur derrière lui.
+  spotTimer = setTimeout(clearSpotlight, SPOT_HOLD());
 }
+/* Dans le scénario, c'est la BOUCLE qui tient le projecteur, pas un minuteur :
+   `wait()` passe par `gate()`, donc le halo reste allumé tant que la démo est en
+   pause. C'est précisément l'instant où on veut s'arrêter pour commenter la
+   capture — avec un `setTimeout`, l'animation reprenait la main au bout de 450 ms. */
+async function holdSpot() {
+  clearTimeout(spotTimer); spotTimer = null;
+  await wait(SPOT_HOLD() * pace());          // wait() divise par pace → durée réelle
+  clearSpotlight();
+}
+/* ── Le pli du dossier ──────────────────────────────────────────────────────
+   Le bord bas de la zone visible ne doit jamais tomber au MILIEU d'une carte :
+   une carte tranchée en deux se lit comme un défaut, et c'est le bloc EDI — le
+   moment central du pitch — qui en souffrait le plus. Après chaque défilement,
+   on ramène donc le pli dans une gouttière entre deux cartes, sans jamais faire
+   sortir la carte visée ni la laisser passer sous le bandeau collant.
+   Appelé aussi pendant la séquence EDI : le bloc GRANDIT de 22 px après avoir
+   été amené à l'écran (le compteur « n/6 » apparaît, un nom passe sur 2 lignes),
+   et personne ne recadrait derrière. */
+const GUT = 6;                                   // < gap des cartes (8 px)
+function snapPanel(target) {
+  const ch = leadSide.clientHeight, st = leadSide.scrollTop;
+  const base = leadSide.getBoundingClientRect().top - st;
+  const box = el => { const r = el.getBoundingClientRect(); return { t: r.top - base, b: r.bottom - base }; };
+  const fold = st + ch;
+  const blocks = [...fieldsEl.children, ...leadSide.querySelectorAll(".lead-score, .lead-edi, .lead-sent")].map(box);
+  const cut = blocks.find(b => b.t < fold - 1 && b.b > fold + 1);
+  if (!cut) return;                              // aucun bloc à cheval sur le pli
+  const sticky = document.querySelector(".lead-progline")?.offsetHeight || 0;
+  const tg = target ? box(target) : null;
+  const max = Math.max(0, leadSide.scrollHeight - ch);
+  const fits = s => !tg || (tg.t >= s + sticky && tg.b <= s + ch - GUT);
+  // ⚠️ Un candidat borné à 0 (ou au maximum) revient au point de départ : il faut
+  // revérifier qu'il résout vraiment la coupure, sinon il gagne le tri par
+  // proximité — distance nulle — sans rien recadrer du tout.
+  const clean = s => !blocks.some(b => b.t < s + ch - 1 && b.b > s + ch + 1);
+  const s = [cut.b + GUT - ch, cut.t - GUT - ch]  // pli sous le bloc, ou au-dessus
+    .map(v => Math.max(0, Math.min(max, v)))
+    .filter(v => clean(v) && fits(v))
+    .sort((a, b) => Math.abs(a - st) - Math.abs(b - st))[0];
+  if (s !== undefined) leadSide.scrollTop = s;
+}
+
 
 function setField(key, val) {
   const el = fieldsEl.querySelector(`.lfield[data-key="${key}"]`); if (!el) return;
   const v = el.querySelector(".lf-value");
   v.textContent = val; el.classList.add("filled");
   el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
-  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  // Instantané, pas « smooth » : un défilement doux dure autant que le
+  // projecteur, le halo pouvait donc s'éteindre pendant que le champ arrivait.
+  el.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(el);
   spotlight(el);
   updateProgress(); down();
 }
 function updateProgress() {
   const n = fieldsEl.querySelectorAll(".lfield.filled").length;
   document.getElementById("pbar").style.width = Math.round(n / FIELDS.length * 100) + "%";
+  // Le chiffre, pas seulement la barre : « 7 / 11 » se lit à trois mètres en visio.
+  document.getElementById("lead-count").textContent = `${n} / ${FIELDS.length}`;
 }
 function resetDossier() {
   clearSpotlight();
@@ -518,7 +578,8 @@ async function showEdi(step) {
     </div>`).join("");
   count.textContent = "";
   block.classList.add("on");
-  block.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  block.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(block);
   // Projecteur sur le réseau partenaire : le reste du panneau s'éteint, sauf le
   // score — « lead chaud » et validation se lisent alors d'un seul regard.
   clearSpotlight(); leadSide.classList.add("spot-edi");
@@ -531,6 +592,9 @@ async function showEdi(step) {
     if (it[1] === "ok") { ok++; row.dataset.st = "ok"; st.innerHTML = "✓ validée"; }
     else { row.dataset.st = "ko"; st.innerHTML = `✗ non retenue${it[2] ? `<span class="edi-motif">${it[2]}</span>` : ""}`; }
     count.textContent = `${ok}/${step.items.length} validée${ok > 1 ? "s" : ""}`;
+    // Le bloc grandit au fil des lignes résolues (compteur, nom sur 2 lignes) :
+    // sans ce recadrage il débordait de 14 px pile pendant « 3/6 validées ».
+    snapPanel(block);
   }
   await wait(520);
   leadSide.classList.remove("spot-edi");
@@ -546,7 +610,26 @@ function applyScore(step) {
 }
 async function showScore(step) {
   await wait(300);
-  applyScore(step); down();
+  applyScore(step);
+  // « 🔥 Chaud · 9/10 » est une preuve commerciale : il ne doit jamais naître
+  // sous la ligne de flottaison, ni passer inaperçu dans un panneau tout allumé.
+  const sc = document.getElementById("lead-score");
+  sc.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(sc);
+  clearSpotlight(); leadSide.classList.add("spot-score");
+  down();
+  await wait(900);
+  leadSide.classList.remove("spot-score");
+}
+/* La ligne « contact » de l'e-mail est lue DANS le dossier, elle n'est pas
+   écrite à l'avance : c'est la règle métier du consentement, et un récapitulatif
+   qui contredirait le dossier se ferait relever par le premier partenaire
+   attentif. Défaut prudent si le champ n'est pas encore tombé : le conseiller. */
+function contactLine() {
+  const v = fieldsEl.querySelector('.lfield[data-key="consent"] .lf-value')?.textContent || "";
+  return /^oui/i.test(v)
+    ? `Contact <b>Sylvie Belkacem · 06 24 18 52 40 · sylvie.belkacem@gmail.com</b> — elle a accepté d'être recontactée directement.`
+    : `Contact <b>via le conseiller SmartSeniors · ${CONSEILLER_TEL}</b> — la famille n'a pas donné son accord pour un appel direct.`;
 }
 async function showSent(step) {
   await wait(350);
@@ -555,8 +638,17 @@ async function showSent(step) {
   document.getElementById("email-card").innerHTML = `
     <div class="email-from"><div class="ef-dot">S</div><div><div class="ef-t">SmartSeniors</div><div class="ef-s">leads@smartseniors.fr · à ${step.n} résidences validées</div></div></div>
     <div class="email-subj">🔥 Nouveau lead chaud · Garches (92) · besoin urgent</div>
-    <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. Contact <b>Sylvie (07 57 99 11 40 si non-consentement)</b>. Recontactez la famille au plus vite.</div>`;
-  document.getElementById("lead-sent").classList.add("show"); down();
+    <div class="email-body">Famille recherche une place pour <b>Jeanne Belkacem, 82 ans</b>, en perte d'autonomie (<b>GIR 2</b>, unité protégée), autour de <b>Garches (5 km)</b>. Budget : retraite 1 600 € + épargne, APA + crédit d'impôt. Délai <b>urgent</b>. ${contactLine()} Recontactez la famille au plus vite.</div>`;
+  const sent = document.getElementById("lead-sent");
+  sent.classList.add("show");
+  // Point de sortie du pitch : le bandeau et l'aperçu d'e-mail sont amenés à
+  // l'écran et tenus sous projecteur, quelle que soit la hauteur du poste.
+  sent.scrollIntoView({ block: "nearest", behavior: "instant" });
+  snapPanel(sent);
+  clearSpotlight(); leadSide.classList.add("spot-sent");
+  down();
+  await wait(1200);
+  leadSide.classList.remove("spot-sent");
 }
 
 /* ════════ SCÉNARIO (déterministe) ════════ */
@@ -621,13 +713,17 @@ const SCRIPT = [
       ["Résidence partenaire — Marnes-la-Coquette","ko","plus de place"],
       ["Résidence partenaire — Rueil-Malmaison","ok"],
     ] },
+  // Le lead part dès la fin de l'EDI : « 4/6 validées » → « lead envoyé ». Les
+  // cartes ci-dessous sont ce qu'Emma délivre à la FAMILLE — utiles, mais
+  // secondaires pour le partenaire, et le bandeau reste affiché pendant qu'elles
+  // se jouent.
+  { t:'sent', n:4, dept:'92' },
   { t:'card', kind:'pdf', titre:"Dossier d'admission — Jeanne Belkacem", sous:"Pré-rempli (identité, adresse, contact) · reste : votre signature + le volet médical (médecin)." },
   { t:'bot',  text:"J'ai d'ailleurs une excellente nouvelle budgétaire : la résidence **L'Empereur** à Garches propose actuellement des conditions très avantageuses." },
   { t:'card', kind:'promo', residence:"EHPAD L'Empereur — Garches", prix:"110 €/jour", detail:"Offre en cours (15 jours) · au lieu de ~145 €/jour" },
   { t:'card', kind:'video', titre:"Visite vidéo — EHPAD L'Empereur (Garches)", embed:"https://www.youtube.com/embed/DvSet0Rkjkk" },
   { t:'card', kind:'itineraire', from:"8 rue de Buzenval, Garches", to:"L'Empereur (Garches)", detail:"≈ 7 min à pied · ou gare Garches–Marnes-la-Coquette (Transilien L) à 5 min" },
   { t:'bot',  text:"Vous n'avez plus à courir partout, **les résidences reviendront vers vous directement**. Et surtout, n'oubliez jamais, Sylvie : **votre présence est irremplaçable** auprès de votre maman. 💛" },
-  { t:'sent', n:4, dept:'92' },
 ];
 
 /* ── Console de contrôle ────────────────────────────────────────────────────
@@ -678,7 +774,7 @@ function fastForward(to) {
       if (el) { el.querySelector('.lf-value').textContent = v; el.classList.add('filled'); }
     }
   }
-  clearSpotlight(); updateProgress(); down();
+  clearSpotlight(); updateProgress(); down(); snapPanel(null);
 }
 function setPaused(p) {
   if (!running) return;
@@ -729,10 +825,10 @@ async function startScript(from = 0) {
       else if (step.t === 'card') await showCard(step);
       else if (step.t === 'score') await showScore(step);
       else if (step.t === 'sent') await showSent(step);
-      // Respiration : le projecteur tient 450 ms (fondu compris), on attend juste
-      // ce qu'il faut pour qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a
-      // fini, la famille n'a pas répondu) — rien n'est coupé.
-      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await wait(510); }
+      // Respiration : le projecteur tient 450 ms (fondu compris), puis 60 ms pour
+      // qu'il soit retombé. Ce silence occupe un temps mort du chat (Emma a fini,
+      // la famille n'a pas répondu) — rien n'est coupé. Total inchangé : 510 ms.
+      if (step.fills) for (const [k, v] of step.fills) { setField(k, v); await holdSpot(); await wait(60); }
       // Après une réplique famille, on laisse le temps de LIRE avant qu'Emma
       // enchaîne : proportionnel à la longueur du message, pas une constante.
       await wait(step.t === 'bot' ? 320 : step.t === 'user' ? readPause(step.text) : 220);
